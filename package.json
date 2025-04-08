@@ -1,0 +1,15 @@
+{
+  "name": "testgorillaclone",
+  "version": "1.0.0",
+  "description": "One-month project for intern in DSV",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}
