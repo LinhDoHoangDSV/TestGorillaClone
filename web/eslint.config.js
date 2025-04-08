@@ -35,7 +35,10 @@ export default tseslint.config(
           jsxSingleQuote: true
         }
       ],
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }]
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true }
+      ]
     }
   }
 )
