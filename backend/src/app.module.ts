@@ -10,6 +10,7 @@ import { QuestionsModule } from './features/questions/questions.module';
 import { DatabaseModule } from './config/database/database.module';
 import * as Joi from 'joi';
 import { ConfigModule } from '@nestjs/config';
+import { AnswersModule } from './features/answers/answers.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ConfigModule } from '@nestjs/config';
     LoggerModule,
     ResponseModule,
     QuestionsModule,
+    AnswersModule,
   ],
   controllers: [AppController],
   providers: [
