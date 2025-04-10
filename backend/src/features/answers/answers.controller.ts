@@ -15,7 +15,15 @@ import { CreateAnswerDto } from './dto/create-answer.dto';
 import { LoggerService } from '../logger/logger.service';
 import { Response } from '../response/response';
 import { UpdateAnswerDto } from './dto/update-answer.dto';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
+@ApiTags('Answers')
 @Controller('answers')
 export class AnswersController {
   constructor(
@@ -24,6 +32,67 @@ export class AnswersController {
     private readonly response: Response,
   ) {}
 
+  @ApiOperation({
+    summary: 'Create a new answer',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Creating answer successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Creating answer successfully',
+        data: {
+          id: 2,
+          question_id: 5,
+          option_text: 'kjasd',
+          is_correct: true,
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request from user',
+    schema: {
+      example: {
+        success: false,
+        message: 'Invalid input data',
+        errors: [
+          {
+            property: 'question_text',
+            constraints: 'Attribute question_text is not allowed',
+          },
+        ],
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'System error',
+    schema: {
+      example: {
+        success: false,
+        message: 'System error',
+        errors: null,
+      },
+    },
+  })
+  @ApiBody({
+    type: CreateAnswerDto,
+    required: true,
+    examples: {
+      user_1: {
+        summary: 'Create a new answer',
+        description: 'Create a new answer',
+        value: {
+          question_id: 5,
+          option_text: 'kjasd',
+          is_correct: true,
+        },
+      },
+    },
+  })
   @Post()
   async create(@Body() createAnswerDto: CreateAnswerDto, @Res() res) {
     try {
@@ -51,6 +120,38 @@ export class AnswersController {
     }
   }
 
+  @ApiOperation({
+    summary: 'Get all questions',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Finding all answers successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Finding all answers successfully',
+        data: [
+          {
+            id: 2,
+            question_id: 5,
+            option_text: 'kjasd',
+            is_correct: true,
+          },
+        ],
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'System error',
+    schema: {
+      example: {
+        success: false,
+        message: 'System error',
+        errors: null,
+      },
+    },
+  })
   @Get()
   async findAll(@Res() res) {
     try {
@@ -78,6 +179,41 @@ export class AnswersController {
     }
   }
 
+  @ApiOperation({
+    summary: 'Get an answer by ID',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the answer to retrieve',
+    type: Number,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Finding answer successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Finding answer successfully',
+        data: {
+          id: 2,
+          question_id: 5,
+          option_text: 'kjasd',
+          is_correct: true,
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'System error',
+    schema: {
+      example: {
+        success: false,
+        message: 'System error',
+        errors: null,
+      },
+    },
+  })
   @Get(':id')
   async findOne(@Param('id') id: string, @Res() res) {
     try {
@@ -101,6 +237,56 @@ export class AnswersController {
     }
   }
 
+  @ApiOperation({
+    summary: 'Update an answer by ID',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the answer to be updated',
+    type: Number,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Updating answer successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Updating answer successfully',
+        data: {
+          id: 2,
+          question_id: 5,
+          option_text: 'kjasd',
+          is_correct: true,
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'System error',
+    schema: {
+      example: {
+        success: false,
+        message: 'System error',
+        errors: null,
+      },
+    },
+  })
+  @ApiBody({
+    type: UpdateAnswerDto,
+    required: false,
+    examples: {
+      user_1: {
+        summary: 'Update an existing question',
+        description: 'Update an existing question',
+        value: {
+          question_id: 5,
+          option_text: 'kjasd',
+          is_correct: true,
+        },
+      },
+    },
+  })
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -135,6 +321,36 @@ export class AnswersController {
     }
   }
 
+  @ApiOperation({
+    summary: 'Delete an answer by ID',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the answer to be deleted',
+    type: Number,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Deleting answer successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Deleting answer successfully',
+        data: null,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'System error',
+    schema: {
+      example: {
+        success: false,
+        message: 'System error',
+        errors: null,
+      },
+    },
+  })
   @Delete(':id')
   async remove(@Param('id') id: string, @Res() res) {
     try {

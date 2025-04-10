@@ -11,6 +11,7 @@ import { DatabaseModule } from './config/database/database.module';
 import * as Joi from 'joi';
 import { ConfigModule } from '@nestjs/config';
 import { AnswersModule } from './features/answers/answers.module';
+import { TestsModule } from './features/tests/tests.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { AnswersModule } from './features/answers/answers.module';
     ResponseModule,
     QuestionsModule,
     AnswersModule,
+    TestsModule,
   ],
   controllers: [AppController],
   providers: [

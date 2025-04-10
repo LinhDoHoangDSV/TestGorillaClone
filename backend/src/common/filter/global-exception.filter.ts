@@ -15,7 +15,7 @@ export class GlobalExceptionFilter extends ExceptionsHandler {
       ? exception.getResponse()
       : exception.message;
 
-    const message = errors.message ? errors.message : 'System error!';
+    const message = errors.message ? errors.message : 'System error';
 
     const newErrors = errors.errors ? errors.errors : errors.error;
 
