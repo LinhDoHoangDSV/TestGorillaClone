@@ -1,0 +1,13 @@
+.app__imgContainer {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fdfdfd;
+  z-index: 101;
+}
+
+.app__img {
+  width: 10%;
+}
