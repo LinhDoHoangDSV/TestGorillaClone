@@ -1,4 +1,4 @@
-import styles from '../../style/components/start-card.module.scss'
+import styles from '../../style/components/home/start-card.module.scss'
 
 interface StatCardProps {
   title: string

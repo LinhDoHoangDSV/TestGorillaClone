@@ -1,4 +1,4 @@
-import styles from '../../style/components/dash-board.module.scss'
+import styles from '../../style/components/home/dash-board.module.scss'
 import StatCard from './start-card'
 import { useNavigate } from 'react-router-dom'
 

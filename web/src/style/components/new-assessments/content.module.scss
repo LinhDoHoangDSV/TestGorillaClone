@@ -1,0 +1,30 @@
+.content {
+  max-width: 1280px;
+  margin: auto;
+
+  &__time {
+    display: flex;
+    gap: 40px;
+    align-items: center;
+    padding: 0 20px;
+
+    &-title {
+      font-size: 2rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    &-input {
+      border-radius: 15px;
+      width: 100px;
+      height: 35px;
+      padding: 0 10px;
+      font-size: 1rem;
+      border: none;
+    }
+  }
+
+  &__step {
+    // Nếu cần style cho phần nội dung bước, thêm ở đây
+  }
+}
