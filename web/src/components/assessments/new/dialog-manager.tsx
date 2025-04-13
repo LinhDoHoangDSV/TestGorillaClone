@@ -4,13 +4,13 @@ import MultipleChoiceDialog from './create-multiple-choice'
 import CodingQuestionDialog from './create-coding'
 
 interface QuestionDialogManagerProps {
-  onSave: (question: any) => void
+  // onSave: (question: any) => void
   onCancel: () => void
   questionType: string | null
 }
 
 const QuestionDialogManager: FC<QuestionDialogManagerProps> = ({
-  onSave,
+  // onSave,
   onCancel,
   questionType
 }) => {
@@ -18,11 +18,11 @@ const QuestionDialogManager: FC<QuestionDialogManagerProps> = ({
 
   switch (questionType) {
     case 'essay':
-      return <EssayQuestionDialog onSave={onSave} onCancel={onCancel} />
+      return <EssayQuestionDialog onCancel={onCancel} />
     case 'multiple-choice':
-      return <MultipleChoiceDialog onSave={onSave} onCancel={onCancel} />
+      return <MultipleChoiceDialog onCancel={onCancel} />
     case 'coding':
-      return <CodingQuestionDialog onSave={onSave} onCancel={onCancel} />
+      return <CodingQuestionDialog onCancel={onCancel} />
     default:
       return null
   }

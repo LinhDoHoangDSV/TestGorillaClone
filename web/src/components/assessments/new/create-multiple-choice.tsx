@@ -1,10 +1,10 @@
 import { type FC, useState } from 'react'
 import styles from '../../../style/components/new-assessments/create-question.module.scss'
 import Button from '../../ui/button'
-import { QuestionsType } from '../../../constant/common'
+// import { QuestionsType } from '../../../constant/common'
 
 interface MultipleChoiceDialogProps {
-  onSave: (question: QuestionsType) => void
+  // onSave: (question: QuestionsType) => void
   onCancel: () => void
 }
 

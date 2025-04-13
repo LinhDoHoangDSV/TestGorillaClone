@@ -1,13 +1,14 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import styles from '../../../style/pages/new-assessment.module.scss'
 import Loading from '../../../components/loading'
 import Header from '../../../components/assessments/new/header'
 import Content from '../../../components/assessments/new/content'
+import { QuestionsType } from '../../../constant/common'
 
 const AssessmentsNew = () => {
   const [currentStep, setCurrentStep] = useState<number>(1)
-  const [testTitle, setTestTitle] = useState<string>('')
-  const [questions, setQuestions] = useState<any[]>([])
+  // const [testTitle, setTestTitle] = useState<string>('')
+  const [questions, setQuestions] = useState<QuestionsType[]>([])
   const [title, setTitle] = useState<string>('Your new test')
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false)
   const [totalTime, setTotalTime] = useState<number>(10)
