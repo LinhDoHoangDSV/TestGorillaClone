@@ -17,6 +17,7 @@ import {
 } from '../../../constant/api'
 import { createQuestion } from '../../../api/questions.api'
 import { createAnswer } from '../../../api/answers.api'
+import { useNavigate } from 'react-router-dom'
 
 const Content: FC<ContentProps> = ({ title }) => {
   const [totalTime, setTotalTime] = useState<string>('10')
@@ -24,6 +25,7 @@ const Content: FC<ContentProps> = ({ title }) => {
   const [isPublish, setIsPublish] = useState<boolean>(false)
   const [description, setDescription] = useState<string>('')
   const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   const handleCreate = async () => {
     if (!+totalTime) {
@@ -70,7 +72,12 @@ const Content: FC<ContentProps> = ({ title }) => {
         }
       }
     }
+
+    dispatch(
+      setToasterAppear({ message: 'Create test successfully', type: 'success' })
+    )
     dispatch(setIsLoadingFalse())
+    navigate('/')
   }
 
   return (

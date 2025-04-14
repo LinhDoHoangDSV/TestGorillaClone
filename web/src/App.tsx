@@ -10,7 +10,11 @@ import Toaster from './components/ui/toast'
 function App() {
   const location = useLocation()
   const findPage = pagesData.find((route) => route.path === location.pathname)
-  const isLoading = useSelector((state: RootState) => state.common.isLoading)
+  const isLoading = useSelector((state: RootState) => {
+    console.log(state.common.isLoading)
+
+    return state.common.isLoading
+  })
   const toaster: boolean = useSelector(
     (state: RootState) => state.common.toaster
   )
