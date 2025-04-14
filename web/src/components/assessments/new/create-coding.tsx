@@ -1,15 +1,9 @@
-'use client'
-
 import { type FC, useState } from 'react'
 import styles from '../../../style/components/new-assessments/create-question.module.scss'
 import Button from '../../ui/button'
+import { QuestionDialogProps } from '../../../constant/common'
 
-interface CodingQuestionDialogProps {
-  // onSave: (question: any) => void
-  onCancel: () => void
-}
-
-const CodingQuestionDialog: FC<CodingQuestionDialogProps> = ({
+const CodingQuestionDialog: FC<QuestionDialogProps> = ({
   // onSave,
   onCancel
 }) => {

@@ -14,8 +14,8 @@ export class TestsService {
 
   async create(createTestDto: CreateTestDto): Promise<Test> {
     const newTest = await this.dataSource.query(
-      `INSERT INTO tests (owner_id, title, description, test_time)
-      VALUES (${createTestDto.owner_id}, '${createTestDto.title}', '${createTestDto.description}', ${createTestDto.test_time})
+      `INSERT INTO tests (owner_id, title, description, test_time, is_publish)
+      VALUES (${createTestDto.owner_id}, '${createTestDto.title}', '${createTestDto.description}', ${createTestDto.test_time}, ${createTestDto.is_publish || false})
       RETURNING *;`,
     );
     return newTest[0];

@@ -96,6 +96,7 @@ export class TestsController {
           title: 'Fullstack Intern Test',
           description: 'Nothing',
           test_time: 15,
+          is_publish: false,
         },
       },
     },

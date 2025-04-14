@@ -1,30 +1,27 @@
 import { type FC, useState } from 'react'
 import styles from '../../../style/components/new-assessments/question-type.module.scss'
-import Button from '../../ui/button'
 import QuestionDialogManager from './dialog-manager'
-import {
-  QuestionsType,
-  QuestionTypeProps,
-  questionTypes
-} from '../../../constant/common'
+import { QuestionTypeProps, questionTypes } from '../../../constant/common'
 
 const QuestionType: FC<QuestionTypeProps> = ({ questions, setQuestions }) => {
   const [activeQuestionType, setActiveQuestionType] = useState<string | null>(
     null
   )
+  const [rowIndex, setRowIndex] = useState<number>(-1)
 
-  const handleAddQuestion = (question: QuestionsType) => {
-    setQuestions([...questions, question])
-    setActiveQuestionType(null)
+  const getTypeName = (type: string) => {
+    if (type === 'multiple_choice') return 'Multiple choice'
+    else if (type === 'essay') return 'Essay'
+    else if (type === 'coding') return 'Coding'
+    else return 'Undifined'
   }
 
   const handleCancelDialog = () => {
     setActiveQuestionType(null)
   }
 
-  const getQuestionTypeLabel = (type: string) => {
-    const questionType = questionTypes.find((qt) => qt.id === type)
-    return questionType ? questionType.name : type
+  const handleCancelDialogEdit = () => {
+    setRowIndex(-1)
   }
 
   return (
@@ -35,9 +32,9 @@ const QuestionType: FC<QuestionTypeProps> = ({ questions, setQuestions }) => {
         <table className={styles['question-type__table']}>
           <thead>
             <tr>
-              <th>Type</th>
-              <th>Title</th>
-              <th>Descrition</th>
+              <th className={styles['question-type__type']}>Type</th>
+              <th className={styles['question-type__text']}>Title</th>
+              <th className={styles['question-type__score']}>Score</th>
             </tr>
           </thead>
           <tbody>
@@ -54,17 +51,29 @@ const QuestionType: FC<QuestionTypeProps> = ({ questions, setQuestions }) => {
               </tr>
             )}
             {questions.map((question, index) => (
-              <tr key={index} className={styles['question-type__question-row']}>
-                <td>{getQuestionTypeLabel(question.type)}</td>
-                <td>{question.title}</td>
-                <td>{question.description}</td>
+              <tr
+                key={index}
+                className={styles['question-type__question-row']}
+                onClick={() => {
+                  setRowIndex(index)
+                }}
+              >
+                <td className={styles['question-type__type']}>
+                  {getTypeName(question.question_type)}
+                </td>
+                <td className={styles['question-type__text']}>
+                  {question.title}
+                </td>
+                <td className={styles['question-type__score']}>
+                  {question.score}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      <section className={styles['question-type__section']}>
+      <div className={styles['question-type__section']}>
         <h3 className={styles['question-type__section-title']}>
           Create custom questions
         </h3>
@@ -120,34 +129,25 @@ const QuestionType: FC<QuestionTypeProps> = ({ questions, setQuestions }) => {
             </div>
           ))}
         </div>
-      </section>
-
-      <div className={styles['question-type__actions']}>
-        <Button
-          variant='primary'
-          // onClick={}
-          disabled={questions.length === 0}
-        >
-          Finish
-          <svg
-            viewBox='0 0 24 24'
-            fill='none'
-            xmlns='http://www.w3.org/2000/svg'
-            className={styles['question-type__button-icon']}
-          >
-            <path
-              d='M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12l-4.58 4.59z'
-              fill='currentColor'
-            />
-          </svg>
-        </Button>
       </div>
+
+      {rowIndex >= 0 && (
+        <QuestionDialogManager
+          questions={questions}
+          setQuestions={setQuestions}
+          questionType={questions[rowIndex].question_type}
+          onCancel={handleCancelDialogEdit}
+          rowIndex={rowIndex}
+        />
+      )}
 
       {activeQuestionType && (
         <QuestionDialogManager
+          questions={questions}
+          setQuestions={setQuestions}
           questionType={activeQuestionType}
-          onSave={handleAddQuestion}
           onCancel={handleCancelDialog}
+          rowIndex={rowIndex}
         />
       )}
     </div>

@@ -1,38 +1,118 @@
-'use client'
-
 import { type FC, useState } from 'react'
 import styles from '../../../style/components/new-assessments/create-question.module.scss'
 import Button from '../../ui/button'
+import {
+  QuestionDialogProps,
+  QuestionsType,
+  sampleEssayQuestion
+} from '../../../constant/common'
+import { useDispatch } from 'react-redux'
+import { setToasterAppear } from '../../../redux/slices/common.slice'
 
-interface EssayQuestionDialogProps {
-  // onSave: (question: any) => void
-  onCancel: () => void
-}
-
-const EssayQuestionDialog: FC<EssayQuestionDialogProps> = ({
-  // onSave,
-  onCancel
+const EssayQuestionDialog: FC<QuestionDialogProps> = ({
+  onCancel,
+  setQuestions,
+  questions,
+  rowIndex
 }) => {
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  // const [timeLimit, setTimeLimit] = useState(5)
-  // const [wordLimit, setWordLimit] = useState(500)
-  // const [evaluationCriteria, setEvaluationCriteria] = useState('')
+  const [question, setQuestion] = useState<QuestionsType>(
+    rowIndex >= 0 ? questions[rowIndex] : sampleEssayQuestion
+  )
+  const [score, setScore] = useState<string>('5')
+  const dispatch = useDispatch()
 
-  // const handleSave = () => {
-  //   if (!title.trim()) {
-  //     return
-  //   }
+  // Add new question
+  const handleSubmit = () => {
+    if (!question?.title) {
+      dispatch(
+        setToasterAppear({ message: 'Title must not be blank', type: 'error' })
+      )
+      return
+    } else if (!question?.question_text) {
+      dispatch(
+        setToasterAppear({
+          message: "Quenstion's description must not be blank",
+          type: 'error'
+        })
+      )
+      return
+    } else if (!+score) {
+      dispatch(
+        setToasterAppear({
+          message: 'Score must be a number',
+          type: 'error'
+        })
+      )
+      return
+    }
 
-  //   onSave({
-  //     type: 'essay',
-  //     title,
-  //     description,
-  //     timeLimit,
-  //     wordLimit,
-  //     evaluationCriteria
-  //   })
-  // }
+    dispatch(
+      setToasterAppear({
+        message: 'Question is added',
+        type: 'success'
+      })
+    )
+    setQuestions([...questions, { ...question, score: parseInt(score) }])
+    setQuestion(sampleEssayQuestion)
+    onCancel()
+  }
+
+  const handleUpdate = () => {
+    if (!question?.title) {
+      dispatch(
+        setToasterAppear({ message: 'Title must not be blank', type: 'error' })
+      )
+      return
+    } else if (!question?.question_text) {
+      dispatch(
+        setToasterAppear({
+          message: "Quenstion's description must not be blank",
+          type: 'error'
+        })
+      )
+      return
+    } else if (!+score) {
+      dispatch(
+        setToasterAppear({
+          message: 'Score must be a number',
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    dispatch(
+      setToasterAppear({
+        message: 'Question is updated',
+        type: 'success'
+      })
+    )
+
+    questions[rowIndex].title = question.title
+    questions[rowIndex].score = parseInt(score)
+    questions[rowIndex].question_text = question.question_text
+
+    setQuestions(questions)
+    setQuestion(sampleEssayQuestion)
+    onCancel()
+  }
+
+  const handleDelete = () => {
+    dispatch(
+      setToasterAppear({
+        message: 'Question is deleted',
+        type: 'success'
+      })
+    )
+
+    const temp = questions.filter((item, index) => {
+      return index !== rowIndex
+    })
+
+    setQuestions(temp)
+    setQuestion(sampleEssayQuestion)
+    onCancel()
+  }
 
   return (
     <div className={styles['question-dialog__overlay']}>
@@ -61,9 +141,6 @@ const EssayQuestionDialog: FC<EssayQuestionDialogProps> = ({
 
         <div className={styles['question-dialog__content']}>
           <div className={styles['question-dialog__section']}>
-            <h3 className={styles['question-dialog__section-title']}>
-              Question
-            </h3>
             <div className={styles['question-dialog__form-group']}>
               <label
                 className={styles['question-dialog__label']}
@@ -76,9 +153,30 @@ const EssayQuestionDialog: FC<EssayQuestionDialogProps> = ({
                 id='title'
                 type='text'
                 className={styles['question-dialog__input']}
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                value={question.title}
+                onChange={(e) =>
+                  setQuestion({ ...question, title: e.target.value })
+                }
                 placeholder='Enter question title'
+                required
+              />
+            </div>
+
+            <div className={styles['question-dialog__form-group']}>
+              <label
+                className={styles['question-dialog__label']}
+                htmlFor='score'
+              >
+                Score{' '}
+                <span className={styles['question-dialog__required']}>*</span>
+              </label>
+              <input
+                id='score'
+                type='text'
+                className={styles['question-dialog__input']}
+                value={score}
+                onChange={(e) => setScore(e.target.value)}
+                placeholder='Enter question score'
                 required
               />
             </div>
@@ -93,8 +191,10 @@ const EssayQuestionDialog: FC<EssayQuestionDialogProps> = ({
               <textarea
                 id='description'
                 className={styles['question-dialog__textarea']}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                value={question.question_text}
+                onChange={(e) =>
+                  setQuestion({ ...question, question_text: e.target.value })
+                }
                 placeholder='Enter detailed instructions for the candidate'
                 rows={4}
               />
@@ -103,15 +203,17 @@ const EssayQuestionDialog: FC<EssayQuestionDialogProps> = ({
         </div>
 
         <div className={styles['question-dialog__footer']}>
-          <Button variant='secondary' onClick={onCancel}>
-            Cancel
+          <Button
+            variant='secondary'
+            onClick={rowIndex >= 0 ? handleDelete : onCancel}
+          >
+            {rowIndex >= 0 ? 'Delete' : 'Cancel'}
           </Button>
           <Button
             variant='primary'
-            // onClick={handleSave}
-            disabled={!title.trim()}
+            onClick={rowIndex >= 0 ? handleUpdate : handleSubmit}
           >
-            Save
+            {rowIndex >= 0 ? 'Update' : 'Save'}
           </Button>
         </div>
       </div>

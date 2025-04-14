@@ -1,22 +1,20 @@
-import type { FC } from 'react'
+import { useEffect, useRef, useState, type FC } from 'react'
 import Pencil from '../../../assets/pencil-solid.svg'
 import styles from '../../../style/components/new-assessments/header.module.scss'
 
 interface HeaderProps {
   title: string
   setTitle: (title: string) => void
-  isEditingTitle: boolean
-  setIsEditingTitle: (isEditing: boolean) => void
-  inputRef: React.RefObject<HTMLInputElement>
 }
 
-const Header: FC<HeaderProps> = ({
-  title,
-  setTitle,
-  isEditingTitle,
-  setIsEditingTitle,
-  inputRef
-}) => {
+const Header: FC<HeaderProps> = ({ title, setTitle }) => {
+  const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (isEditingTitle && inputRef.current) inputRef.current.focus()
+  }, [isEditingTitle])
+
   const handleChangeTitle = () => {
     setIsEditingTitle(true)
   }

@@ -1,47 +1,149 @@
-import type { FC } from 'react'
+import { useState, type FC } from 'react'
 import styles from '../../../style/components/new-assessments/content.module.scss'
 import QuestionType from './question-type'
-import { QuestionsType } from '../../../constant/common'
+import { ContentProps, QuestionsType } from '../../../constant/common'
+import Button from '../../ui/button'
+import { createTest } from '../../../api/tests.api'
+import { useDispatch } from 'react-redux'
+import {
+  setIsLoadingFalse,
+  setIsLoadingTrue,
+  setToasterAppear
+} from '../../../redux/slices/common.slice'
+import {
+  CreateAnswerDto,
+  CreateQuestionDto,
+  CreateTestDto
+} from '../../../constant/api'
+import { createQuestion } from '../../../api/questions.api'
+import { createAnswer } from '../../../api/answers.api'
 
-interface ContentProps {
-  totalTime: number
-  setTotalTime: (time: number) => void
-  questions: QuestionsType[]
-  setQuestions: (questions: QuestionsType[]) => void
-  onNext: () => void
-  onBack: () => void
-}
+const Content: FC<ContentProps> = ({ title }) => {
+  const [totalTime, setTotalTime] = useState<string>('10')
+  const [questions, setQuestions] = useState<QuestionsType[]>([])
+  const [isPublish, setIsPublish] = useState<boolean>(false)
+  const [description, setDescription] = useState<string>('')
+  const dispatch = useDispatch()
 
-const Content: FC<ContentProps> = ({
-  totalTime,
-  setTotalTime,
-  questions,
-  setQuestions
-  // onNext,
-  // onBack
-}) => {
+  const handleCreate = async () => {
+    if (!+totalTime) {
+      dispatch(
+        setToasterAppear({
+          message: 'Total time must be a number',
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    dispatch(setIsLoadingTrue())
+
+    const data: CreateTestDto = {
+      owner_id: 1,
+      description,
+      is_publish: isPublish,
+      test_time: parseInt(totalTime),
+      title
+    }
+
+    const newTest = await createTest(data)
+
+    for (const i of questions) {
+      const createQuestionDto: CreateQuestionDto = {
+        question_text: i.question_text,
+        question_type: i.question_type,
+        score: i.score,
+        test_id: newTest?.data?.data?.id
+      }
+
+      const newQuestion = await createQuestion(createQuestionDto)
+
+      if (i.answers) {
+        for (const j of i.answers) {
+          const createAnserDto: CreateAnswerDto = {
+            is_correct: j.is_correct,
+            option_text: j.option_text,
+            question_id: newQuestion?.data?.data?.id
+          }
+
+          await createAnswer(createAnserDto)
+        }
+      }
+    }
+    dispatch(setIsLoadingFalse())
+  }
+
   return (
     <div className={styles['content']}>
-      <div className={styles['content__time']}>
-        <div className={styles['content__time-title']}>Total time: </div>
+      <div className={styles['content__field']}>
+        <div className={styles['content__label']}>Total time:</div>
         <input
-          className={styles['content__time-input']}
-          min={0}
-          max={500}
+          className={styles['content__input']}
           value={totalTime}
-          onChange={(e) => setTotalTime(parseInt(e.target.value))}
+          onChange={(e) => setTotalTime(e.target.value)}
           type='number'
           placeholder='Total time'
         />
       </div>
 
-      <div className={styles['content__step']}>
-        <QuestionType
-          questions={questions}
-          setQuestions={setQuestions}
-          // onNext={onNext}
-          // onBack={onBack}
+      <div className={styles['content__field']}>
+        <div className={styles['content__label']}>Description:</div>
+        <input
+          className={styles['content__input']}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          type='text'
+          placeholder='Description'
         />
+      </div>
+
+      <div className={styles['content__publish']}>
+        <div className={styles['content__ptitle']}>
+          Do you want to publish this test?
+        </div>
+        <div className={styles['content__radio-group']}>
+          <label className={styles['content__radio']}>
+            <input
+              type='radio'
+              name='publish'
+              value='yes'
+              checked={isPublish === true}
+              onChange={() => setIsPublish(true)}
+            />
+            Yes
+          </label>
+          <label className={styles['content__radio']}>
+            <input
+              type='radio'
+              name='publish'
+              value='no'
+              checked={isPublish === false}
+              onChange={() => setIsPublish(false)}
+            />
+            No
+          </label>
+        </div>
+      </div>
+
+      <div className={styles['content__step']}>
+        <QuestionType questions={questions} setQuestions={setQuestions} />
+      </div>
+
+      <div className={styles['content__button']}>
+        <Button variant='primary' onClick={handleCreate}>
+          Finish
+          <svg
+            viewBox='0 0 24 24'
+            fill='none'
+            xmlns='http://www.w3.org/2000/svg'
+            className={styles['question-type__button-icon']}
+          >
+            <path
+              d='M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12l-4.58 4.59z'
+              fill='currentColor'
+            />
+          </svg>
+        </Button>
       </div>
     </div>
   )

@@ -1,24 +1,51 @@
 import { type FC, useState } from 'react'
 import styles from '../../../style/components/new-assessments/create-question.module.scss'
 import Button from '../../ui/button'
-// import { QuestionsType } from '../../../constant/common'
+import { QuestionDialogProps } from '../../../constant/common'
+import { useDispatch } from 'react-redux'
+import { setToasterAppear } from '../../../redux/slices/common.slice'
 
-interface MultipleChoiceDialogProps {
-  // onSave: (question: QuestionsType) => void
-  onCancel: () => void
+interface TempType {
+  id: string
+  text: string
+  isCorrect: boolean
 }
 
-const MultipleChoiceDialog: FC<MultipleChoiceDialogProps> = ({ onCancel }) => {
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [options, setOptions] = useState([
-    { id: '1', text: '', isCorrect: false },
-    { id: '2', text: '', isCorrect: false },
-    { id: '3', text: '', isCorrect: false },
-    { id: '4', text: '', isCorrect: false }
-  ])
+const MultipleChoiceDialog: FC<QuestionDialogProps> = ({
+  onCancel,
+  setQuestions,
+  questions,
+  rowIndex
+}) => {
+  const dispatch = useDispatch()
+  const [title, setTitle] = useState(
+    rowIndex >= 0 ? questions[rowIndex].title : ''
+  )
+  const [description, setDescription] = useState(
+    rowIndex >= 0 ? questions[rowIndex].question_text : ''
+  )
+  const [counter, setCounter] = useState<number>(
+    rowIndex >= 0 ? questions.length + 1 : 3
+  )
+  const [options, setOptions] = useState<TempType[]>(
+    rowIndex >= 0 && questions[rowIndex]?.answers
+      ? questions[rowIndex]?.answers.map((item, index) => {
+          return {
+            id: (index + 1).toString(),
+            text: item.option_text,
+            isCorrect: item.is_correct
+          }
+        })
+      : [
+          { id: '1', text: '', isCorrect: false },
+          { id: '2', text: '', isCorrect: false }
+        ]
+  )
   const [allowMultipleCorrect, setAllowMultipleCorrect] = useState(false)
   const [shuffleOptions, setShuffleOptions] = useState(false)
+  const [score, setScore] = useState<string>(
+    rowIndex >= 0 ? questions[rowIndex].score.toString() : '5'
+  )
 
   const handleOptionChange = (id: string, text: string) => {
     setOptions(
@@ -46,8 +73,9 @@ const MultipleChoiceDialog: FC<MultipleChoiceDialogProps> = ({ onCancel }) => {
   }
 
   const addOption = () => {
-    const newId = (options.length + 1).toString()
+    const newId = counter.toString()
     setOptions([...options, { id: newId, text: '', isCorrect: false }])
+    setCounter(counter + 1)
   }
 
   const removeOption = (id: string) => {
@@ -55,25 +83,152 @@ const MultipleChoiceDialog: FC<MultipleChoiceDialogProps> = ({ onCancel }) => {
     setOptions(options.filter((option) => option.id !== id))
   }
 
-  // const handleSave = () => {
-  //   if (!title.trim() || options.filter((o) => o.text.trim()).length < 2) {
-  //     return
-  //   }
+  // Add question
+  const handleSave = () => {
+    if (!title.trim()) {
+      dispatch(
+        setToasterAppear({ message: 'Title must not be blank', type: 'error' })
+      )
+      return
+    }
 
-  //   if (!options.some((option) => option.isCorrect)) {
-  //     return
-  //   }
+    if (!+score) {
+      dispatch(
+        setToasterAppear({ message: 'Score must be a number', type: 'error' })
+      )
+      return
+    }
 
-  //   //   onSave({
-  //   //     type: 'multiple-choice',
-  //   //     title,
-  //   //     description,
-  //   //     timeLimit,
-  //   //     options: options.filter((o) => o.text.trim()),
-  //   //     allowMultipleCorrect,
-  //   //     shuffleOptions
-  //   //   })
-  //   // }
+    if (!description.trim()) {
+      dispatch(
+        setToasterAppear({
+          message: 'Description must not be blank',
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    if (!options.some((option) => option.isCorrect)) {
+      dispatch(
+        setToasterAppear({
+          message: 'Must provide correct answer',
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    if (!options.every((option) => option.text.trim())) {
+      dispatch(
+        setToasterAppear({
+          message: 'Answer mus not be blank',
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    const answers = options.map((item) => {
+      return {
+        option_text: item.text,
+        is_correct: item.isCorrect
+      }
+    })
+
+    setQuestions([
+      ...questions,
+      {
+        question_type: 'multiple_choice',
+        question_text: description,
+        title,
+        score: parseInt(score),
+        answers
+      }
+    ])
+
+    dispatch(setToasterAppear({ message: 'Question added', type: 'success' }))
+    onCancel()
+  }
+
+  const handleDelete = () => {
+    dispatch(
+      setToasterAppear({
+        message: 'Question is deleted',
+        type: 'success'
+      })
+    )
+
+    const temp = questions.filter((item, index) => {
+      return index !== rowIndex
+    })
+
+    setQuestions(temp)
+    onCancel()
+  }
+
+  const handleUpdate = () => {
+    if (!title.trim()) {
+      dispatch(
+        setToasterAppear({ message: 'Title must not be blank', type: 'error' })
+      )
+      return
+    }
+
+    if (!description.trim()) {
+      dispatch(
+        setToasterAppear({
+          message: 'Description must not be blank',
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    if (!+score) {
+      dispatch(
+        setToasterAppear({ message: 'Score must be a number', type: 'error' })
+      )
+      return
+    }
+
+    if (!options.some((option) => option.isCorrect)) {
+      dispatch(
+        setToasterAppear({
+          message: 'Must provide correct answer',
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    if (!options.every((option) => option.text.trim())) {
+      dispatch(
+        setToasterAppear({
+          message: 'Answer mus not be blank',
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    const answers = options.map((item) => {
+      return {
+        option_text: item.text,
+        is_correct: item.isCorrect
+      }
+    })
+
+    questions[rowIndex].title = title
+    questions[rowIndex].answers = answers
+    questions[rowIndex].question_text = description
+    questions[rowIndex].score = parseInt(score)
+
+    setQuestions(questions)
+
+    dispatch(setToasterAppear({ message: 'Question updated', type: 'success' }))
+    onCancel()
+  }
 
   return (
     <div className={styles['question-dialog__overlay']}>
@@ -102,9 +257,6 @@ const MultipleChoiceDialog: FC<MultipleChoiceDialogProps> = ({ onCancel }) => {
 
         <div className={styles['question-dialog__content']}>
           <div className={styles['question-dialog__section']}>
-            <h3 className={styles['question-dialog__section-title']}>
-              Question
-            </h3>
             <div className={styles['question-dialog__form-group']}>
               <label
                 className={styles['question-dialog__label']}
@@ -138,6 +290,25 @@ const MultipleChoiceDialog: FC<MultipleChoiceDialogProps> = ({ onCancel }) => {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder='Enter detailed instructions for the candidate'
                 rows={3}
+              />
+            </div>
+
+            <div className={styles['question-dialog__form-group']}>
+              <label
+                className={styles['question-dialog__label']}
+                htmlFor='title'
+              >
+                Score{' '}
+                <span className={styles['question-dialog__required']}>*</span>
+              </label>
+              <input
+                id='score'
+                type='text'
+                className={styles['question-dialog__input']}
+                value={score}
+                onChange={(e) => setScore(e.target.value)}
+                placeholder='Enter question score'
+                required
               />
             </div>
           </div>
@@ -258,19 +429,17 @@ const MultipleChoiceDialog: FC<MultipleChoiceDialogProps> = ({ onCancel }) => {
         </div>
 
         <div className={styles['question-dialog__footer']}>
-          <Button variant='secondary' onClick={onCancel}>
-            Cancel
+          <Button
+            variant='secondary'
+            onClick={rowIndex >= 0 ? handleDelete : onCancel}
+          >
+            {rowIndex >= 0 ? 'Delete' : 'Cancel'}
           </Button>
           <Button
             variant='primary'
-            // onClick={handleSave}
-            disabled={
-              !title.trim() ||
-              options.filter((o) => o.text.trim()).length < 2 ||
-              !options.some((option) => option.isCorrect)
-            }
+            onClick={rowIndex >= 0 ? handleUpdate : handleSave}
           >
-            Save
+            {rowIndex >= 0 ? 'Update' : 'Save'}
           </Button>
         </div>
       </div>

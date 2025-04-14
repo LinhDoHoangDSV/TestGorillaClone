@@ -2,27 +2,53 @@ import type { FC } from 'react'
 import EssayQuestionDialog from './create-essay'
 import MultipleChoiceDialog from './create-multiple-choice'
 import CodingQuestionDialog from './create-coding'
+import { QuestionsType } from '../../../constant/common'
 
 interface QuestionDialogManagerProps {
   // onSave: (question: any) => void
   onCancel: () => void
   questionType: string | null
+  setQuestions: (questions: QuestionsType[]) => void
+  questions: QuestionsType[]
+  rowIndex: number
 }
 
 const QuestionDialogManager: FC<QuestionDialogManagerProps> = ({
   // onSave,
   onCancel,
-  questionType
+  questionType,
+  setQuestions,
+  questions,
+  rowIndex
 }) => {
-  if (!questionType) return null
-
   switch (questionType) {
     case 'essay':
-      return <EssayQuestionDialog onCancel={onCancel} />
-    case 'multiple-choice':
-      return <MultipleChoiceDialog onCancel={onCancel} />
+      return (
+        <EssayQuestionDialog
+          onCancel={onCancel}
+          setQuestions={setQuestions}
+          questions={questions}
+          rowIndex={rowIndex}
+        />
+      )
+    case 'multiple_choice':
+      return (
+        <MultipleChoiceDialog
+          onCancel={onCancel}
+          setQuestions={setQuestions}
+          questions={questions}
+          rowIndex={rowIndex}
+        />
+      )
     case 'coding':
-      return <CodingQuestionDialog onCancel={onCancel} />
+      return (
+        <CodingQuestionDialog
+          onCancel={onCancel}
+          setQuestions={setQuestions}
+          questions={questions}
+          rowIndex={rowIndex}
+        />
+      )
     default:
       return null
   }

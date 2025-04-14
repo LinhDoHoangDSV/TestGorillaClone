@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsDate,
   IsNotEmpty,
   IsNumber,
@@ -21,6 +22,10 @@ export class CreateTestDto {
   @IsNotEmpty({ message: 'test_time must not be empty' })
   @IsNumber({}, { message: 'test_time must be a number' })
   test_time: number;
+
+  @IsOptional()
+  @IsBoolean({ message: 'is_publish must be a boolean' })
+  is_publish: boolean;
 
   @IsOptional()
   @IsDate({ message: 'deleted_at must be a date' })

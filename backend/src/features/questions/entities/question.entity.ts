@@ -1,5 +1,13 @@
+import { Test } from '../../tests/entities/test.entity';
 import { QUESTION_TYPE } from '../../../common/constant';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Answer } from '../../answers/entities/answer.entity';
 
 @Entity({ name: 'questions' })
 export class Question {
@@ -9,6 +17,9 @@ export class Question {
   @Column({ name: 'test_id' })
   test_id: number;
 
+  @Column({ name: 'title' })
+  title: string;
+
   @Column('text')
   question_text: string;
 
@@ -17,4 +28,10 @@ export class Question {
 
   @Column({ name: 'score' })
   score: number;
+
+  @ManyToOne(() => Test, (test) => test.questions)
+  test: Test;
+
+  @OneToMany(() => Answer, (answer) => answer.question, { cascade: true })
+  answers: Answer[];
 }

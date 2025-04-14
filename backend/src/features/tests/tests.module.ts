@@ -8,5 +8,6 @@ import { ResponseModule } from '../response/response.module';
   controllers: [TestsController],
   providers: [TestsService],
   imports: [LoggerModule, ResponseModule],
+  exports: [TestsService],
 })
 export class TestsModule {}

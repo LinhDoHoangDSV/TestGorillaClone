@@ -9,6 +9,7 @@ import {
   Res,
   HttpStatus,
   HttpException,
+  BadRequestException,
 } from '@nestjs/common';
 import { AnswersService } from './answers.service';
 import { CreateAnswerDto } from './dto/create-answer.dto';
@@ -22,12 +23,14 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { QuestionsService } from '../questions/questions.service';
 
 @ApiTags('Answers')
 @Controller('answers')
 export class AnswersController {
   constructor(
     private readonly answersService: AnswersService,
+    private readonly questionsService: QuestionsService,
     private readonly logger: LoggerService,
     private readonly response: Response,
   ) {}
@@ -96,6 +99,11 @@ export class AnswersController {
   @Post()
   async create(@Body() createAnswerDto: CreateAnswerDto, @Res() res) {
     try {
+      const existingQuestion = await this.questionsService.findOne(
+        createAnswerDto.question_id,
+      );
+      if (!existingQuestion)
+        throw new BadRequestException('No question match question_id');
       const newAnswer = await this.answersService.create(createAnswerDto);
       this.logger.debug('Creating answer successfully');
       this.response.initResponse(
