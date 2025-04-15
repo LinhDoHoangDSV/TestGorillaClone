@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    // "prepare": "husky",
+    "prepare": "husky",
     "check:web": "cd web && npm run check:all && cd ../",
     "check:backend": "cd backend && npm run check:all && cd ../",
     "backend:build": "cd backend && npm run build",
