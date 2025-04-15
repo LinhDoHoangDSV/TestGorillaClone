@@ -9,10 +9,12 @@ import {
   setToasterAppear
 } from '../../redux/slices/common.slice'
 import { TestCriteria } from '../../constant/api'
+import { useNavigate } from 'react-router-dom'
 
 const TestCard: FC = () => {
   const [tests, setAllTests] = useState([])
   const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   useEffect(() => {
     async function firstFetch() {
@@ -47,7 +49,9 @@ const TestCard: FC = () => {
     firstFetch()
   }, [])
 
-  const handleView = () => {}
+  const handleView = () => {
+    navigate('/assessments')
+  }
   const handleClone = () => {}
 
   return (
