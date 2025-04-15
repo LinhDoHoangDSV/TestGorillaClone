@@ -75,13 +75,39 @@ export const questionTypes = [
   { id: 'coding', name: 'Coding', icon: 'coding' }
 ]
 
-export interface TestCardProps {
-  id: number
-  title: string
-  description: string
-}
-
 export interface ToasterProps {
   message: string
   type: string // info / success / error
+}
+
+export interface CandidateProps {
+  candidates: {
+    id: number
+    email: string
+    completionTime: string
+    score: number
+  }[]
+}
+
+export interface QuestionProps {
+  questions: {
+    id: number
+    type: string
+    title: string
+    score: number
+  }[]
+}
+
+export interface Candidate {
+  id: number
+  email: string
+  completionTime: string
+  score: number
+}
+
+export interface Question {
+  id: number
+  type: string
+  title: string
+  score: number
 }

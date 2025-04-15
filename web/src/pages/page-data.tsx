@@ -42,6 +42,13 @@ const pagesData: RouterType[] = [
     element: <Login />,
     header: false,
     footer: false
+  },
+  {
+    title: 'assessments',
+    path: '/assessments',
+    element: <Assessments />,
+    header: false,
+    footer: false
   }
 ]
 

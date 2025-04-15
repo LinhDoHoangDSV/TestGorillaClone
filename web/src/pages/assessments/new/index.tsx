@@ -1,8 +1,11 @@
-import { Suspense, useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import styles from '../../../style/pages/new-assessment.module.scss'
 import Loading from '../../../components/loading'
-import Header from '../../../components/assessments/new/header'
-import Content from '../../../components/assessments/new/content'
+
+const Header = lazy(() => import('../../../components/assessments/new/header'))
+const Content = lazy(
+  () => import('../../../components/assessments/new/content')
+)
 
 const AssessmentsNew = () => {
   const [title, setTitle] = useState<string>('Your new test')

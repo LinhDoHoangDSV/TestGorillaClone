@@ -4,6 +4,7 @@ import { UpdateQuestionDto } from './dto/update-question.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { Question } from './entities/question.entity';
+import { FindQuestionCriteriasDto } from './dto/find-question-criterias.dto';
 
 @Injectable()
 export class QuestionsService {
@@ -12,54 +13,90 @@ export class QuestionsService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async create(createQuestionDto: CreateQuestionDto) {
-    const newQuestion = await this.dataSource.query(
-      `INSERT INTO questions (test_id, question_text, question_type, score)
-      VALUES (${createQuestionDto.test_id}, '${createQuestionDto.question_text}', '${createQuestionDto.question_type}', ${createQuestionDto.score ? createQuestionDto.score : 5})
-      RETURNING *;`,
-    );
-    return newQuestion[0];
+  async create(createQuestionDto: CreateQuestionDto): Promise<Question | null> {
+    const {
+      test_id,
+      question_text,
+      question_type,
+      score = 5,
+    } = createQuestionDto;
+    const query = `
+      INSERT INTO questions (test_id, question_text, question_type, score)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *;
+    `;
+    const values = [test_id, question_text, question_type, score];
+    const [result] = await this.dataSource.query(query, values);
+    return result || null;
   }
 
-  async findAll(): Promise<Question[]> {
-    const result = await this.dataSource.query(`SELECT * FROM questions;`);
+  async findByCriterias(
+    findQuestionCriteriasDto: FindQuestionCriteriasDto,
+  ): Promise<Question[] | null> {
+    const conditions: string[] = [];
+    const values: any[] = [];
+
+    for (const key in findQuestionCriteriasDto) {
+      conditions.push(`${key} = $${conditions.length + 1}`);
+      values.push(findQuestionCriteriasDto[key]);
+    }
+
+    const whereClause =
+      conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    const query = `SELECT * FROM questions ${whereClause}`;
+    const result = await this.dataSource.query(query, values);
     return result;
   }
 
-  async findOne(id: number): Promise<Question> {
-    const result = await this.dataSource.query(
-      `SELECT * FROM questions
-      WHERE ID = ${id};`,
-    );
-    return result[0] ? result[0] : null;
+  async findAll(): Promise<Question[]> {
+    const query = `SELECT * FROM questions;`;
+    const result = await this.dataSource.query(query);
+    return result;
+  }
+
+  async findOne(id: number): Promise<Question | null> {
+    const query = `
+      SELECT * FROM questions
+      WHERE id = $1;
+    `;
+    const [result] = await this.dataSource.query(query, [id]);
+    return result || null;
   }
 
   async update(
     id: number,
     updateQuestionDto: UpdateQuestionDto,
-  ): Promise<Question> {
-    let sampleText = '';
+  ): Promise<Question | null> {
+    const updates: string[] = [];
+    const values: any[] = [];
+    let index = 1;
 
-    for (const i in updateQuestionDto) {
-      sampleText += `${i} = ${updateQuestionDto[i]}, `;
+    for (const key in updateQuestionDto) {
+      updates.push(`${key} = $${index}`);
+      values.push(updateQuestionDto[key]);
+      index++;
     }
 
-    if (sampleText == '') return this.findOne(id);
+    if (updates.length === 0) {
+      return this.findOne(id);
+    }
 
-    const updatedQuestion = await this.dataSource.query(
-      `UPDATE questions
-      ${sampleText != '' ? `SET ${sampleText.slice(0, -2)}` : ''}
-      WHERE id = ${id}
-      RETURNING *;`,
-    );
-    return updatedQuestion[0][0] ? updatedQuestion[0][0] : null;
+    values.push(id);
+    const query = `
+      UPDATE questions
+      SET ${updates.join(', ')}
+      WHERE id = $${index}
+      RETURNING *;
+    `;
+    const [result] = await this.dataSource.query(query, values);
+    return result || null;
   }
 
-  async remove(id: number) {
-    await this.dataSource.query(
-      `DELETE FROM questions
-      WHERE id = ${id};`,
-    );
-    return null;
+  async remove(id: number): Promise<void> {
+    const query = `
+      DELETE FROM questions
+      WHERE id = $1;
+    `;
+    await this.dataSource.query(query, [id]);
   }
 }

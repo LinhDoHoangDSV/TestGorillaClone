@@ -1,0 +1,60 @@
+.test_info {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+
+  &__section {
+    margin-bottom: 30px;
+  }
+
+  &__section_title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 15px;
+  }
+
+  &__field {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+  }
+
+  &__label {
+    font-size: 18px;
+    font-weight: bold;
+    margin-right: 10px;
+    min-width: 200px;
+  }
+
+  &__input {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    width: 300px;
+
+    &:focus {
+      outline: none;
+      border-color: #007bff;
+    }
+  }
+
+  &__radio_group {
+    display: flex;
+    gap: 20px;
+  }
+
+  &__radio_option {
+    display: flex;
+    align-items: center;
+  }
+
+  &__radio {
+    margin-right: 5px;
+  }
+
+  &__radio_label {
+    font-size: 16px;
+  }
+}

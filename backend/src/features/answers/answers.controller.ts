@@ -24,6 +24,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { QuestionsService } from '../questions/questions.service';
+import { FindCriteriasDto } from './dto/find-criterias.dto';
 
 @ApiTags('Answers')
 @Controller('answers')
@@ -99,10 +100,10 @@ export class AnswersController {
   @Post()
   async create(@Body() createAnswerDto: CreateAnswerDto, @Res() res) {
     try {
-      const existingQuestion = await this.questionsService.findOne(
+      const existingAnswer = await this.questionsService.findOne(
         createAnswerDto.question_id,
       );
-      if (!existingQuestion)
+      if (!existingAnswer)
         throw new BadRequestException('No question match question_id');
       const newAnswer = await this.answersService.create(createAnswerDto);
       this.logger.debug('Creating answer successfully');
@@ -121,6 +122,37 @@ export class AnswersController {
         this.response.initResponse(
           false,
           'System error while creating answer',
+          null,
+        );
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(this.response);
+      }
+    }
+  }
+
+  @Post('/criterias')
+  async findByCriterias(
+    @Body() findCriteriasDto: FindCriteriasDto,
+    @Res() res,
+  ) {
+    try {
+      const existingAnswers =
+        await this.answersService.findByCriterias(findCriteriasDto);
+      this.logger.debug('Finding answers successfully');
+      this.response.initResponse(
+        true,
+        'Creating answer successfully',
+        existingAnswers,
+      );
+      return res.status(HttpStatus.OK).json(this.response);
+    } catch (error) {
+      this.logger.error('Error while finding answers', error?.stack);
+      if (error instanceof HttpException) {
+        this.response.initResponse(false, error?.message, null);
+        return res.status(error?.getStatus()).json(this.response);
+      } else {
+        this.response.initResponse(
+          false,
+          'System error while finding answers',
           null,
         );
         return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(this.response);

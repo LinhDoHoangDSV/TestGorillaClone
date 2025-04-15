@@ -1,5 +1,5 @@
 import { useState, type FC } from 'react'
-import styles from '../../../style/components/new-assessments/content.module.scss'
+import styles from '../../../style/components/assessments/new/content.module.scss'
 import QuestionType from './question-type'
 import { ContentProps, QuestionsType } from '../../../constant/common'
 import Button from '../../ui/button'

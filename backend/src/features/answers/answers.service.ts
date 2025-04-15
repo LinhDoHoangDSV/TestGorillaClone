@@ -4,6 +4,7 @@ import { UpdateAnswerDto } from './dto/update-answer.dto';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { Answer } from './entities/answer.entity';
+import { FindCriteriasDto } from './dto/find-criterias.dto';
 
 @Injectable()
 export class AnswersService {
@@ -12,51 +13,82 @@ export class AnswersService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async create(createAnswerDto: CreateAnswerDto): Promise<Answer> {
-    const newAnswer = await this.dataSource.query(
-      `INSERT INTO answers (question_id, option_text, is_correct)
-        VALUES (${createAnswerDto.question_id}, '${createAnswerDto.option_text}', ${createAnswerDto.is_correct ? createAnswerDto.is_correct : false})
-        RETURNING *;`,
-    );
-    return newAnswer[0];
+  async create(createAnswerDto: CreateAnswerDto): Promise<Answer | null> {
+    const { question_id, option_text, is_correct = false } = createAnswerDto;
+    const query = `
+      INSERT INTO answers (question_id, option_text, is_correct)
+      VALUES ($1, $2, $3)
+      RETURNING *;
+    `;
+    const values = [question_id, option_text, is_correct];
+    const [result] = await this.dataSource.query(query, values);
+    return result;
+  }
+
+  async findByCriterias(criteria: FindCriteriasDto): Promise<Answer[]> {
+    const conditions: string[] = [];
+    const values: any[] = [];
+
+    for (const i in criteria) {
+      conditions.push(`${i} = $${conditions.length + 1}`);
+      values.push(criteria[i]);
+    }
+
+    const whereClause =
+      conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+
+    const query = `SELECT * FROM answers ${whereClause}`;
+
+    const result = await this.dataSource.query(query, values);
+    return result;
   }
 
   async findAll(): Promise<Answer[]> {
-    const result = await this.dataSource.query(`SELECT * FROM answers;`);
+    const query = `SELECT * FROM answers;`;
+    const result = await this.dataSource.query(query);
     return result;
   }
 
   async findOne(id: number): Promise<Answer> {
-    const result = await this.dataSource.query(
-      `SELECT * FROM answers
-        WHERE ID = ${id}`,
-    );
-    return result[0] ? result[0] : null;
+    const query = `
+      SELECT * FROM answers
+      WHERE id = $1;
+    `;
+    const [result] = await this.dataSource.query(query, [id]);
+    return result || null;
   }
 
   async update(id: number, updateAnswerDto: UpdateAnswerDto): Promise<Answer> {
-    let sampleText = '';
+    const updates: string[] = [];
+    const values: any[] = [];
+    let index = 1;
 
-    for (const i in updateAnswerDto) {
-      sampleText += `${i} = ${typeof updateAnswerDto[i] != 'string' ? updateAnswerDto[i] : `'${updateAnswerDto[i]}'`}, `;
+    for (const key in updateAnswerDto) {
+      updates.push(`${key} = $${index}`);
+      values.push(updateAnswerDto[key]);
+      index++;
     }
 
-    if (sampleText == '') return this.findOne(id);
+    if (updates.length === 0) {
+      return this.findOne(id);
+    }
 
-    const updatedQuestion = await this.dataSource.query(
-      `UPDATE answers
-        SET ${sampleText.slice(0, -2)}
-        WHERE id = ${id}
-        RETURNING *;`,
-    );
-    return updatedQuestion[0][0] ? updatedQuestion[0][0] : null;
+    values.push(id);
+    const query = `
+      UPDATE answers
+      SET ${updates.join(', ')}
+      WHERE id = $${index}
+      RETURNING *;
+    `;
+    const [[result]] = await this.dataSource.query(query, values);
+    return result || null;
   }
 
-  async remove(id: number) {
-    await this.dataSource.query(
-      `DELETE FROM answers
-        WHERE id = ${id};`,
-    );
-    return null;
+  async remove(id: number): Promise<void> {
+    const query = `
+      DELETE FROM answers
+      WHERE id = $1;
+    `;
+    await this.dataSource.query(query, [id]);
   }
 }

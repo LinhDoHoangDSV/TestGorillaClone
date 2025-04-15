@@ -1,5 +1,5 @@
 import { type FC, useState } from 'react'
-import styles from '../../../style/components/new-assessments/create-question.module.scss'
+import styles from '../../../style/components/assessments/new/create-question.module.scss'
 import Button from '../../ui/button'
 import { QuestionDialogProps } from '../../../constant/common'
 

@@ -26,6 +26,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { TestsService } from '../tests/tests.service';
+import { FindQuestionCriteriasDto } from './dto/find-question-criterias.dto';
 
 @ApiTags('Questions')
 @Controller('questions')
@@ -121,6 +122,38 @@ export class QuestionsController {
         this.response.initResponse(
           false,
           'System error while creating question',
+          null,
+        );
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(this.response);
+      }
+    }
+  }
+
+  @Post('/criterias')
+  async findByCriterias(
+    @Body() findQuestionCriteriasDto: FindQuestionCriteriasDto,
+    @Res() res,
+  ) {
+    try {
+      const existingQuestions = await this.questionsService.findByCriterias(
+        findQuestionCriteriasDto,
+      );
+      this.logger.debug('Finding questions successfully');
+      this.response.initResponse(
+        true,
+        'Finding questions successfully',
+        existingQuestions,
+      );
+      return res.status(HttpStatus.OK).json(this.response);
+    } catch (error) {
+      this.logger.error('Error while finding questions', error?.stack);
+      if (error instanceof HttpException) {
+        this.response.initResponse(false, error?.message, null);
+        return res.status(error?.getStatus()).json(this.response);
+      } else {
+        this.response.initResponse(
+          false,
+          'System error while finding questions',
           null,
         );
         return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(this.response);

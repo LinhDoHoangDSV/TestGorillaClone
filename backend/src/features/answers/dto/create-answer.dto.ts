@@ -4,7 +4,7 @@ export class CreateAnswerDto {
   @IsNotEmpty({ message: 'question_id is required' })
   question_id: number;
 
-  @IsOptional()
+  @IsNotEmpty({ message: 'option_text must not be empty' })
   option_text: string;
 
   @IsOptional()

@@ -21,6 +21,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -28,15 +29,21 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
+        // type: 'postgres',
+        // host: configService.get('DB_HOST'),
+        // port: parseInt(configService.get('DB_PORT'), 10) || 5432,
+        // username: configService.get('DB_USER'),
+        // password: configService.get('DB_PASS'),
+        // database: configService.get('DB_NAME'),
+        // entities: [__dirname + '/../**/**/*.entity{.ts,.js}'],
+        // synchronize: false,
+        // autoLoadEntities: true,
+        // logging: true,
         type: 'postgres',
-        host: configService.get('DB_HOST'),
-        port: parseInt(configService.get('DB_PORT'), 10) || 5432,
-        username: configService.get('DB_USER'),
-        password: configService.get('DB_PASS'),
-        database: configService.get('DB_NAME'),
-        entities: [__dirname + '/../**/**/*.entity{.ts,.js}'],
-        synchronize: false,
-        autoLoadEntities: true,
+        url: configService.get<string>('DB_URL'),
+        entities: [join(__dirname, '..', '**', '*.entity.{ts,js}')],
+        migrations: [join(__dirname, 'migration', '*.{ts,js}')],
+        migrationsRun: true,
         logging: true,
       }),
     }),

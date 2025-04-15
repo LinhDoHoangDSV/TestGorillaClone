@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FC } from 'react'
 import Pencil from '../../../assets/pencil-solid.svg'
-import styles from '../../../style/components/new-assessments/header.module.scss'
+import styles from '../../../style/components/assessments/new/header.module.scss'
+import { useNavigate } from 'react-router-dom'
 
 interface HeaderProps {
   title: string
@@ -9,6 +10,7 @@ interface HeaderProps {
 
 const Header: FC<HeaderProps> = ({ title, setTitle }) => {
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false)
+  const navigate = useNavigate()
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -25,6 +27,10 @@ const Header: FC<HeaderProps> = ({ title, setTitle }) => {
 
   const handleBlur = () => {
     setIsEditingTitle(false)
+  }
+
+  const handleExit = () => {
+    navigate('/')
   }
 
   return (
@@ -51,7 +57,9 @@ const Header: FC<HeaderProps> = ({ title, setTitle }) => {
           onClick={handleChangeTitle}
         />
       </div>
-      <button className={styles['header__save-button']}>Save and exit</button>
+      <button className={styles['header__save-button']} onClick={handleExit}>
+        Exit
+      </button>
     </div>
   )
 }

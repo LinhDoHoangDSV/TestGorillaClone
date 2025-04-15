@@ -4,6 +4,7 @@ import { UpdateTestDto } from './dto/update-test.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { Test } from './entities/test.entity';
+import { FindTestCriteriasDto } from './dto/find-test-criterias.dto';
 
 @Injectable()
 export class TestsService {
@@ -12,51 +13,94 @@ export class TestsService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async create(createTestDto: CreateTestDto): Promise<Test> {
-    const newTest = await this.dataSource.query(
-      `INSERT INTO tests (owner_id, title, description, test_time, is_publish)
-      VALUES (${createTestDto.owner_id}, '${createTestDto.title}', '${createTestDto.description}', ${createTestDto.test_time}, ${createTestDto.is_publish || false})
-      RETURNING *;`,
-    );
-    return newTest[0];
+  async create(createTestDto: CreateTestDto): Promise<Test | null> {
+    const {
+      owner_id,
+      title,
+      description,
+      test_time,
+      is_publish = false,
+    } = createTestDto;
+    const query = `
+      INSERT INTO tests (owner_id, title, description, test_time, is_publish)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING *;
+    `;
+    const values = [
+      owner_id,
+      title,
+      description || null,
+      test_time,
+      is_publish,
+    ];
+    const [result] = await this.dataSource.query(query, values);
+    return result || null;
   }
 
-  async findAll(): Promise<Test[]> {
-    const result = await this.dataSource.query(`SELECT * FROM tests;`);
+  async findByCriterias(
+    findTestCriteriasDto: FindTestCriteriasDto,
+  ): Promise<Test[]> {
+    const conditions: string[] = [];
+    const values: any[] = [];
+
+    for (const key in findTestCriteriasDto) {
+      conditions.push(`${key} = $${conditions.length + 1}`);
+      values.push(findTestCriteriasDto[key]);
+    }
+
+    const whereClause =
+      conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    const query = `SELECT * FROM tests ${whereClause}`;
+    const result = await this.dataSource.query(query, values);
     return result;
   }
 
-  async findOne(id: number): Promise<Test> {
-    const result = await this.dataSource.query(
-      `SELECT * FROM tests
-      WHERE id = ${id};`,
-    );
-    return result[0] ? result[0] : null;
+  async findAll(): Promise<Test[]> {
+    const query = `SELECT * FROM tests;`;
+    const result = await this.dataSource.query(query);
+    return result;
   }
 
-  async update(id: number, updateTestDto: UpdateTestDto): Promise<Test> {
-    let sampleText = '';
+  async findOne(id: number): Promise<Test | null> {
+    const query = `
+      SELECT * FROM tests
+      WHERE id = $1;
+    `;
+    const [result] = await this.dataSource.query(query, [id]);
+    return result || null;
+  }
 
-    for (const i in updateTestDto) {
-      sampleText += `${i} = ${typeof updateTestDto[i] != 'string' ? updateTestDto[i] : `'${updateTestDto[i]}'`}, `;
+  async update(id: number, updateTestDto: UpdateTestDto): Promise<Test | null> {
+    const updates: string[] = [];
+    const values: any[] = [];
+    let index = 1;
+
+    for (const key in updateTestDto) {
+      updates.push(`${key} = $${index}`);
+      values.push(updateTestDto[key]);
+      index++;
     }
 
-    if (sampleText == '') return this.findOne(id);
+    if (updates.length === 0) {
+      return this.findOne(id);
+    }
 
-    const updatedTest = await this.dataSource.query(
-      `UPDATE tests
-        SET ${sampleText.slice(0, -2)}
-        WHERE id = ${id}
-        RETURNING *;`,
-    );
-    return updatedTest[0][0] ? updatedTest[0][0] : null;
+    values.push(id);
+    const query = `
+      UPDATE tests
+      SET ${updates.join(', ')}
+      WHERE id = $${index}
+      RETURNING *;
+    `;
+    const [result] = await this.dataSource.query(query, values);
+    return result || null;
   }
 
-  async remove(id: number) {
-    await this.dataSource.query(
-      `DELETE FROM tests
-      WHERE id = ${id};`,
-    );
-    return null;
+  async remove(id: number): Promise<void> {
+    const query = `
+      DELETE FROM tests
+      WHERE id = $1;
+    `;
+    await this.dataSource.query(query, [id]);
   }
 }
