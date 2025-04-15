@@ -1,0 +1,30 @@
+{
+  "projects": [
+    {
+      "name": "backend",
+      "root": "backend",
+      "builds": [
+        {
+          "src": "dist/main.js",
+          "use": "@vercel/node"
+        }
+      ],
+      "routes": [
+        {
+          "src": "/(.*)",
+          "dest": "dist/main.js"
+        }
+      ]
+    },
+    {
+      "name": "web",
+      "root": "web",
+      "builds": [
+        {
+          "src": "build/**/*",
+          "use": "@vercel/static"
+        }
+      ]
+    }
+  ]
+}
