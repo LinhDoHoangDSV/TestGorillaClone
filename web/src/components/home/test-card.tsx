@@ -23,7 +23,7 @@ const TestCard: FC = () => {
       const criterias: TestCriteria = {
         is_publish: true
       }
-      const result = await getAllTestsByCriteria(criterias)
+      const result: any = await getAllTestsByCriteria(criterias)
 
       if (result?.status > 299) {
         dispatch(
@@ -56,7 +56,7 @@ const TestCard: FC = () => {
 
   return (
     <div className={style.wrapper}>
-      {tests.map((test, index) => {
+      {tests.map((test: any, index) => {
         return (
           <div className={style.card} key={index}>
             <div className={style.card__title}>{test?.title}</div>

@@ -48,7 +48,7 @@ const Content: FC<ContentProps> = ({ title }) => {
       title
     }
 
-    const newTest = await createTest(data)
+    const newTest: any = await createTest(data)
 
     for (const i of questions) {
       const createQuestionDto: CreateQuestionDto = {
@@ -58,7 +58,7 @@ const Content: FC<ContentProps> = ({ title }) => {
         test_id: newTest?.data?.data?.id
       }
 
-      const newQuestion = await createQuestion(createQuestionDto)
+      const newQuestion: any = await createQuestion(createQuestionDto)
 
       if (i.answers) {
         for (const j of i.answers) {

@@ -106,6 +106,8 @@ const EssayQuestionDialog: FC<QuestionDialogProps> = ({
     )
 
     const temp = questions.filter((item, index) => {
+      console.log(item)
+
       return index !== rowIndex
     })
 

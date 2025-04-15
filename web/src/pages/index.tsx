@@ -17,7 +17,7 @@ const Home = () => {
           <div className={style['home__test-card-line']}></div>
         </div>
 
-        <TestCard id={1} description='I dont know' title='hihi' />
+        <TestCard />
       </div>
     </Suspense>
   )
