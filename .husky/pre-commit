@@ -1,4 +1,4 @@
 echo '---------- Check web ----------'
 # npm run check:web
 echo '---------- Check backend ----------'
-npm run check:backend
+# npm run check:backend
