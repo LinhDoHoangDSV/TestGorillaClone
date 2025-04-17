@@ -19,12 +19,16 @@ import { LoggerService } from '../logger/logger.service';
 import { Response } from '../response/response';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { FindTestAssignmentCriteriaDto } from './dto/find-test-assignment-criteria.dto';
+import { InviteTestDto } from './dto/invite-test.dto';
+import { SendRequestDto } from '../mail-service/dto/send-request.dto';
+import { MailService } from '../mail-service/mail-service.service';
 
 @Controller('test-assignment')
 export class TestAssignmentController {
   constructor(
     private readonly testAssignmentService: TestAssignmentService,
     private readonly testsService: TestsService,
+    private readonly mailService: MailService,
     private readonly logger: LoggerService,
     private readonly response: Response,
   ) {}
@@ -213,6 +217,53 @@ export class TestAssignmentController {
         this.response.initResponse(
           false,
           'System error while finding test_assignment',
+          null,
+        );
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(this.response);
+      }
+    }
+  }
+
+  @Post('/invite')
+  async inviteTest(@Body() inviteTestDto: InviteTestDto, @Res() res) {
+    try {
+      const existingTest = await this.testsService.findOne(
+        inviteTestDto.test_id,
+      );
+
+      if (!existingTest) throw new BadRequestException('Do not exist test');
+
+      const { emails, ...createTestAssignmentDto } = inviteTestDto;
+
+      emails.split(',').map(async (email) => {
+        const code = Math.floor(Math.random() * 1000000).toString();
+        const newTestAssignment = await this.testAssignmentService.create({
+          ...createTestAssignmentDto,
+          candidate_email: email.trim(),
+          code,
+        });
+
+        const emailRequest: SendRequestDto = {
+          code,
+          email: email.trim(),
+          url: `http://localhost:3000/api/v1/assessments/attendance/${newTestAssignment.id * 300003 + 200003}`,
+        };
+
+        await this.mailService.requestTest(emailRequest);
+      });
+
+      this.logger.debug('Sending requests successfully');
+      this.response.initResponse(true, 'Sending requests successfully', null);
+      return res.status(HttpStatus.OK).json(this.response);
+    } catch (error) {
+      this.logger.error('Error while sending requests', error?.stack);
+      if (error instanceof HttpException) {
+        this.response.initResponse(false, error?.message, null);
+        return res.status(error?.getStatus()).json(this.response);
+      } else {
+        this.response.initResponse(
+          false,
+          'System error while sending requests',
           null,
         );
         return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(this.response);

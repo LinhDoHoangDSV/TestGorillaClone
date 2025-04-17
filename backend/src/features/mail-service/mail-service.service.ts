@@ -9,7 +9,7 @@ export class MailService {
   async requestTest(sendRequestDto: SendRequestDto) {
     await this.mailerService.sendMail({
       to: sendRequestDto.email.trim(),
-      subject: 'GORILLATESTCLONE INVITATION',
+      subject: 'TESTGORILLACLONE INVITATION',
       template: 'request',
       context: {
         email: sendRequestDto.email.trim(),

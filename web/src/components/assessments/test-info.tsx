@@ -13,6 +13,7 @@ import {
 import { getAllQuestionsByCriteria } from '../../api/questions.api'
 import { getAllTestAssignmentByCriteria } from '../../api/test-assignment.api'
 import { getAllAnswerByCriteria } from '../../api/answers.api'
+import InviteDialog from './attendance/invite-dialog'
 
 const TestInfo: FC<TestInfoProps> = ({ testId, type }) => {
   const dispatch = useDispatch()
@@ -151,10 +152,20 @@ const TestInfo: FC<TestInfoProps> = ({ testId, type }) => {
       </div>
 
       {type === 'own' && (
-        <div className={styles.test_info__section}>
-          <h2 className={styles.test_info__section_title}>Candidates</h2>
-          <CandidateTable testAssignments={testAssignments} />
+        <div className={styles.test_info}>
+          <div className={styles.test_info__section}>
+            <div className={styles.test_info__section_title}>
+              <div>Candidates</div>
+              <InviteDialog testId={testId} />
+              {/* <div className={styles.test_info__actions}> */}
+            </div>
+            <CandidateTable testAssignments={testAssignments} />
+          </div>
         </div>
+        // <div className={styles.test_info__section}>
+        //   <h2 className={styles.test_info__section_title}>Candidates</h2>
+        //   <CandidateTable testAssignments={testAssignments} />
+        // </div>
       )}
 
       <div className={styles.test_info__section}>

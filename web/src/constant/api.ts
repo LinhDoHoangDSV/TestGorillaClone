@@ -39,3 +39,15 @@ export interface QuestionsCriteriaDto {
   score?: number
   title?: string
 }
+
+export interface SendTestRequestDto {
+  test_id?: number
+  candidate_email?: string
+  expired_invitation?: Date
+  started_at?: Date
+  is_online?: boolean
+  score?: number
+  code?: string
+  status?: string
+  emails: string
+}
