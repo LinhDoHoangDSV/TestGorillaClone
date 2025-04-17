@@ -22,10 +22,20 @@ export interface CreateQuestionDto {
   question_text: string
   question_type: string
   score: number
+  title: string
 }
 
 export interface CreateAnswerDto {
   question_id: number
   option_text: string
   is_correct: boolean
+}
+
+export interface QuestionsCriteriaDto {
+  id?: number
+  test_id?: number
+  question_text?: string
+  question_type?: string
+  score?: number
+  title?: string
 }

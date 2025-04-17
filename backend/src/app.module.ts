@@ -12,6 +12,11 @@ import * as Joi from 'joi';
 import { ConfigModule } from '@nestjs/config';
 import { AnswersModule } from './features/answers/answers.module';
 import { TestsModule } from './features/tests/tests.module';
+import { StatisticsModule } from './features/statistics/statistics.module';
+import { UsersModule } from './features/users/users.module';
+import { RolesModule } from './features/roles/roles.module';
+import { TestAssignmentModule } from './features/test-assignment/test-assignment.module';
+import { UserAnswersModule } from './features/user-answers/user-answers.module';
 
 @Module({
   imports: [
@@ -34,6 +39,11 @@ import { TestsModule } from './features/tests/tests.module';
     QuestionsModule,
     AnswersModule,
     TestsModule,
+    StatisticsModule,
+    UsersModule,
+    RolesModule,
+    TestAssignmentModule,
+    UserAnswersModule,
   ],
   controllers: [AppController],
   providers: [

@@ -1,59 +1,91 @@
-import { FC, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import styles from '../../style/components/assessments/test-info.module.scss'
 import CandidateTable from './candidates-table'
 import QuestionTable from './questions-table'
-import { Candidate, Question } from '../../constant/common'
+import { Question, TestAssignment, TestInfoProps } from '../../constant/common'
+import { getTestById } from '../../api/tests.api'
+import { useDispatch } from 'react-redux'
+import {
+  setIsLoadingFalse,
+  setIsLoadingTrue,
+  setToasterAppear
+} from '../../redux/slices/common.slice'
+import { getAllQuestionsByCriteria } from '../../api/questions.api'
+import { getAllTestAssignmentByCriteria } from '../../api/test-assignment.api'
+import { getAllAnswerByCriteria } from '../../api/answers.api'
 
-const TestInfo: FC = () => {
-  const [totalTime, setTotalTime] = useState<string>('10')
-  const [description, setDescription] = useState<string>('')
+const TestInfo: FC<TestInfoProps> = ({ testId, type }) => {
+  const dispatch = useDispatch()
+  const [title, setTitle] = useState<string>('title')
+  const [totalTime, setTotalTime] = useState<string>('time')
+  const [description, setDescription] = useState<string>('description')
   const [isPublished, setIsPublished] = useState<boolean>(false)
+  const [questions, setQuestions] = useState<Question[]>([])
+  const [testAssignments, setTestAssignments] = useState<TestAssignment[]>([])
 
-  const candidates: Candidate[] = [
-    {
-      id: 1,
-      email: 'candidate1@example.com',
-      completionTime: '45 minutes',
-      score: 85
-    },
-    {
-      id: 2,
-      email: 'candidate2@example.com',
-      completionTime: '38 minutes',
-      score: 92
-    },
-    {
-      id: 3,
-      email: 'candidate3@example.com',
-      completionTime: '52 minutes',
-      score: 78
-    }
-  ]
+  useEffect(() => {
+    const firstFetch = async () => {
+      dispatch(setIsLoadingTrue())
 
-  const questions: Question[] = [
-    {
-      id: 1,
-      type: 'Multiple Choice',
-      title: 'Basic JavaScript knowledge',
-      score: 10
-    },
-    {
-      id: 2,
-      type: 'Coding',
-      title: 'React component implementation',
-      score: 20
-    },
-    {
-      id: 3,
-      type: 'Essay',
-      title: 'Describe your development workflow',
-      score: 15
+      const result = await getTestById(testId)
+
+      if (result?.status > 299) {
+        dispatch(
+          setToasterAppear({
+            message: 'Error while getting test information',
+            type: 'error'
+          })
+        )
+        return
+      }
+
+      setTitle(result?.data?.data?.title)
+      setDescription(result?.data?.data?.description)
+      setTotalTime(result?.data?.data?.test_time)
+      setIsPublished(result?.data?.data?.is_publish)
+
+      const questions = await getAllQuestionsByCriteria({ test_id: testId })
+      questions?.data?.data?.map(async (question) => {
+        if (question.question_type === 'multiple_choice') {
+          const answers = await getAllAnswerByCriteria({
+            question_id: question.id
+          })
+          question.answers = answers?.data?.data
+        }
+
+        return question
+      })
+
+      setQuestions(questions?.data?.data)
+
+      if (type === 'owner') {
+        const testAssignments = await getAllTestAssignmentByCriteria({
+          test_id: testId
+        })
+        setTestAssignments(testAssignments?.data?.data)
+      }
+
+      dispatch(setIsLoadingFalse())
     }
-  ]
+
+    firstFetch()
+  }, [testId])
 
   return (
     <div className={styles.test_info}>
       <div className={styles.test_info__section}>
+        <div className={styles.test_info__field}>
+          <label className={styles.test_info__label}>Title:</label>
+          <input
+            type='text'
+            className={styles.test_info__input}
+            value={title}
+            placeholder='Title'
+            onChange={(e) => setTitle(e.target.value)}
+            disabled={type !== 'own'}
+          />
+        </div>
+
         <div className={styles.test_info__field}>
           <label className={styles.test_info__label}>Total time:</label>
           <input
@@ -61,6 +93,7 @@ const TestInfo: FC = () => {
             className={styles.test_info__input}
             value={totalTime}
             onChange={(e) => setTotalTime(e.target.value)}
+            disabled={type !== 'own'}
           />
         </div>
 
@@ -72,13 +105,12 @@ const TestInfo: FC = () => {
             value={description}
             placeholder='Description'
             onChange={(e) => setDescription(e.target.value)}
+            disabled={type !== 'own'}
           />
         </div>
 
         <div className={styles.test_info__field}>
-          <label className={styles.test_info__label}>
-            Do you want to publish this test?
-          </label>
+          <label className={styles.test_info__label}>Public:</label>
           <div className={styles.test_info__radio_group}>
             <div className={styles.test_info__radio_option}>
               <input
@@ -88,6 +120,7 @@ const TestInfo: FC = () => {
                 className={styles.test_info__radio}
                 checked={isPublished}
                 onChange={() => setIsPublished(true)}
+                disabled={type !== 'own'}
               />
               <label
                 htmlFor='publish-yes'
@@ -104,6 +137,7 @@ const TestInfo: FC = () => {
                 className={styles.test_info__radio}
                 checked={!isPublished}
                 onChange={() => setIsPublished(false)}
+                disabled={type !== 'own'}
               />
               <label
                 htmlFor='publish-no'
@@ -116,14 +150,20 @@ const TestInfo: FC = () => {
         </div>
       </div>
 
-      <div className={styles.test_info__section}>
-        <h2 className={styles.test_info__section_title}>Candidates</h2>
-        <CandidateTable candidates={candidates} />
-      </div>
+      {type === 'own' && (
+        <div className={styles.test_info__section}>
+          <h2 className={styles.test_info__section_title}>Candidates</h2>
+          <CandidateTable testAssignments={testAssignments} />
+        </div>
+      )}
 
       <div className={styles.test_info__section}>
-        <h2 className={styles.test_info__section_title}>Custom questions</h2>
-        <QuestionTable questions={questions} />
+        <h2 className={styles.test_info__section_title}>Questions</h2>
+        <QuestionTable
+          type={type}
+          questions={questions}
+          setQuestions={setQuestions}
+        />
       </div>
     </div>
   )

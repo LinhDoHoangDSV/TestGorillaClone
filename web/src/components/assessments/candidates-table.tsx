@@ -2,7 +2,7 @@ import { FC } from 'react'
 import styles from '../../style/components/assessments/candidates-table.module.scss'
 import { CandidateProps } from '../../constant/common'
 
-const CandidateTable: FC<CandidateProps> = ({ candidates }) => {
+const CandidateTable: FC<CandidateProps> = ({ testAssignments }) => {
   return (
     <div className={styles['question-type__table-container']}>
       <table className={styles['question-type__table']}>
@@ -15,7 +15,7 @@ const CandidateTable: FC<CandidateProps> = ({ candidates }) => {
           </tr>
         </thead>
         <tbody>
-          {candidates.length === 0 && (
+          {testAssignments.length === 0 && (
             <tr>
               <td
                 colSpan={3}
@@ -25,7 +25,7 @@ const CandidateTable: FC<CandidateProps> = ({ candidates }) => {
               </td>
             </tr>
           )}
-          {candidates.map((candidate, index) => (
+          {testAssignments.map((testAssignment, index) => (
             <tr
               key={index}
               className={styles['question-type__question-row']}
@@ -35,13 +35,13 @@ const CandidateTable: FC<CandidateProps> = ({ candidates }) => {
             >
               <td className={styles['question-type__type']}>{index + 1}</td>
               <td className={styles['question-type__text']}>
-                {candidate.email}
+                {testAssignment.candidate_email}
               </td>
               <td className={styles['question-type__text']}>
-                {candidate.completionTime}
+                {testAssignment.started_at}
               </td>
               <td className={styles['question-type__score']}>
-                {candidate.score}
+                {testAssignment.score}
               </td>
             </tr>
           ))}

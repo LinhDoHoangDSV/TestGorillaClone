@@ -18,6 +18,7 @@ export interface ContentProps {
 }
 
 export interface AnswerType {
+  id?: number
   option_text: string
   is_correct: boolean
 }
@@ -38,23 +39,16 @@ export interface QuestionsType {
 }
 
 export interface QuestionTypeProps {
-  questions: QuestionsType[]
-  setQuestions: (questions: QuestionsType[]) => void
+  questions: Question[]
+  setQuestions: (questions: Question[]) => void
 }
 
 export interface QuestionDialogProps {
+  type: string
   onCancel: () => void
-  setQuestions: (questions: QuestionsType[]) => void
-  questions: QuestionsType[]
+  setQuestions: (questions: Question[]) => void
+  questions: Question[]
   rowIndex: number
-}
-
-export const sampleMulQuestion: QuestionsType = {
-  question_text: '',
-  answers: null,
-  question_type: 'multiple_choice',
-  score: 5,
-  title: ''
 }
 
 export const sampleEssayQuestion: QuestionsType = {
@@ -81,33 +75,59 @@ export interface ToasterProps {
 }
 
 export interface CandidateProps {
-  candidates: {
-    id: number
-    email: string
-    completionTime: string
-    score: number
-  }[]
+  testAssignments: TestAssignment[]
 }
 
 export interface QuestionProps {
-  questions: {
-    id: number
-    type: string
-    title: string
-    score: number
-  }[]
+  type: string
+  questions: Question[]
+  setQuestions: (questions: Question[]) => void
 }
 
-export interface Candidate {
+export interface TestAssignment {
   id: number
-  email: string
-  completionTime: string
+  test_id: number
+  candidate_email: string
+  expired_invitation: Date
+  started_at: Date
+  is_online: boolean
   score: number
+  code: string
+  status: string
 }
 
 export interface Question {
   id: number
-  type: string
-  title: string
+  test_id: number
+  question_text: string
+  question_type: string
   score: number
+  title: string
+  answers?: AnswerType[]
+}
+
+export interface UpdateQuestionDto {
+  id: number
+  test_id?: number
+  question_text?: string
+  question_type?: string
+  score?: number
+  title?: string
+}
+
+export const sampleQuestion: Partial<Question> = {}
+
+export interface TestEntity {
+  id?: number
+  owner_id?: number
+  title?: string
+  description?: string
+  test_time?: number
+  deleted_at?: Date | null
+  is_publish?: boolean
+}
+
+export interface TestInfoProps {
+  testId: number
+  type: string
 }

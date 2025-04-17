@@ -19,13 +19,14 @@ export class QuestionsService {
       question_text,
       question_type,
       score = 5,
+      title,
     } = createQuestionDto;
     const query = `
-      INSERT INTO questions (test_id, question_text, question_type, score)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO questions (test_id, question_text, question_type, score, title)
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING *;
     `;
-    const values = [test_id, question_text, question_type, score];
+    const values = [test_id, question_text, question_type, score, title];
     const [result] = await this.dataSource.query(query, values);
     return result || null;
   }

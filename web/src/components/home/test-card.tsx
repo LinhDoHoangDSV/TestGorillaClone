@@ -10,9 +10,10 @@ import {
 } from '../../redux/slices/common.slice'
 import { TestCriteria } from '../../constant/api'
 import { useNavigate } from 'react-router-dom'
+import { TestEntity } from '../../constant/common'
 
 const TestCard: FC = () => {
-  const [tests, setAllTests] = useState([])
+  const [tests, setAllTests] = useState<TestEntity[]>([])
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
@@ -49,20 +50,21 @@ const TestCard: FC = () => {
     firstFetch()
   }, [])
 
-  const handleView = () => {
-    navigate('/assessments')
+  const handleView = (test) => {
+    navigate(`/assessments/view/${300003 * test.id + 200003}`)
   }
+
   const handleClone = () => {}
 
   return (
     <div className={style.wrapper}>
-      {tests.map((test: any, index) => {
+      {tests.map((test: TestEntity, index) => {
         return (
           <div className={style.card} key={index}>
             <div className={style.card__title}>{test?.title}</div>
             <div className={style.card__description}>{test?.description}</div>
             <div className={style.card__footer}>
-              <Button variant='primary' onClick={handleView}>
+              <Button variant='primary' onClick={() => handleView(test)}>
                 View test
               </Button>
               <Button variant='primary' onClick={handleClone}>

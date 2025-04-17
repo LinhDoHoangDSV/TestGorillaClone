@@ -13,3 +13,16 @@ export const createAnswer = async (data: CreateAnswerDto) => {
     return error
   }
 }
+
+export const getAllAnswerByCriteria = async (
+  data: Partial<CreateAnswerDto>
+) => {
+  try {
+    const result = await axios.post(`${TEST_URL}/criterias`, data)
+    console.log(result)
+    return result
+  } catch (error) {
+    console.log(error)
+    return error
+  }
+}

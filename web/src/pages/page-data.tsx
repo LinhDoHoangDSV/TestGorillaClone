@@ -2,8 +2,9 @@ import Home from '.'
 import Footer from '../components/footer'
 import Header from '../components/header'
 import { RouterType } from '../constant/common'
-import Assessments from './assessments'
+import Assessment from './assessments'
 import AssessmentsNew from './assessments/new'
+import AssessmentViewAndOwn from './assessments/view-and-own'
 import Candidates from './candidates'
 import Login from './login'
 
@@ -18,7 +19,7 @@ const pagesData: RouterType[] = [
   {
     title: 'assessments',
     path: '/assessments',
-    element: <Assessments />,
+    element: <Assessment />,
     header: <Header />,
     footer: <Footer />
   },
@@ -44,9 +45,23 @@ const pagesData: RouterType[] = [
     footer: false
   },
   {
-    title: 'assessments',
-    path: '/assessments',
-    element: <Assessments />,
+    title: 'assessments/edit',
+    path: '/assessments/:path',
+    element: <AssessmentViewAndOwn />,
+    header: <Header />,
+    footer: <Footer />
+  },
+  {
+    title: 'assessments/view',
+    path: '/assessments/view/:path',
+    element: <AssessmentViewAndOwn />,
+    header: <Header />,
+    footer: <Footer />
+  },
+  {
+    title: 'not-found',
+    path: '*',
+    element: <div>Page not found</div>,
     header: false,
     footer: false
   }

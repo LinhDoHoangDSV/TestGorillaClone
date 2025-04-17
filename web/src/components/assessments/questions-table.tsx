@@ -1,8 +1,24 @@
 import styles from '../../style/components/assessments/questions-table.module.scss'
 import { QuestionProps } from '../../constant/common'
-import { FC } from 'react'
+import { FC, useState } from 'react'
+import ViewDialogManager from './viewassess/dialog-manager'
 
-const QuestionTable: FC<QuestionProps> = ({ questions }) => {
+const QuestionTable: FC<QuestionProps> = ({
+  type,
+  questions,
+  setQuestions
+}) => {
+  const [rowIndex, setRowIndex] = useState<number>(-1)
+
+  const handleCancelDialogEdit = () => {
+    setRowIndex(-1)
+  }
+
+  const getTypeName = (question_type: string) => {
+    if (question_type === 'essay') return 'Essay'
+    else if (question_type === 'multiple_choice') return 'Multiple choice'
+  }
+
   return (
     <div className={styles['question-type__table-container']}>
       <table className={styles['question-type__table']}>
@@ -30,12 +46,12 @@ const QuestionTable: FC<QuestionProps> = ({ questions }) => {
             <tr
               key={index}
               className={styles['question-type__question-row']}
-              // onClick={() => {
-              //   setRowIndex(index)
-              // }}
+              onClick={() => {
+                setRowIndex(index)
+              }}
             >
               <td className={styles['question-type__type']}>
-                {/* {getTypeName(question.question_type)} */}
+                {getTypeName(question.question_type)}
               </td>
               <td className={styles['question-type__text']}>
                 {question.title}
@@ -47,6 +63,17 @@ const QuestionTable: FC<QuestionProps> = ({ questions }) => {
           ))}
         </tbody>
       </table>
+
+      {rowIndex >= 0 && (
+        <ViewDialogManager
+          type={type}
+          questions={questions}
+          setQuestions={setQuestions}
+          questionType={questions[rowIndex].question_type}
+          onCancel={handleCancelDialogEdit}
+          rowIndex={rowIndex}
+        />
+      )}
     </div>
   )
 }

@@ -7,7 +7,6 @@ import { join } from 'path';
 config();
 
 const configService = new ConfigService();
-console.log(configService.get<string>('DB_URL'));
 
 const AppDataSource = new DataSource({
   type: 'postgres',
@@ -15,7 +14,7 @@ const AppDataSource = new DataSource({
   synchronize: false,
   entities: [join(__dirname, '..', '**', '*.entity.{ts,js}')], // Corrected path
   migrations: [join(__dirname, 'migration', '*.{ts,js}')],
-  migrationsRun: true,
+  // migrationsRun: true,
   logging: true,
 });
 

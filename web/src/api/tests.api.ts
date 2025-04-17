@@ -35,3 +35,14 @@ export const getAllTestsByCriteria = async (data: TestCriteria) => {
     return error
   }
 }
+
+export const getTestById = async (id: number) => {
+  try {
+    const result = await axios(`${TEST_URL}/${id}`)
+    console.log(result)
+    return result
+  } catch (error) {
+    console.log(error)
+    return error
+  }
+}
