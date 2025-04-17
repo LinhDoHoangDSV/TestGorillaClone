@@ -1,35 +1,25 @@
-import React from 'react'
-
-import { type FC, useState } from 'react'
-import type { Questionn } from '../../../constant/common'
+import { FC } from 'react'
+import { QuestionResponse } from '../../../constant/common'
 import styles from '../../../style/components/assessments/attendance/esssay-question.module.scss'
 
 interface EssayQuestionProps {
-  question: Questionn
-  onAnswerChange: (questionId: string, answer: string) => void
+  answer: string
+  setAnswer: (answer: string) => void
+  question: QuestionResponse
 }
 
 const EssayQuestion: FC<EssayQuestionProps> = ({
-  question,
-  onAnswerChange
+  answer,
+  setAnswer,
+  question
 }) => {
-  const [answer, setAnswer] = useState('')
-
-  const handleAnswerChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newAnswer = e.target.value
-    setAnswer(newAnswer)
-    onAnswerChange(question.id, newAnswer)
-  }
-
   return (
     <div className={styles.question}>
       <div className={styles.question__content}>
-        {question.description && (
-          <div className={styles.question__description}>
-            {question.description}
-          </div>
+        {question.title && (
+          <div className={styles.question__description}>{question.title}</div>
         )}
-        <h2 className={styles.question__text}>{question.text}</h2>
+        <h2 className={styles.question__text}>{question.question_text}</h2>
       </div>
 
       <div className={styles.question__answer}>
@@ -37,7 +27,7 @@ const EssayQuestion: FC<EssayQuestionProps> = ({
         <textarea
           className={styles.question__answerTextarea}
           value={answer}
-          onChange={handleAnswerChange}
+          onChange={(e) => setAnswer(e.target.value)}
           placeholder='Type your answer here...'
           rows={10}
         />

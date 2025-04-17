@@ -51,3 +51,10 @@ export interface SendTestRequestDto {
   status?: string
   emails: string
 }
+
+export interface CreateUserAnser {
+  test_assignment_id: number
+  question_id: number
+  answer_text: string
+  score: number
+}

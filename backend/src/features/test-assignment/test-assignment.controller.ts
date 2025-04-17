@@ -22,6 +22,7 @@ import { FindTestAssignmentCriteriaDto } from './dto/find-test-assignment-criter
 import { InviteTestDto } from './dto/invite-test.dto';
 import { SendRequestDto } from '../mail-service/dto/send-request.dto';
 import { MailService } from '../mail-service/mail-service.service';
+import { AdjustScoreDto } from './dto/adjust-score.dto';
 
 @Controller('test-assignment')
 export class TestAssignmentController {
@@ -246,7 +247,7 @@ export class TestAssignmentController {
         const emailRequest: SendRequestDto = {
           code,
           email: email.trim(),
-          url: `http://localhost:3000/api/v1/assessments/attendance/${newTestAssignment.id * 300003 + 200003}`,
+          url: `http://localhost:3000/assessments/attendance/${newTestAssignment.id * 300003 + 200003}`,
         };
 
         await this.mailService.requestTest(emailRequest);
@@ -453,6 +454,46 @@ export class TestAssignmentController {
         true,
         'Updating test_assignment successfully',
         updatedRole,
+      );
+      return res.status(HttpStatus.OK).json(this.response);
+    } catch (error) {
+      this.logger.error('Error while updating test_assignment', error?.stack);
+      if (error instanceof HttpException) {
+        this.response.initResponse(false, error?.message, null);
+        return res.status(error?.getStatus()).json(this.response);
+      } else {
+        this.response.initResponse(
+          false,
+          'System error while updating test_assignment',
+          null,
+        );
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(this.response);
+      }
+    }
+  }
+
+  @Patch('/score-adjustment/:id')
+  async adjustScore(
+    @Param('id') id: string,
+    @Body() adjustScoreDto: AdjustScoreDto,
+    @Res() res,
+  ) {
+    try {
+      const existingTestAssignment =
+        await this.testAssignmentService.findOne(+id);
+
+      if (!existingTestAssignment)
+        throw new BadRequestException('No test assignment exist');
+      const newScore = existingTestAssignment.score + adjustScoreDto.score;
+      const updatedTestAssignment = await this.testAssignmentService.update(
+        +id,
+        { score: newScore },
+      );
+      this.logger.debug('Updating test_assignment successfully');
+      this.response.initResponse(
+        true,
+        'Updating test_assignment successfully',
+        updatedTestAssignment,
       );
       return res.status(HttpStatus.OK).json(this.response);
     } catch (error) {

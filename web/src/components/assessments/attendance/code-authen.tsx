@@ -4,34 +4,18 @@ import logoUrl from '../../../assets/logo.svg'
 
 interface CodeAuthenticationProps {
   testTitle: string
-  correctCode: string
-  onAuthenticated: () => void
+  onAuthenticated: (code: string) => void
 }
 
 const CodeAuthentication: FC<CodeAuthenticationProps> = ({
   testTitle,
-  correctCode,
   onAuthenticated
 }) => {
-  const [code, setCode] = useState('')
-  const [error, setError] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [code, setCode] = useState<string>('')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSubmitting(true)
-    setError('')
-
-    // Simulate a slight delay for better UX
-    setTimeout(() => {
-      // if (code.trim().toUpperCase() === correctCode.toUpperCase()) {
-      //   onAuthenticated()
-      // } else {
-      //   setError('Invalid access code. Please try again.')
-      // }
-      onAuthenticated()
-      setIsSubmitting(false)
-    }, 500)
+    onAuthenticated(code.toString())
   }
 
   return (
@@ -67,15 +51,14 @@ const CodeAuthentication: FC<CodeAuthenticationProps> = ({
                 autoComplete='off'
                 required
               />
-              {error && <div className={styles.auth__error}>{error}</div>}
             </div>
 
             <button
               type='submit'
               className={styles.auth__button}
-              disabled={isSubmitting || !code.trim()}
+              disabled={!code.trim()}
             >
-              {isSubmitting ? 'Verifying...' : 'Start Test'}
+              Start Test
             </button>
           </form>
         </div>

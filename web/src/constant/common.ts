@@ -158,7 +158,7 @@ export interface Test {
 export const sampleTest: Test = {
   id: '1',
   title: 'Sample Test',
-  accessCode: 'TEST123', // This is the code users need to enter
+  accessCode: 'TEST123',
   questions: [
     {
       id: '1',
@@ -192,4 +192,48 @@ export const sampleTest: Test = {
       ]
     }
   ]
+}
+
+export interface TestAssignmentResponse {
+  id: number
+  test_id: number
+  candidate_email: string
+  expired_invitation: Date | null
+  started_at: Date | null
+  is_online: boolean
+  score: number
+  code: string
+  status: string
+}
+
+export interface AnswerResponse {
+  id: number
+  question_id: number
+  option_text: string
+  is_correct: boolean
+}
+
+export interface QuestionResponse {
+  id: number
+  test_id: number
+  question_text: string
+  question_type: string
+  score: number
+  title: string
+  answers?: AnswerResponse[]
+}
+
+export interface TestResponse {
+  id: number
+  owner_id: number
+  title: string
+  description: string
+  test_time: number
+  deleted_at: Date | null
+  is_publish: boolean
+  questions?: QuestionResponse[]
+}
+
+export interface UpdateScoreTestAssignment {
+  score: number
 }
