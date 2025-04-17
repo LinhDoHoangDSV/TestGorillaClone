@@ -1,7 +1,7 @@
 import { useState, type FC } from 'react'
 import styles from '../../../style/components/assessments/new/content.module.scss'
 import QuestionType from './question-type'
-import { ContentProps, Question, QuestionsType } from '../../../constant/common'
+import { ContentProps, Question } from '../../../constant/common'
 import Button from '../../ui/button'
 import { createTest } from '../../../api/tests.api'
 import { useDispatch } from 'react-redux'

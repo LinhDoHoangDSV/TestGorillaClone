@@ -3,6 +3,7 @@ import Footer from '../components/footer'
 import Header from '../components/header'
 import { RouterType } from '../constant/common'
 import Assessment from './assessments'
+import TakeAssessment from './assessments/attendance'
 import AssessmentsNew from './assessments/new'
 import AssessmentViewAndOwn from './assessments/view-and-own'
 import Candidates from './candidates'
@@ -36,6 +37,13 @@ const pagesData: RouterType[] = [
     element: <AssessmentsNew />,
     header: false,
     footer: <Footer />
+  },
+  {
+    title: 'assessments-attendance',
+    path: '/assessments/attendance/:path',
+    element: <TakeAssessment />,
+    header: false,
+    footer: false
   },
   {
     title: 'login',
