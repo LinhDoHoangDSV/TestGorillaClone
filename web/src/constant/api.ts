@@ -15,6 +15,7 @@ export interface TestCriteria {
   test_time?: number
   is_publish?: boolean
   deleted_at?: Date | null
+  limit?: number
 }
 
 export interface CreateQuestionDto {

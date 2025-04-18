@@ -40,17 +40,26 @@ export class TestsService {
   async findByCriterias(
     findTestCriteriasDto: FindTestCriteriasDto,
   ): Promise<Test[]> {
+    const { limit = null, ...remainCriteriaDto } = findTestCriteriasDto;
+    let counter: number = 0;
     const conditions: string[] = [];
     const values: any[] = [];
+    let limitQuery: string = '';
 
-    for (const key in findTestCriteriasDto) {
-      conditions.push(`${key} = $${conditions.length + 1}`);
-      values.push(findTestCriteriasDto[key]);
+    for (const key in remainCriteriaDto) {
+      conditions.push(`${key} = $${counter + 1}`);
+      values.push(remainCriteriaDto[key]);
+      counter++;
+    }
+
+    if (limit > 0) {
+      values.push(limit);
+      limitQuery = `LIMIT $${counter + 1}`;
     }
 
     const whereClause =
       conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-    const query = `SELECT * FROM tests ${whereClause}`;
+    const query = `SELECT * FROM tests ${whereClause} ${limitQuery}`;
     const result = await this.dataSource.query(query, values);
     return result;
   }

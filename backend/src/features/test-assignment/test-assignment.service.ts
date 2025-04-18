@@ -25,11 +25,12 @@ export class TestAssignmentService {
       is_online = false,
       score = 0,
       code,
+      count_exit = 0,
       status = TestAssignmentStatus.NOT_STARTED,
     } = createTestAssignmentDto;
     const query = `
-          INSERT INTO test_assignment (test_id, candidate_email, expired_invitation, started_at, is_online, score, code, status)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+          INSERT INTO test_assignment (test_id, candidate_email, expired_invitation, started_at, is_online, score, code, count_exit, status)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
           RETURNING *;
         `;
     const values = [
@@ -40,6 +41,7 @@ export class TestAssignmentService {
       is_online,
       score,
       code,
+      count_exit,
       status,
     ];
     const [result] = await this.dataSource.query(query, values);

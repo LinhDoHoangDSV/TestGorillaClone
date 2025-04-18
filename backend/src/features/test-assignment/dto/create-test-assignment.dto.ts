@@ -38,6 +38,10 @@ export class CreateTestAssignmentDto {
   @IsString({ message: '' })
   code: string;
 
+  @IsOptional()
+  @IsNumber({}, { message: 'count_exit must be a number' })
+  count_exit: number;
+
   @IsNotEmpty({ message: 'status is required' })
   @IsEnum(TestAssignmentStatus, {
     message: `status must be ${Object.values(TestAssignmentStatus)}`,

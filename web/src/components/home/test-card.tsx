@@ -22,7 +22,8 @@ const TestCard: FC = () => {
       dispatch(setIsLoadingTrue())
 
       const criterias: TestCriteria = {
-        is_publish: true
+        is_publish: true,
+        limit: 9
       }
       const result: any = await getAllTestsByCriteria(criterias)
 

@@ -34,9 +34,13 @@ export class InviteTestDto {
   @IsNumber({}, { message: 'score must be a number' })
   score: number;
 
-  @IsOptional({ message: '' })
-  @IsString({ message: '' })
+  @IsOptional()
+  @IsString({ message: 'code must be a string' })
   code: string;
+
+  @IsOptional()
+  @IsNumber({}, { message: 'count_exit must be a number' })
+  count_exit: number;
 
   @IsOptional({ message: 'status is required' })
   @IsEnum(TestAssignmentStatus, {

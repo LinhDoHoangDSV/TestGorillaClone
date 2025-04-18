@@ -26,7 +26,11 @@ const MultipleChoiceQuestion: FC<MultipleChoiceQuestionProps> = ({
         {question.title && (
           <div className={styles.question__description}>{question.title}</div>
         )}
-        <h2 className={styles.question__text}>{question.question_text}</h2>
+        {question.question_text.split('\n').map((text, index) => (
+          <div className={styles.question__text} key={index}>
+            {text}
+          </div>
+        ))}
       </div>
 
       <div className={styles.question__options}>

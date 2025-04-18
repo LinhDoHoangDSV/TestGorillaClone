@@ -86,7 +86,7 @@ const InviteDialog: FC<InviteDialogProps> = ({ testId }) => {
                 <input
                   type='email'
                   className={styles.invite__input}
-                  placeholder='Nhập email người tham gia'
+                  placeholder='Input emails'
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   autoFocus

@@ -11,15 +11,17 @@ import {
 } from '../../../redux/slices/common.slice'
 import { createUserAnsers } from '../../../api/user-answers.api'
 import { CreateUserAnser } from '../../../constant/api'
-import { updateTestAssignment } from '../../../api/test-assignment.api'
+import { increaseScoreTestAssignment } from '../../../api/test-assignment.api'
 
 interface TestTakerProps {
+  seconds: number
   test: TestResponse | null
   testAssignmentId: number
-  onComplete: (answers: Record<string, string>) => void
+  onComplete: () => void
 }
 
 const TestTaker: FC<TestTakerProps> = ({
+  seconds,
   test,
   onComplete,
   testAssignmentId
@@ -43,15 +45,15 @@ const TestTaker: FC<TestTakerProps> = ({
 
     await createUserAnsers(data)
     if (data.score > 0) {
-      await updateTestAssignment({ score: data.score }, testAssignmentId)
+      await increaseScoreTestAssignment({ score: data.score }, testAssignmentId)
     }
     setAnswer('')
     setScore(0)
 
-    if (currentQuestionIndex < test?.questions.length - 1) {
+    if (currentQuestionIndex < test?.questions?.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1)
     } else {
-      onComplete(answers)
+      onComplete()
     }
     dispatch(setIsLoadingFalse())
   }
@@ -82,21 +84,13 @@ const TestTaker: FC<TestTakerProps> = ({
 
   return (
     <div className={styles.testTaker}>
-      <TestHeader onNext={handleNext} />
+      <TestHeader onNext={handleNext} seconds={seconds} />
 
       <div className={styles.testTaker__content}>
         <div className={styles.testTaker__progress}>
           <div className={styles.testTaker__progressText}>
-            Question {currentQuestionIndex + 1} of {test.questions.length}
+            Question {currentQuestionIndex + 1} of {test?.questions?.length}
           </div>
-          {/* <div className={styles.testTaker__progressBar}>
-            <div
-              className={styles.testTaker__progressFill}
-              style={{
-                width: `${((currentQuestionIndex + 1) / test.questions.length) * 100}%`
-              }}
-            />
-          </div> */}
         </div>
 
         <div className={styles.testTaker__question}>

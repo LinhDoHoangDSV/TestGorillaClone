@@ -15,6 +15,18 @@
     height: 40px;
   }
 
+  &__right {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+  }
+
+  &__timer {
+    padding: 10px;
+    background-color: #e5e1e1;
+    border-radius: 10px;
+  }
+
   &__nextButton {
     display: flex;
     align-items: center;
@@ -36,5 +48,11 @@
 
   &__nextIcon {
     font-size: 18px;
+  }
+
+  @media (max-width: 512px) {
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
   }
 }

@@ -61,6 +61,9 @@ const CodeAuthentication: FC<CodeAuthenticationProps> = ({
               Start Test
             </button>
           </form>
+          <p className={styles.auth__note}>
+            Note*: Your test will finish if you try to exit from fullscreen mode
+          </p>
         </div>
       </div>
     </div>

@@ -1,6 +1,10 @@
 import axios from 'axios'
 import { SendTestRequestDto, serverBaseUrl } from '../constant/api'
-import { TestAssignment, UpdateScoreTestAssignment } from '../constant/common'
+import {
+  TestAssignment,
+  UpdateScoreTestAssignment,
+  UpdateTestAssignment
+} from '../constant/common'
 
 export const TEST_URL = `${import.meta.env[`${serverBaseUrl}`]}/test-assignment`
 
@@ -39,12 +43,26 @@ export const getTestAssignmentById = async (id: number) => {
   }
 }
 
-export const updateTestAssignment = async (
+export const increaseScoreTestAssignment = async (
   data: UpdateScoreTestAssignment,
   id: number
 ) => {
   try {
     const result = await axios.patch(`${TEST_URL}/score-adjustment/${id}`, data)
+    console.log(result)
+    return result
+  } catch (error) {
+    console.log(error)
+    return error
+  }
+}
+
+export const updateTestAssignment = async (
+  data: UpdateTestAssignment,
+  id: number
+) => {
+  try {
+    const result = await axios.patch(`${TEST_URL}/${id}`, data)
     console.log(result)
     return result
   } catch (error) {

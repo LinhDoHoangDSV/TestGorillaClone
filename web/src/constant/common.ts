@@ -155,45 +155,6 @@ export interface Test {
   questions: Questionn[]
 }
 
-export const sampleTest: Test = {
-  id: '1',
-  title: 'Sample Test',
-  accessCode: 'TEST123',
-  questions: [
-    {
-      id: '1',
-      type: 'multiple_choice',
-      text: 'On which day did Madhu see Jo and Bryn playing basketball while wearing white shoes?',
-      description:
-        'Madhu saw Jo and Bryn, who are both taller than 6 feet, playing basketball while wearing white shoes. Jo invited their friend Carey, who weighs 193 pounds and is about 5½ feet tall, to join them for tennis the next morning. After playing tennis, all had to finish homework that was due the next day, a Tuesday.',
-      options: [
-        { id: '1a', text: 'Saturday' },
-        { id: '1b', text: 'Sunday' },
-        { id: '1c', text: 'Monday' },
-        { id: '1d', text: 'Tuesday' }
-      ]
-    },
-    {
-      id: '2',
-      type: 'essay',
-      text: 'Explain the importance of critical thinking in problem-solving.',
-      description:
-        'Consider real-world examples and how critical thinking skills can be applied in different contexts.'
-    },
-    {
-      id: '3',
-      type: 'multiple_choice',
-      text: 'What is the capital of France?',
-      options: [
-        { id: '3a', text: 'London' },
-        { id: '3b', text: 'Berlin' },
-        { id: '3c', text: 'Paris' },
-        { id: '3d', text: 'Madrid' }
-      ]
-    }
-  ]
-}
-
 export interface TestAssignmentResponse {
   id: number
   test_id: number
@@ -236,4 +197,16 @@ export interface TestResponse {
 
 export interface UpdateScoreTestAssignment {
   score: number
+}
+
+export interface UpdateTestAssignment {
+  id?: number
+  test_id?: number
+  candidate_email?: string
+  expired_invitation?: Date | null
+  started_at?: Date | null
+  is_online?: boolean
+  score?: number
+  code?: string
+  status?: string
 }

@@ -23,6 +23,7 @@ import { InviteTestDto } from './dto/invite-test.dto';
 import { SendRequestDto } from '../mail-service/dto/send-request.dto';
 import { MailService } from '../mail-service/mail-service.service';
 import { AdjustScoreDto } from './dto/adjust-score.dto';
+import { AdjustExitDto } from './dto/adjust-exit-count.dto';
 
 @Controller('test-assignment')
 export class TestAssignmentController {
@@ -237,7 +238,9 @@ export class TestAssignmentController {
       const { emails, ...createTestAssignmentDto } = inviteTestDto;
 
       emails.split(',').map(async (email) => {
-        const code = Math.floor(Math.random() * 1000000).toString();
+        const code = Math.floor(Math.random() * 1000000)
+          .toString()
+          .padStart(6, '0');
         const newTestAssignment = await this.testAssignmentService.create({
           ...createTestAssignmentDto,
           candidate_email: email.trim(),
@@ -488,6 +491,48 @@ export class TestAssignmentController {
       const updatedTestAssignment = await this.testAssignmentService.update(
         +id,
         { score: newScore },
+      );
+      this.logger.debug('Updating test_assignment successfully');
+      this.response.initResponse(
+        true,
+        'Updating test_assignment successfully',
+        updatedTestAssignment,
+      );
+      return res.status(HttpStatus.OK).json(this.response);
+    } catch (error) {
+      this.logger.error('Error while updating test_assignment', error?.stack);
+      if (error instanceof HttpException) {
+        this.response.initResponse(false, error?.message, null);
+        return res.status(error?.getStatus()).json(this.response);
+      } else {
+        this.response.initResponse(
+          false,
+          'System error while updating test_assignment',
+          null,
+        );
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(this.response);
+      }
+    }
+  }
+
+  @Patch('/exit-adjustment/:id')
+  async adjustExitCount(
+    @Body() adjustCountExitDto: AdjustExitDto,
+    @Param('id') id: string,
+    @Res() res,
+  ) {
+    try {
+      const existingTestAssignment =
+        await this.testAssignmentService.findOne(+id);
+
+      if (!existingTestAssignment)
+        throw new BadRequestException('No test assignment exist');
+
+      const newExitCount =
+        existingTestAssignment.count_exit + adjustCountExitDto.count_exit;
+      const updatedTestAssignment = await this.testAssignmentService.update(
+        +id,
+        { count_exit: newExitCount },
       );
       this.logger.debug('Updating test_assignment successfully');
       this.response.initResponse(
