@@ -68,9 +68,6 @@ const TestCard: FC = () => {
               <Button variant='primary' onClick={() => handleView(test)}>
                 View test
               </Button>
-              <Button variant='primary' onClick={handleClone}>
-                Clone test
-              </Button>
             </div>
           </div>
         )

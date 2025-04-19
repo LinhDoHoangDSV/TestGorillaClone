@@ -1,4 +1,4 @@
-import { FC, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import styles from '../../../style/components/assessments/new/create-question.module.scss'
 import Button from '../../ui/button'
 import {
@@ -14,6 +14,7 @@ import {
   setToasterAppear
 } from '../../../redux/slices/common.slice'
 import { deleteQuestion, updateQuestion } from '../../../api/questions.api'
+import { useLocation } from 'react-router-dom'
 
 const EssayQuestionDialog: FC<QuestionDialogProps> = ({
   type,
@@ -22,11 +23,20 @@ const EssayQuestionDialog: FC<QuestionDialogProps> = ({
   questions,
   rowIndex
 }) => {
+  const dispatch = useDispatch()
+  const location = useLocation()
   const [question, setQuestion] = useState<QuestionsType>(
     rowIndex >= 0 ? questions[rowIndex] : sampleEssayQuestion
   )
   const [score, setScore] = useState<string>('5')
-  const dispatch = useDispatch()
+  const [isViewPage, setIsViewPage] = useState<boolean>(false)
+
+  useEffect(() => {
+    if (location.pathname.includes('assessments/new')) setIsViewPage(false)
+    else setIsViewPage(true)
+
+    setScore(questions[rowIndex].score.toString())
+  }, [location.pathname])
 
   // Update question
   const handleUpdate = async () => {
@@ -65,14 +75,16 @@ const EssayQuestionDialog: FC<QuestionDialogProps> = ({
     questions[rowIndex].score = parseInt(score)
     questions[rowIndex].question_text = question.question_text
 
-    const data: UpdateQuestionDto = {
-      title: questions[rowIndex].title,
-      score: questions[rowIndex].score,
-      question_text: questions[rowIndex].question_text,
-      id: questions[rowIndex].id
-    }
+    if (isViewPage) {
+      const data: UpdateQuestionDto = {
+        title: questions[rowIndex].title,
+        score: questions[rowIndex].score,
+        question_text: questions[rowIndex].question_text
+      }
 
-    await updateQuestion(data)
+      await updateQuestion(questions[rowIndex].id, data)
+      console.log('oke')
+    }
 
     setQuestions(questions)
     setQuestion(sampleEssayQuestion)
@@ -89,7 +101,9 @@ const EssayQuestionDialog: FC<QuestionDialogProps> = ({
       })
     )
 
-    await deleteQuestion(questions[rowIndex].id)
+    if (isViewPage) {
+      await deleteQuestion(questions[rowIndex].id)
+    }
 
     const temp = questions.filter((item, index) => {
       return index !== rowIndex

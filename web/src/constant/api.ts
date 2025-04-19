@@ -18,6 +18,15 @@ export interface TestCriteria {
   limit?: number
 }
 
+export interface UpdateTestDto {
+  owner_id?: number
+  title?: string
+  description?: string
+  test_time?: number
+  is_publish?: boolean
+  deleted_at?: Date | null
+}
+
 export interface CreateQuestionDto {
   test_id: number
   question_text: string

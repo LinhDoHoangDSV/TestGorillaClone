@@ -1,28 +1,39 @@
 import { FC, useEffect, useState } from 'react'
 import styles from '../../style/components/assessments/test-info.module.scss'
-import CandidateTable from './candidates-table'
 import QuestionTable from './questions-table'
-import { Question, TestAssignment, TestInfoProps } from '../../constant/common'
-import { getTestById } from '../../api/tests.api'
+import {
+  Question,
+  sampleTest,
+  TestAssignment,
+  TestInfoProps,
+  TestResponse
+} from '../../constant/common'
+import { createTest, getTestById, updateTest } from '../../api/tests.api'
 import { useDispatch } from 'react-redux'
 import {
   setIsLoadingFalse,
   setIsLoadingTrue,
   setToasterAppear
 } from '../../redux/slices/common.slice'
-import { getAllQuestionsByCriteria } from '../../api/questions.api'
+import {
+  createQuestion,
+  getAllQuestionsByCriteria
+} from '../../api/questions.api'
 import { getAllTestAssignmentByCriteria } from '../../api/test-assignment.api'
-import { getAllAnswerByCriteria } from '../../api/answers.api'
+import { createAnswer, getAllAnswerByCriteria } from '../../api/answers.api'
 import InviteDialog from './attendance/invite-dialog'
+import { useNavigate } from 'react-router-dom'
 
 const TestInfo: FC<TestInfoProps> = ({ testId, type }) => {
   const dispatch = useDispatch()
-  const [title, setTitle] = useState<string>('title')
-  const [totalTime, setTotalTime] = useState<string>('time')
-  const [description, setDescription] = useState<string>('description')
-  const [isPublished, setIsPublished] = useState<boolean>(false)
+  const navigate = useNavigate()
   const [questions, setQuestions] = useState<Question[]>([])
   const [testAssignments, setTestAssignments] = useState<TestAssignment[]>([])
+  const [test, setTest] = useState<TestResponse>(sampleTest)
+  const [title, setTitle] = useState<string>('')
+  const [time, setTime] = useState<string>('0')
+  const [description, setDescription] = useState<string>('')
+  const [isPublish, setIsPublish] = useState<boolean>(false)
 
   useEffect(() => {
     const firstFetch = async () => {
@@ -40,22 +51,24 @@ const TestInfo: FC<TestInfoProps> = ({ testId, type }) => {
         return
       }
 
-      setTitle(result?.data?.data?.title)
-      setDescription(result?.data?.data?.description)
-      setTotalTime(result?.data?.data?.test_time)
-      setIsPublished(result?.data?.data?.is_publish)
+      const tempTest = result?.data?.data
+      setTest(tempTest)
+      setTitle(tempTest?.title)
+      setIsPublish(tempTest?.is_publish)
+      setDescription(tempTest?.description)
+      setTime((tempTest?.test_time).toString())
 
       const questions = await getAllQuestionsByCriteria({ test_id: testId })
-      questions?.data?.data?.map(async (question) => {
-        if (question.question_type === 'multiple_choice') {
-          const answers = await getAllAnswerByCriteria({
-            question_id: question.id
-          })
-          question.answers = answers?.data?.data
-        }
+      const questionsData = questions?.data?.data
 
-        return question
-      })
+      for (const i in questionsData) {
+        if (questionsData[i].question_type === 'multiple_choice') {
+          const answers = await getAllAnswerByCriteria({
+            question_id: questionsData[i].id
+          })
+          questionsData[i].answers = answers?.data?.data
+        }
+      }
 
       setQuestions(questions?.data?.data)
 
@@ -71,6 +84,96 @@ const TestInfo: FC<TestInfoProps> = ({ testId, type }) => {
 
     firstFetch()
   }, [testId])
+
+  const handleCloneTest = async () => {
+    dispatch(setIsLoadingTrue())
+
+    const { id, ...testData } = test
+    const newTest = await createTest({
+      ...testData,
+      title: `${testData?.title} clone`
+    })
+
+    if (newTest?.status > 299) {
+      dispatch(
+        setToasterAppear({
+          message: 'Error when creating new test',
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    for (const question of questions) {
+      const { id, answers = null, ...questionData } = question
+      const newQuestion = await createQuestion({
+        ...questionData,
+        test_id: newTest?.data?.data?.id
+      })
+
+      if (question?.question_type === 'multiple_choice') {
+        for (const answer of question.answers) {
+          await createAnswer({
+            is_correct: answer?.is_correct,
+            option_text: answer?.option_text,
+            question_id: newQuestion?.data?.data?.id
+          })
+        }
+      }
+    }
+
+    navigate(`/assessments/${newTest?.data?.data?.id * 300003 + 200003}`)
+    dispatch(setIsLoadingFalse())
+  }
+
+  const handleUpdateTest = async () => {
+    if (title.trim() === '') {
+      dispatch(
+        setToasterAppear({ message: 'title must not be blank', type: 'error' })
+      )
+      return
+    }
+
+    if (time.trim() === '' || !+time) {
+      dispatch(
+        setToasterAppear({ message: 'time must be a number', type: 'error' })
+      )
+      return
+    }
+
+    if (description.trim() === '') {
+      dispatch(
+        setToasterAppear({
+          message: 'description must not be blank',
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    dispatch(setIsLoadingTrue())
+
+    const result = await updateTest(test?.id, {
+      title,
+      description,
+      is_publish: isPublish,
+      test_time: +time
+    })
+
+    if (result?.status > 299) {
+      dispatch(
+        setToasterAppear({
+          message: 'Error while updating test',
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    setTest(result?.data?.data)
+
+    dispatch(setIsLoadingFalse())
+  }
 
   return (
     <div className={styles.test_info}>
@@ -92,8 +195,8 @@ const TestInfo: FC<TestInfoProps> = ({ testId, type }) => {
           <input
             type='text'
             className={styles.test_info__input}
-            value={totalTime}
-            onChange={(e) => setTotalTime(e.target.value)}
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
             disabled={type !== 'own'}
           />
         </div>
@@ -119,8 +222,8 @@ const TestInfo: FC<TestInfoProps> = ({ testId, type }) => {
                 id='publish-yes'
                 name='publish'
                 className={styles.test_info__radio}
-                checked={isPublished}
-                onChange={() => setIsPublished(true)}
+                checked={isPublish}
+                onChange={() => setIsPublish(true)}
                 disabled={type !== 'own'}
               />
               <label
@@ -136,8 +239,8 @@ const TestInfo: FC<TestInfoProps> = ({ testId, type }) => {
                 id='publish-no'
                 name='publish'
                 className={styles.test_info__radio}
-                checked={!isPublished}
-                onChange={() => setIsPublished(false)}
+                checked={!isPublish}
+                onChange={() => setIsPublish(false)}
                 disabled={type !== 'own'}
               />
               <label
@@ -151,23 +254,6 @@ const TestInfo: FC<TestInfoProps> = ({ testId, type }) => {
         </div>
       </div>
 
-      {type === 'own' && (
-        <div className={styles.test_info}>
-          <div className={styles.test_info__section}>
-            <div className={styles.test_info__section_title}>
-              <div>Candidates</div>
-              <InviteDialog testId={testId} />
-              {/* <div className={styles.test_info__actions}> */}
-            </div>
-            <CandidateTable testAssignments={testAssignments} />
-          </div>
-        </div>
-        // <div className={styles.test_info__section}>
-        //   <h2 className={styles.test_info__section_title}>Candidates</h2>
-        //   <CandidateTable testAssignments={testAssignments} />
-        // </div>
-      )}
-
       <div className={styles.test_info__section}>
         <h2 className={styles.test_info__section_title}>Questions</h2>
         <QuestionTable
@@ -176,6 +262,29 @@ const TestInfo: FC<TestInfoProps> = ({ testId, type }) => {
           setQuestions={setQuestions}
         />
       </div>
+
+      {type === 'view' && (
+        <div className={styles.test_info__clone}>
+          <button
+            onClick={handleCloneTest}
+            className={styles.test_info__clone_button}
+          >
+            Clone test
+          </button>
+        </div>
+      )}
+
+      {type === 'own' && (
+        <div className={styles.test_info__clone}>
+          <InviteDialog testId={testId} />
+          <button
+            onClick={handleUpdateTest}
+            className={styles.test_info__clone_button}
+          >
+            Update test
+          </button>
+        </div>
+      )}
     </div>
   )
 }

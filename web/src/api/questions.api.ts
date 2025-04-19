@@ -30,9 +30,9 @@ export const getAllQuestionsByCriteria = async (data: QuestionsCriteriaDto) => {
   }
 }
 
-export const updateQuestion = async (data: UpdateQuestionDto) => {
+export const updateQuestion = async (id: number, data: UpdateQuestionDto) => {
   try {
-    const result = await axios.patch(`${TEST_URL}/${data.id}`, data)
+    const result = await axios.patch(`${TEST_URL}/${id}`, data)
     console.log(result)
     return result
   } catch (error) {

@@ -107,7 +107,7 @@ export interface Question {
 }
 
 export interface UpdateQuestionDto {
-  id: number
+  id?: number
   test_id?: number
   question_text?: string
   question_type?: string
@@ -193,6 +193,16 @@ export interface TestResponse {
   deleted_at: Date | null
   is_publish: boolean
   questions?: QuestionResponse[]
+}
+
+export const sampleTest: TestResponse = {
+  deleted_at: null,
+  id: 0,
+  owner_id: 0,
+  title: '',
+  description: '',
+  is_publish: true,
+  test_time: 0
 }
 
 export interface UpdateScoreTestAssignment {

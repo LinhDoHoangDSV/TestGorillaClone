@@ -38,10 +38,6 @@ export class InviteTestDto {
   @IsString({ message: 'code must be a string' })
   code: string;
 
-  @IsOptional()
-  @IsNumber({}, { message: 'count_exit must be a number' })
-  count_exit: number;
-
   @IsOptional({ message: 'status is required' })
   @IsEnum(TestAssignmentStatus, {
     message: `status must be ${Object.values(TestAssignmentStatus)}`,

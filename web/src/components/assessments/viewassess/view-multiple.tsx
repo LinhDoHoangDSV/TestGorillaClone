@@ -1,9 +1,10 @@
-import { type FC, useState } from 'react'
+import { type FC, useEffect, useState } from 'react'
 import styles from '../../../style/components/assessments/new/create-question.module.scss'
 import Button from '../../ui/button'
 import { QuestionDialogProps } from '../../../constant/common'
 import { useDispatch } from 'react-redux'
 import { setToasterAppear } from '../../../redux/slices/common.slice'
+import { useLocation } from 'react-router-dom'
 
 interface TempType {
   id: string
@@ -19,6 +20,8 @@ const MultipleChoiceDialog: FC<QuestionDialogProps> = ({
   rowIndex
 }) => {
   const dispatch = useDispatch()
+  const location = useLocation()
+  const [isViewPage, setIsViewPage] = useState<boolean>(false)
   const [title, setTitle] = useState(
     rowIndex >= 0 ? questions[rowIndex].title : ''
   )
@@ -26,7 +29,7 @@ const MultipleChoiceDialog: FC<QuestionDialogProps> = ({
     rowIndex >= 0 ? questions[rowIndex].question_text : ''
   )
   const [counter, setCounter] = useState<number>(
-    rowIndex >= 0 ? questions.length + 1 : 3
+    rowIndex >= 0 ? questions[rowIndex].answers.length + 1 : 3
   )
   const [options, setOptions] = useState<TempType[]>(
     rowIndex >= 0 && questions[rowIndex]?.answers
@@ -47,6 +50,13 @@ const MultipleChoiceDialog: FC<QuestionDialogProps> = ({
   const [score, setScore] = useState<string>(
     rowIndex >= 0 ? questions[rowIndex].score.toString() : '5'
   )
+  console.log(options)
+  console.log('questions', questions)
+
+  useEffect(() => {
+    if (location.pathname.includes('assessments/new')) setIsViewPage(false)
+    else setIsViewPage(true)
+  }, [location.pathname])
 
   const handleOptionChange = (id: string, text: string) => {
     setOptions(
@@ -170,7 +180,7 @@ const MultipleChoiceDialog: FC<QuestionDialogProps> = ({
       <div className={styles['question-dialog']}>
         <div className={styles['question-dialog__header']}>
           <h2 className={styles['question-dialog__title']}>
-            Multiple-Choice Question
+            Multiple Choice Question
           </h2>
           <button
             className={styles['question-dialog__close-button']}

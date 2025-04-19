@@ -27,9 +27,6 @@ export class TestAssignment {
   @Column({ length: 6, unique: true, name: 'code' })
   code: string;
 
-  @Column({ name: 'count_exit' })
-  count_exit: number;
-
   @Column({
     type: 'enum',
     enum: TestAssignmentStatus,

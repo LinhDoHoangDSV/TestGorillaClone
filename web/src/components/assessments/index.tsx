@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import type { TestEntity } from '../../constant/common'
 import { getAllTests } from '../../api/tests.api'
@@ -14,6 +14,7 @@ const AssessmentsComponent = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const [tests, setTests] = useState<TestEntity[]>([])
+  const [filterTitle, setFilterTitle] = useState<string>('')
 
   useEffect(() => {
     const firstFetch = async () => {
@@ -47,6 +48,14 @@ const AssessmentsComponent = () => {
     navigate(`/assessments/${id * 300003 + 200003}`)
   }
 
+  const handleFilterChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setFilterTitle(e.target.value)
+  }
+
+  const filteredTests = tests.filter((test) =>
+    test.title.toLowerCase().includes(filterTitle.toLowerCase())
+  )
+
   return (
     <div className={styles.assessments}>
       <div className={styles.assessments__container}>
@@ -59,6 +68,16 @@ const AssessmentsComponent = () => {
             <span className={styles.assessments__buttonIcon}>+</span>
             Create assessment
           </button>
+        </div>
+
+        <div className={styles.assessments__filter}>
+          <input
+            type='text'
+            className={styles.assessments__filterInput}
+            placeholder='Search by test title...'
+            value={filterTitle}
+            onChange={handleFilterChange}
+          />
         </div>
       </div>
 
@@ -73,20 +92,22 @@ const AssessmentsComponent = () => {
             </tr>
           </thead>
           <tbody>
-            {tests.length === 0 && (
+            {filteredTests.length === 0 && (
               <tr>
                 <td colSpan={4} className={styles.assessments__emptyMessage}>
-                  You have no test.
+                  {tests.length === 0
+                    ? 'You have no test.'
+                    : 'No tests match your search.'}
                 </td>
               </tr>
             )}
-            {tests.map((test, index) => (
+            {filteredTests.map((test, index) => (
               <tr
                 key={index}
                 className={styles.assessments__row}
                 onClick={() => handleNavigate(test.id)}
               >
-                <td>{index}</td>
+                <td>{index + 1}</td>
                 <td>{test.title}</td>
                 <td>{test.test_time}</td>
                 <td>{test.is_publish ? 'Yes' : 'No'}</td>

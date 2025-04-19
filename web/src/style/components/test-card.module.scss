@@ -2,6 +2,7 @@
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
+  margin: 0 auto;
 }
 
 .card {
@@ -37,6 +38,6 @@
   &__footer {
     display: flex;
     width: 100%;
-    justify-content: space-between;
+    justify-content: end;
   }
 }
