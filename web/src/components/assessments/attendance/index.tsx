@@ -1,11 +1,7 @@
 import { useEffect, useState } from 'react'
 import TestTaker from './test-taker'
 import CodeAuthentication from './code-authen'
-import {
-  TestAssignmentResponse,
-  TestResponse,
-  UpdateTestAssignment
-} from '../../../constant/common'
+import { TestAssignmentResponse, TestResponse } from '../../../constant/common'
 import styles from '../../../style/components/assessments/attendance/index.module.scss'
 import { useLocation } from 'react-router-dom'
 import { useDispatch } from 'react-redux'

@@ -68,3 +68,18 @@ export interface CreateUserAnser {
   answer_text: string
   score: number
 }
+
+export interface UserAnserCriterias {
+  id?: number
+  test_assignment_id?: number
+  question_id?: number
+  answer_text?: string
+  score?: number
+}
+
+export interface UserAnswerUpdate {
+  test_assignment_id?: number
+  question_id?: number
+  answer_text?: string
+  score?: number
+}

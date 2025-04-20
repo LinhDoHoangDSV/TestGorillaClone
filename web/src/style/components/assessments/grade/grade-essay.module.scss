@@ -1,0 +1,140 @@
+.question {
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+
+  &__content {
+    padding: 24px;
+    border-bottom: 1px solid #f3f4f6;
+    max-height: 400px;
+    overflow-y: scroll;
+  }
+
+  &__description {
+    color: #4b5563;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+
+  &__text {
+    font-size: 14px;
+    color: #111827;
+    margin: 0;
+  }
+
+  &__answer {
+    padding: 24px;
+    background-color: #fff;
+    width: 100%;
+  }
+
+  &__answerTitle {
+    font-size: 12px;
+    font-weight: 600;
+    color: #4b5563;
+    margin: 0 0 16px 0;
+    letter-spacing: 0.05em;
+  }
+
+  &__answerTextarea {
+    width: 75%;
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #111827;
+    border-radius: 6px;
+    resize: vertical;
+    min-height: 150px;
+    font-family: inherit;
+    transition: border-color 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: #c026d3;
+      box-shadow: 0 0 0 2px rgba(192, 38, 211, 0.1);
+    }
+
+    &::placeholder {
+      color: #9ca3af;
+    }
+  }
+
+  &__givingGrade {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  &__pointInput {
+    border-radius: 10px;
+    height: 30px;
+    padding: 5px 10px;
+    width: 110px;
+    border: 1px solid #adadad;
+  }
+}
+
+@media (min-width: 384px) {
+  .question {
+    &__answerTextarea {
+      width: 80%;
+    }
+  }
+}
+
+@media (min-width: 512px) {
+  .question {
+    &__answerTextarea {
+      width: 85%;
+    }
+  }
+}
+
+@media (min-width: 768px) {
+  .question {
+    flex-direction: row;
+
+    &__content {
+      flex: 1;
+      padding: 32px;
+      border-bottom: none;
+      border-right: 1px solid #f3f4f6;
+      max-height: 500px;
+    }
+
+    &__description {
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    &__text {
+      font-size: 15px;
+    }
+
+    &__answer {
+      width: 40%;
+      padding: 32px;
+    }
+
+    &__answerTitle {
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    &__answerTextarea {
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 200px;
+      width: 93%;
+    }
+  }
+}

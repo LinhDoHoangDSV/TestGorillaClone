@@ -4,8 +4,10 @@ import Header from '../components/header'
 import { RouterType } from '../constant/common'
 import Assessment from './assessments'
 import TakeAssessment from './assessments/attendance'
+import AssessmentGrade from './assessments/grade'
 import AssessmentsNew from './assessments/new'
 import AssessmentViewAndOwn from './assessments/view-and-own'
+import LoginPage from './auth'
 import Candidates from './candidates'
 import Login from './login'
 
@@ -32,11 +34,25 @@ const pagesData: RouterType[] = [
     footer: <Footer />
   },
   {
+    title: 'grade-assessments',
+    path: '/assessments/grade/:path',
+    element: <AssessmentGrade />,
+    header: <Header />,
+    footer: <Footer />
+  },
+  {
     title: 'new-assessments',
     path: '/assessments/new',
     element: <AssessmentsNew />,
     header: false,
     footer: <Footer />
+  },
+  {
+    title: 'login',
+    path: '/login',
+    element: <LoginPage />,
+    header: false,
+    footer: false
   },
   {
     title: 'assessments-attendance',

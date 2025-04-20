@@ -119,6 +119,10 @@ const CandidatesComponent = () => {
     )
   }
 
+  const handleClickRow = (candidate) => {
+    navigate(`/assessments/grade/${candidate.id * 300003 + 200003}`)
+  }
+
   return (
     <div className={styles.candidates}>
       <div className={styles.candidates__container}>
@@ -182,7 +186,11 @@ const CandidatesComponent = () => {
             </thead>
             <tbody>
               {filteredCandidates.map((candidate, index) => (
-                <tr key={candidate.id} className={styles.candidates__row}>
+                <tr
+                  key={candidate.id}
+                  className={styles.candidates__row}
+                  onClick={() => handleClickRow(candidate)}
+                >
                   <td>{index + 1}</td>
                   <td>{candidate.candidate_email}</td>
                   <td>{candidate.testTitle}</td>
