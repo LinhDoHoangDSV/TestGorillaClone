@@ -249,7 +249,7 @@ export class TestAssignmentController {
         const emailRequest: SendRequestDto = {
           code,
           email: email.trim(),
-          url: `http://localhost:3000/assessments/attendance/${newTestAssignment.id * 300003 + 200003}`,
+          url: `https://testgorillaclonefe.web.app/assessments/attendance/${newTestAssignment.id * 300003 + 200003}`,
         };
 
         await this.mailService.requestTest(emailRequest);
