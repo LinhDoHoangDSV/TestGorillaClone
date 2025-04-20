@@ -23,7 +23,7 @@ export class UsersService {
       refresh_token = null,
     } = createUserDto;
     const query = `
-          INSERT INTO users (name, description)
+          INSERT INTO users (role_id, email, first_name, last_name,phone_number, refresh_token)
           VALUES ($1, $2, $3, $4, $5, $6)
           RETURNING *;
         `;
