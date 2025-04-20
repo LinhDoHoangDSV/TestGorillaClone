@@ -55,8 +55,6 @@ const TestCard: FC = () => {
     navigate(`/assessments/view/${300003 * test.id + 200003}`)
   }
 
-  const handleClone = () => {}
-
   return (
     <div className={style.wrapper}>
       {tests.map((test: TestEntity, index) => {
