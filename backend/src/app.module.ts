@@ -18,7 +18,6 @@ import { RolesModule } from './features/roles/roles.module';
 import { TestAssignmentModule } from './features/test-assignment/test-assignment.module';
 import { UserAnswersModule } from './features/user-answers/user-answers.module';
 import { MailServiceModule } from './features/mail-service/mail-service.module';
-import { AuthModule } from './features/auth/auth.module';
 
 @Module({
   imports: [
@@ -47,7 +46,6 @@ import { AuthModule } from './features/auth/auth.module';
     TestAssignmentModule,
     UserAnswersModule,
     MailServiceModule,
-    AuthModule,
   ],
   controllers: [AppController],
   providers: [
