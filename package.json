@@ -3,10 +3,6 @@
   "version": "1.0.0",
   "description": "One-month project for intern in DSV",
   "main": "index.js",
-  "workspaces": [
-    "backend",
-    "web"
-  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     // "prepare": "husky",

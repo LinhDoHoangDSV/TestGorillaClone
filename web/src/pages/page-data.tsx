@@ -2,8 +2,12 @@ import Home from '.'
 import Footer from '../components/footer'
 import Header from '../components/header'
 import { RouterType } from '../constant/common'
-import Assessments from './assessments'
+import Assessment from './assessments'
+import TakeAssessment from './assessments/attendance'
+import AssessmentGrade from './assessments/grade'
 import AssessmentsNew from './assessments/new'
+import AssessmentViewAndOwn from './assessments/view-and-own'
+import LoginPage from './auth'
 import Candidates from './candidates'
 import Login from './login'
 
@@ -18,7 +22,7 @@ const pagesData: RouterType[] = [
   {
     title: 'assessments',
     path: '/assessments',
-    element: <Assessments />,
+    element: <Assessment />,
     header: <Header />,
     footer: <Footer />
   },
@@ -26,6 +30,13 @@ const pagesData: RouterType[] = [
     title: 'candidates',
     path: '/candidates',
     element: <Candidates />,
+    header: <Header />,
+    footer: <Footer />
+  },
+  {
+    title: 'grade-assessments',
+    path: '/assessments/grade/:path',
+    element: <AssessmentGrade />,
     header: <Header />,
     footer: <Footer />
   },
@@ -39,14 +50,42 @@ const pagesData: RouterType[] = [
   {
     title: 'login',
     path: '/login',
+    element: <LoginPage />,
+    header: false,
+    footer: false
+  },
+  {
+    title: 'assessments-attendance',
+    path: '/assessments/attendance/:path',
+    element: <TakeAssessment />,
+    header: false,
+    footer: false
+  },
+  {
+    title: 'login',
+    path: '/login',
     element: <Login />,
     header: false,
     footer: false
   },
   {
-    title: 'assessments',
-    path: '/assessments',
-    element: <Assessments />,
+    title: 'assessments/edit',
+    path: '/assessments/:path',
+    element: <AssessmentViewAndOwn />,
+    header: <Header />,
+    footer: <Footer />
+  },
+  {
+    title: 'assessments/view',
+    path: '/assessments/view/:path',
+    element: <AssessmentViewAndOwn />,
+    header: <Header />,
+    footer: <Footer />
+  },
+  {
+    title: 'not-found',
+    path: '*',
+    element: <div>Page not found</div>,
     header: false,
     footer: false
   }

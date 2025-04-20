@@ -1,7 +1,7 @@
 import { useState, type FC } from 'react'
 import styles from '../../../style/components/assessments/new/content.module.scss'
 import QuestionType from './question-type'
-import { ContentProps, QuestionsType } from '../../../constant/common'
+import { ContentProps, Question } from '../../../constant/common'
 import Button from '../../ui/button'
 import { createTest } from '../../../api/tests.api'
 import { useDispatch } from 'react-redux'
@@ -21,7 +21,7 @@ import { useNavigate } from 'react-router-dom'
 
 const Content: FC<ContentProps> = ({ title }) => {
   const [totalTime, setTotalTime] = useState<string>('10')
-  const [questions, setQuestions] = useState<QuestionsType[]>([])
+  const [questions, setQuestions] = useState<Question[]>([])
   const [isPublish, setIsPublish] = useState<boolean>(false)
   const [description, setDescription] = useState<string>('')
   const dispatch = useDispatch()
@@ -55,7 +55,8 @@ const Content: FC<ContentProps> = ({ title }) => {
         question_text: i.question_text,
         question_type: i.question_type,
         score: i.score,
-        test_id: newTest?.data?.data?.id
+        test_id: newTest?.data?.data?.id,
+        title: i.title
       }
 
       const newQuestion: any = await createQuestion(createQuestionDto)

@@ -14,7 +14,6 @@ const Home = () => {
           <div className={style['home__test-card-title']}>
             Discover more tests
           </div>
-          <div className={style['home__test-card-line']}></div>
         </div>
 
         <TestCard />

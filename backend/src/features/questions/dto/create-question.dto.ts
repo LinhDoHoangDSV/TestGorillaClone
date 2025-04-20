@@ -1,4 +1,10 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { QUESTION_TYPE } from '../../../common/constant';
 
 export class CreateQuestionDto {
@@ -18,4 +24,8 @@ export class CreateQuestionDto {
   @IsOptional()
   @IsNumber({}, { message: 'score must be a number' })
   score: number;
+
+  @IsNotEmpty({ message: 'title must not be empty' })
+  @IsString({ message: 'title must be a string' })
+  title: string;
 }

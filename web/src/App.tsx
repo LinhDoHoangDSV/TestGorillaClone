@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom'
+import { matchPath, useLocation } from 'react-router-dom'
 import Router from './pages/router'
 import pagesData from './pages/page-data'
 
@@ -6,13 +6,17 @@ import { useSelector } from 'react-redux'
 import { RootState } from './redux/store'
 import Loading from './components/loading'
 import Toaster from './components/ui/toast'
+import { useMemo } from 'react'
 
 function App() {
   const location = useLocation()
-  const findPage = pagesData.find((route) => route.path === location.pathname)
+  const findPage = useMemo(() => {
+    return pagesData.find((route) => {
+      const match = matchPath({ path: route.path }, location.pathname)
+      return match !== null
+    })
+  }, [location.pathname])
   const isLoading = useSelector((state: RootState) => {
-    console.log(state.common.isLoading)
-
     return state.common.isLoading
   })
   const toaster: boolean = useSelector(

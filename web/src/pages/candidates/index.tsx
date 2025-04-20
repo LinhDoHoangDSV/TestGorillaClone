@@ -1,5 +1,16 @@
+import { lazy, Suspense } from 'react'
+import Loading from '../../components/loading'
+
+const CandidatesComp = lazy(
+  () => import('../../components/candidates/candidates')
+)
+
 const Candidates = () => {
-  return <div>Candidates</div>
+  return (
+    <Suspense fallback={<Loading />}>
+      <CandidatesComp />
+    </Suspense>
+  )
 }
 
 export default Candidates
