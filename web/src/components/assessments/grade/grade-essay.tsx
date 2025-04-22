@@ -16,6 +16,7 @@ const GradeEssay = ({ question, marks, setMarks }) => {
       )
     )
   }
+  console.log(marks)
 
   return (
     <div className={styles.question}>

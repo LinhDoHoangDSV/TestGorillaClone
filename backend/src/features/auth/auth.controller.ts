@@ -154,7 +154,7 @@ export class AuthController {
   }
 
   @UseGuards(RefreshTokenGuard)
-  @Get('refresh')
+  @Post('/refresh')
   async refresh(@Req() request: RequestWithUserDto, @Res() res) {
     const { user } = request;
     try {

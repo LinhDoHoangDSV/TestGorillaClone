@@ -6,6 +6,7 @@ interface UserState {
   first_name: string
   last_name: string
   role_id: number | null
+  isAuthen: boolean
 }
 
 const initialState: UserState = {
@@ -13,7 +14,8 @@ const initialState: UserState = {
   email: '',
   first_name: '',
   last_name: '',
-  role_id: null
+  role_id: null,
+  isAuthen: false
 }
 
 const userSlice = createSlice({
@@ -26,9 +28,15 @@ const userSlice = createSlice({
       state.last_name = action.payload.last_name
       state.id = action.payload.id
       state.role_id = action.payload.role_id
+    },
+    setIsAuthen: (state, action) => {
+      state.isAuthen = action.payload.value
+    },
+    clearAuth: (state) => {
+      state.isAuthen = false
     }
   }
 })
 
-export const { setInitialState } = userSlice.actions
+export const { setInitialState, setIsAuthen, clearAuth } = userSlice.actions
 export default userSlice.reducer

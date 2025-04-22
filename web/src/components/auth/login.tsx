@@ -1,21 +1,29 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import styles from '../../style/components/auth/login.module.scss'
 import logoImage from '../../assets/logo.svg'
 import { useGoogleLogin } from '@react-oauth/google'
 import { getInformation, login, refreshToken } from '../../api/auth.api'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import {
   setIsLoadingFalse,
   setIsLoadingTrue,
   setToasterAppear
 } from '../../redux/slices/common.slice'
 import { useNavigate } from 'react-router-dom'
-import { setInitialState } from '../../redux/slices/user.slice'
+import { setIsAuthen } from '../../redux/slices/user.slice'
+import { RootState } from '../../redux/store'
 
 const LoginPage = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const isAuthen = useSelector((state: RootState) => {
+    return state.user.isAuthen
+  })
   const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    if (isAuthen) navigate('/')
+  }, [isAuthen, navigate])
 
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -29,31 +37,7 @@ const LoginPage = () => {
         return
       }
 
-      const userInformation = await getInformation()
-
-      if (userInformation?.status > 299) {
-        dispatch(
-          setToasterAppear({
-            message: "Fail to get user's information",
-            type: 'error'
-          })
-        )
-        return
-      }
-
-      const data = userInformation?.data?.data
-      dispatch(
-        setInitialState({
-          email: data?.email,
-          id: data?.id,
-          first_name: data?.first_name,
-          last_name: data?.last_name,
-          role_id: data?.role_id
-        })
-      )
-
-      navigate('/')
-
+      dispatch(setIsAuthen({ value: true }))
       dispatch(setIsLoadingFalse())
     }
   })

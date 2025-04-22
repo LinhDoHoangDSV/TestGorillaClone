@@ -10,6 +10,7 @@ import {
 import { useEffect, useState } from 'react'
 import { StatisticsResponse } from '../../constant/common'
 import { getUserStatistics } from '../../api/statistic.api'
+import { logout } from '../../api/auth.api'
 
 const Dashboard = () => {
   const navigate = useNavigate()
@@ -48,9 +49,10 @@ const Dashboard = () => {
           </h1>
           <button
             className={styles.dashboard__createBtn}
-            onClick={() => {
-              dispatch(setActiveState({ value: 1 }))
-              navigate('/assessments/new')
+            onClick={async () => {
+              await logout()
+              // dispatch(setActiveState({ value: 1 }))
+              // navigate('/assessments/new')
             }}
           >
             <span className={styles.dashboard__plusIcon}>+</span>
