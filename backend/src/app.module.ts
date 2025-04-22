@@ -19,6 +19,7 @@ import { TestAssignmentModule } from './features/test-assignment/test-assignment
 import { UserAnswersModule } from './features/user-answers/user-answers.module';
 import { MailServiceModule } from './features/mail-service/mail-service.module';
 import { AuthModule } from './features/auth/auth.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { AuthModule } from './features/auth/auth.module';
         JWT_ACCESS_TOKEN_EXPIRATION_TIME: Joi.string().required(),
       }),
     }),
+    ScheduleModule.forRoot(),
     DatabaseModule,
     LoggerModule,
     ResponseModule,

@@ -12,7 +12,9 @@ export const getAllTestAssignmentByCriteria = async (
   data: Partial<TestAssignment>
 ) => {
   try {
-    const result = await axios.post(`${TEST_URL}/criterias`, data)
+    const result = await axios.post(`${TEST_URL}/criterias`, data, {
+      withCredentials: true
+    })
     console.log(result)
     return result
   } catch (error) {
@@ -23,7 +25,9 @@ export const getAllTestAssignmentByCriteria = async (
 
 export const sendTestRequest = async (data: SendTestRequestDto) => {
   try {
-    const result = await axios.post(`${TEST_URL}/invite`, data)
+    const result = await axios.post(`${TEST_URL}/invite`, data, {
+      withCredentials: true
+    })
     console.log(result)
     return result
   } catch (error) {
@@ -34,7 +38,35 @@ export const sendTestRequest = async (data: SendTestRequestDto) => {
 
 export const getTestAssignmentById = async (id: number) => {
   try {
-    const result = await axios(`${TEST_URL}/${id}`)
+    const result = await axios(`${TEST_URL}/${id}`, {
+      withCredentials: true
+    })
+    console.log(result)
+    return result
+  } catch (error) {
+    console.log(error)
+    return error
+  }
+}
+
+export const startAssessment = async (id: number) => {
+  try {
+    const result = await axios(`${TEST_URL}/start/${id}`, {
+      withCredentials: true
+    })
+    console.log(result)
+    return result
+  } catch (error) {
+    console.log(error)
+    return error
+  }
+}
+
+export const completeAssessment = async (id: number) => {
+  try {
+    const result = await axios(`${TEST_URL}/complete/${id}`, {
+      withCredentials: true
+    })
     console.log(result)
     return result
   } catch (error) {
@@ -62,7 +94,9 @@ export const updateTestAssignment = async (
   id: number
 ) => {
   try {
-    const result = await axios.patch(`${TEST_URL}/${id}`, data)
+    const result = await axios.patch(`${TEST_URL}/${id}`, data, {
+      withCredentials: true
+    })
     console.log(result)
     return result
   } catch (error) {

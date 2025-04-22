@@ -10,7 +10,9 @@ export const TEST_URL = `${import.meta.env[`${serverBaseUrl}`]}/questions`
 
 export const createQuestion = async (data: CreateQuestionDto) => {
   try {
-    const result = await axios.post(TEST_URL, data)
+    const result = await axios.post(TEST_URL, data, {
+      withCredentials: true
+    })
     console.log(result)
     return result
   } catch (error) {
@@ -21,7 +23,9 @@ export const createQuestion = async (data: CreateQuestionDto) => {
 
 export const getAllQuestionsByCriteria = async (data: QuestionsCriteriaDto) => {
   try {
-    const result = await axios.post(`${TEST_URL}/criterias`, data)
+    const result = await axios.post(`${TEST_URL}/criterias`, data, {
+      withCredentials: true
+    })
     console.log(result)
     return result
   } catch (error) {
@@ -32,7 +36,9 @@ export const getAllQuestionsByCriteria = async (data: QuestionsCriteriaDto) => {
 
 export const updateQuestion = async (id: number, data: UpdateQuestionDto) => {
   try {
-    const result = await axios.patch(`${TEST_URL}/${id}`, data)
+    const result = await axios.patch(`${TEST_URL}/${id}`, data, {
+      withCredentials: true
+    })
     console.log(result)
     return result
   } catch (error) {
@@ -43,7 +49,9 @@ export const updateQuestion = async (id: number, data: UpdateQuestionDto) => {
 
 export const deleteQuestion = async (id: number) => {
   try {
-    const result = await axios.delete(`${TEST_URL}/${id}`)
+    const result = await axios.delete(`${TEST_URL}/${id}`, {
+      withCredentials: true
+    })
     console.log(result)
     return result
   } catch (error) {

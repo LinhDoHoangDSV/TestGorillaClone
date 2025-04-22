@@ -9,6 +9,8 @@ import {
   Res,
   HttpException,
   HttpStatus,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { TestsService } from './tests.service';
 import { CreateTestDto } from './dto/create-test.dto';
@@ -23,12 +25,17 @@ import {
 import { LoggerService } from '../logger/logger.service';
 import { Response } from '../response/response';
 import { FindTestCriteriasDto } from './dto/find-test-criterias.dto';
+import { AuthGuard } from 'src/common/guard/jwt_auth.guard';
+import RoleGuard from 'src/common/guard/role.guard';
+import { RequestWithUserDto, Roles } from 'src/common/constant';
+import { StatisticsService } from '../statistics/statistics.service';
 
 @ApiTags('Tests')
 @Controller('tests')
 export class TestsController {
   constructor(
     private readonly testsService: TestsService,
+    private readonly statisticsService: StatisticsService,
     private readonly logger: LoggerService,
     private readonly response: Response,
   ) {}
@@ -102,10 +109,28 @@ export class TestsController {
       },
     },
   })
+  @UseGuards(RoleGuard(Roles.HR))
+  @UseGuards(AuthGuard)
   @Post()
-  async create(@Body() createTestDto: CreateTestDto, @Res() res) {
+  async create(
+    @Body() createTestDto: CreateTestDto,
+    @Res() res,
+    @Req() request: RequestWithUserDto,
+  ) {
+    const { user } = request;
     try {
-      const newTest = await this.testsService.create(createTestDto);
+      const newTest = await this.testsService.create({
+        ...createTestDto,
+        owner_id: user.userId,
+      });
+      const [existingStatistics] = await this.statisticsService.findByCriterias(
+        { user_id: user.userId },
+      );
+
+      await this.statisticsService.update(existingStatistics.id, {
+        active_assess: existingStatistics.active_assess + 1,
+      });
+
       this.logger.debug('Create test successfully');
       this.response.initResponse(true, 'Create test successfully', newTest);
       return res.status(201).json(this.response);
@@ -118,6 +143,38 @@ export class TestsController {
         this.response.initResponse(
           false,
           'System error while creating test',
+          null,
+        );
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(this.response);
+      }
+    }
+  }
+
+  @UseGuards(RoleGuard(Roles.HR))
+  @UseGuards(AuthGuard)
+  @Get('/all/own')
+  async findAllOwnTests(@Res() res, @Req() request: RequestWithUserDto) {
+    const { user } = request;
+    try {
+      const existingTests = await this.testsService.findByCriterias({
+        owner_id: user.userId,
+      });
+      this.logger.debug('Finding tests successfully');
+      this.response.initResponse(
+        true,
+        'Finding tests successfully',
+        existingTests,
+      );
+      return res.status(HttpStatus.OK).json(this.response);
+    } catch (error) {
+      this.logger.error('Error while finding tests', error?.stack);
+      if (error instanceof HttpException) {
+        this.response.initResponse(false, error?.message, null);
+        return res.status(error?.getStatus()).json(this.response);
+      } else {
+        this.response.initResponse(
+          false,
+          'System error while finding tests',
           null,
         );
         return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(this.response);
@@ -325,6 +382,8 @@ export class TestsController {
       },
     },
   })
+  @UseGuards(RoleGuard(Roles.HR))
+  @UseGuards(AuthGuard)
   @Patch(':id')
   async update(
     @Param('id') id: string,

@@ -11,17 +11,17 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsString({ message: 'first_name must be a string' })
-  first_name: string;
+  first_name?: string;
 
   @IsOptional()
   @IsString({ message: 'last_name must be a string' })
-  last_name: string;
+  last_name?: string;
 
   @IsOptional()
   @IsString({ message: 'phone_number must be a string' })
-  phone_number: string;
+  phone_number?: string;
 
   @IsOptional()
   @IsString({ message: 'refresh_token must be a string' })
-  refresh_token: string;
+  refresh_token?: string;
 }

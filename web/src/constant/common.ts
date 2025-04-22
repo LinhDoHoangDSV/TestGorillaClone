@@ -220,3 +220,11 @@ export interface UpdateTestAssignment {
   code?: string
   status?: string
 }
+
+export interface StatisticsResponse {
+  id?: number
+  user_id?: number
+  total_invitation?: number
+  active_assess?: number
+  total_assess_complete?: number
+}

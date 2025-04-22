@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 
 export class CreateTestDto {
-  @IsNotEmpty({ message: 'owner_id must not be empty' })
+  @IsOptional()
   @IsNumber({}, { message: 'owner_id must be a number' })
   owner_id: number;
 

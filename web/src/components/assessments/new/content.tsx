@@ -6,6 +6,7 @@ import Button from '../../ui/button'
 import { createTest } from '../../../api/tests.api'
 import { useDispatch } from 'react-redux'
 import {
+  setActiveState,
   setIsLoadingFalse,
   setIsLoadingTrue,
   setToasterAppear
@@ -38,10 +39,19 @@ const Content: FC<ContentProps> = ({ title }) => {
       return
     }
 
+    if (!description || description === '') {
+      dispatch(
+        setToasterAppear({
+          message: 'Description must not be empty',
+          type: 'error'
+        })
+      )
+      return
+    }
+
     dispatch(setIsLoadingTrue())
 
     const data: CreateTestDto = {
-      owner_id: 1,
       description,
       is_publish: isPublish,
       test_time: parseInt(totalTime),
@@ -78,6 +88,7 @@ const Content: FC<ContentProps> = ({ title }) => {
       setToasterAppear({ message: 'Create test successfully', type: 'success' })
     )
     dispatch(setIsLoadingFalse())
+    dispatch(setActiveState({ value: 0 }))
     navigate('/')
   }
 

@@ -10,7 +10,9 @@ export const TEST_URL = `${import.meta.env[`${serverBaseUrl}`]}/tests`
 
 export const createTest = async (data: CreateTestDto) => {
   try {
-    const result = await axios.post(TEST_URL, data)
+    const result = await axios.post(TEST_URL, data, {
+      withCredentials: true
+    })
     console.log(result)
     return result
   } catch (error) {
@@ -30,9 +32,24 @@ export const getAllTests = async () => {
   }
 }
 
-export const getAllTestsByCriteria = async (data: TestCriteria) => {
+export const getAllTestsByCriteria = async (data?: TestCriteria) => {
   try {
-    const result = await axios.post(`${TEST_URL}/criterias`, data)
+    const result = await axios.post(`${TEST_URL}/criterias`, data, {
+      withCredentials: true
+    })
+    console.log(result)
+    return result
+  } catch (error) {
+    console.log(error)
+    return error
+  }
+}
+
+export const getAllOwnTests = async () => {
+  try {
+    const result = await axios(`${TEST_URL}/all/own`, {
+      withCredentials: true
+    })
     console.log(result)
     return result
   } catch (error) {
@@ -43,7 +60,9 @@ export const getAllTestsByCriteria = async (data: TestCriteria) => {
 
 export const getTestById = async (id: number) => {
   try {
-    const result = await axios(`${TEST_URL}/${id}`)
+    const result = await axios(`${TEST_URL}/${id}`, {
+      withCredentials: true
+    })
     console.log(result)
     return result
   } catch (error) {
@@ -54,7 +73,9 @@ export const getTestById = async (id: number) => {
 
 export const updateTest = async (id: number, data: UpdateTestDto) => {
   try {
-    const result = await axios.patch(`${TEST_URL}/${id}`, data)
+    const result = await axios.patch(`${TEST_URL}/${id}`, data, {
+      withCredentials: true
+    })
     console.log(result)
     return result
   } catch (error) {

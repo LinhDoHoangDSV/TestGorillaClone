@@ -21,7 +21,9 @@ export const createUserAnsers = async (data: CreateUserAnser) => {
 
 export const getUserAnswerByCriterias = async (data: UserAnserCriterias) => {
   try {
-    const result = await axios.post(`${TEST_URL}/criterias`, data)
+    const result = await axios.post(`${TEST_URL}/criterias`, data, {
+      withCredentials: true
+    })
     console.log(result)
     return result
   } catch (error) {

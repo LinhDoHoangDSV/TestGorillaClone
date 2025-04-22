@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateStatisticDto } from './dto/create-statistic.dto';
 import { UpdateStatisticDto } from './dto/update-statistic.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { DataSource, EntityManager } from 'typeorm';
 import { Statistic } from './entities/statistic.entity';
 import { FindStatisticCriteriaDto } from './dto/find-statistic-criteria.dto';
 
@@ -15,26 +15,32 @@ export class StatisticsService {
 
   async create(
     createStatisticDto: CreateStatisticDto,
-  ): Promise<Statistic | null> {
+    manager?: EntityManager,
+  ): Promise<Statistic> {
     const {
       user_id,
       total_invitation = 0,
       active_assess = 0,
       total_assess_complete = 0,
     } = createStatisticDto;
+
     const query = `
-          INSERT INTO statistics (user_id, total_invitation, active_assess, total_assess_complete)
-          VALUES ($1, $2, $3, $4)
-          RETURNING *;
-        `;
+      INSERT INTO statistics (user_id, total_invitation, active_assess, total_assess_complete)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *;
+    `;
     const values = [
       user_id,
       total_invitation,
       active_assess,
       total_assess_complete,
     ];
-    const [result] = await this.dataSource.query(query, values);
-    return result;
+
+    const [result] = manager
+      ? await manager.query(query, values)
+      : await this.dataSource.query(query, values);
+
+    return result as Statistic;
   }
 
   async findByCriterias(

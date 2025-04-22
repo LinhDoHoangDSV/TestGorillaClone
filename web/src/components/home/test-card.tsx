@@ -4,6 +4,7 @@ import Button from '../ui/button'
 import { getAllTestsByCriteria } from '../../api/tests.api'
 import { useDispatch } from 'react-redux'
 import {
+  setActiveState,
   setIsLoadingFalse,
   setIsLoadingTrue,
   setToasterAppear
@@ -53,9 +54,8 @@ const TestCard: FC = () => {
 
   const handleView = (test) => {
     navigate(`/assessments/view/${300003 * test.id + 200003}`)
+    dispatch(setActiveState({ value: 1 }))
   }
-
-  const handleClone = () => {}
 
   return (
     <div className={style.wrapper}>

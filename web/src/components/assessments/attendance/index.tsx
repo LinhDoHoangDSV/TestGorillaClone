@@ -11,7 +11,9 @@ import {
   setToasterAppear
 } from '../../../redux/slices/common.slice'
 import {
+  completeAssessment,
   getTestAssignmentById,
+  startAssessment,
   updateTestAssignment
 } from '../../../api/test-assignment.api'
 import { getTestById } from '../../../api/tests.api'
@@ -137,7 +139,7 @@ function TakeAssessmentComp() {
       setSeconds((prev) => {
         if (prev <= 1) {
           clearInterval(timer)
-          handleTestComplete()
+          handleTestComplete('timeout')
           return 0
         }
         return (
@@ -255,14 +257,17 @@ function TakeAssessmentComp() {
     }
 
     setStartTime(testAssessment?.started_at ?? new Date())
+    await startAssessment(testAssessment?.id)
 
     dispatch(setIsLoadingFalse())
     setIsAuthenticated(true)
   }
 
-  const handleTestComplete = async () => {
+  const handleTestComplete = async (status?: string) => {
     dispatch(setIsLoadingTrue())
-    await updateTestAssignment({ status: 'completed' }, testAssessment?.id)
+    if (status !== 'timeout') {
+      await completeAssessment(testAssessment?.id)
+    }
     setTestCompleted(true)
     dispatch(setIsLoadingFalse())
   }

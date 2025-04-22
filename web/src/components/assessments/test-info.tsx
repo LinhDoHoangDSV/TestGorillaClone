@@ -88,7 +88,7 @@ const TestInfo: FC<TestInfoProps> = ({ testId, type }) => {
   const handleCloneTest = async () => {
     dispatch(setIsLoadingTrue())
 
-    const { id, ...testData } = test
+    const { id, owner_id, ...testData } = test
     const newTest = await createTest({
       ...testData,
       title: `${testData?.title} clone`
@@ -122,6 +122,9 @@ const TestInfo: FC<TestInfoProps> = ({ testId, type }) => {
       }
     }
 
+    dispatch(
+      setToasterAppear({ message: 'Clone test successfully', type: 'success' })
+    )
     navigate(`/assessments/${newTest?.data?.data?.id * 300003 + 200003}`)
     dispatch(setIsLoadingFalse())
   }

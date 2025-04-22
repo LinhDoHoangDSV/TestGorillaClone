@@ -5,7 +5,9 @@ export const TEST_URL = `${import.meta.env[`${serverBaseUrl}`]}/answers`
 
 export const createAnswer = async (data: CreateAnswerDto) => {
   try {
-    const result = await axios.post(TEST_URL, data)
+    const result = await axios.post(TEST_URL, data, {
+      withCredentials: true
+    })
     console.log(result)
     return result
   } catch (error) {
@@ -18,7 +20,9 @@ export const getAllAnswerByCriteria = async (
   data: Partial<CreateAnswerDto>
 ) => {
   try {
-    const result = await axios.post(`${TEST_URL}/criterias`, data)
+    const result = await axios.post(`${TEST_URL}/criterias`, data, {
+      withCredentials: true
+    })
     console.log(result)
     return result
   } catch (error) {

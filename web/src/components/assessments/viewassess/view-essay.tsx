@@ -83,7 +83,6 @@ const EssayQuestionDialog: FC<QuestionDialogProps> = ({
       }
 
       await updateQuestion(questions[rowIndex].id, data)
-      console.log('oke')
     }
 
     setQuestions(questions)

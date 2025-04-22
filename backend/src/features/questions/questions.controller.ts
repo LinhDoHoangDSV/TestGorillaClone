@@ -10,6 +10,7 @@ import {
   HttpStatus,
   HttpException,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { QuestionsService } from './questions.service';
 import { CreateQuestionDto } from './dto/create-question.dto';
@@ -27,6 +28,9 @@ import {
 } from '@nestjs/swagger';
 import { TestsService } from '../tests/tests.service';
 import { FindQuestionCriteriasDto } from './dto/find-question-criterias.dto';
+import { AuthGuard } from 'src/common/guard/jwt_auth.guard';
+import RoleGuard from 'src/common/guard/role.guard';
+import { Roles } from 'src/common/constant';
 
 @ApiTags('Questions')
 @Controller('questions')
@@ -98,6 +102,8 @@ export class QuestionsController {
       },
     },
   })
+  @UseGuards(RoleGuard(Roles.HR))
+  @UseGuards(AuthGuard)
   @Post()
   async create(@Body() createQuestionDto: CreateQuestionDto, @Res() res) {
     try {
@@ -343,6 +349,8 @@ export class QuestionsController {
       },
     },
   })
+  @UseGuards(RoleGuard(Roles.HR))
+  @UseGuards(AuthGuard)
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -407,6 +415,8 @@ export class QuestionsController {
       },
     },
   })
+  @UseGuards(RoleGuard(Roles.HR))
+  @UseGuards(AuthGuard)
   @Delete(':id')
   async remove(@Param('id') id: string, @Res() res) {
     try {

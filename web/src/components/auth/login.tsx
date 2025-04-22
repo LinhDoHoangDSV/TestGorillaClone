@@ -1,17 +1,62 @@
 import { useState } from 'react'
 import styles from '../../style/components/auth/login.module.scss'
 import logoImage from '../../assets/logo.svg'
+import { useGoogleLogin } from '@react-oauth/google'
+import { getInformation, login, refreshToken } from '../../api/auth.api'
+import { useDispatch } from 'react-redux'
+import {
+  setIsLoadingFalse,
+  setIsLoadingTrue,
+  setToasterAppear
+} from '../../redux/slices/common.slice'
+import { useNavigate } from 'react-router-dom'
+import { setInitialState } from '../../redux/slices/user.slice'
 
 const LoginPage = () => {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleGoogleLogin = () => {
-    setIsLoading(true)
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      dispatch(setIsLoadingTrue())
+      const result = await login(tokenResponse.access_token)
 
-    setTimeout(() => {
-      setIsLoading(false)
-    }, 1500)
-  }
+      if (result?.status > 299) {
+        dispatch(
+          setToasterAppear({ message: 'Login Fail. Try again', type: 'error' })
+        )
+        return
+      }
+
+      const userInformation = await getInformation()
+
+      if (userInformation?.status > 299) {
+        dispatch(
+          setToasterAppear({
+            message: "Fail to get user's information",
+            type: 'error'
+          })
+        )
+        return
+      }
+
+      const data = userInformation?.data?.data
+      dispatch(
+        setInitialState({
+          email: data?.email,
+          id: data?.id,
+          first_name: data?.first_name,
+          last_name: data?.last_name,
+          role_id: data?.role_id
+        })
+      )
+
+      navigate('/')
+
+      dispatch(setIsLoadingFalse())
+    }
+  })
 
   return (
     <div className={styles.login}>

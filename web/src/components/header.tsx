@@ -4,11 +4,17 @@ import sidebarImage from '../assets/bars-solid.svg'
 import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { AppSidebar } from './sidebar'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from '../redux/store'
+import { setActiveState } from '../redux/slices/common.slice'
 
 const Header = () => {
-  const [activeState, setActiveState] = useState(0)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const activeState = useSelector(
+    (state: RootState) => state.common.activeState
+  )
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
     <>
@@ -30,7 +36,10 @@ const Header = () => {
                   activeState === 0 ? styles['header__navItem--active'] : ''
                 }`}
               >
-                <Link to='/' onClick={() => setActiveState(0)}>
+                <Link
+                  to='/'
+                  onClick={() => dispatch(setActiveState({ value: 0 }))}
+                >
                   Home
                 </Link>
               </li>
@@ -39,7 +48,10 @@ const Header = () => {
                   activeState === 1 ? styles['header__navItem--active'] : ''
                 }`}
               >
-                <Link to='/assessments' onClick={() => setActiveState(1)}>
+                <Link
+                  to='/assessments'
+                  onClick={() => dispatch(setActiveState({ value: 1 }))}
+                >
                   Assessments
                 </Link>
               </li>
@@ -48,7 +60,10 @@ const Header = () => {
                   activeState === 2 ? styles['header__navItem--active'] : ''
                 }`}
               >
-                <Link to='/candidates' onClick={() => setActiveState(2)}>
+                <Link
+                  to='/candidates'
+                  onClick={() => dispatch(setActiveState({ value: 2 }))}
+                >
                   Candidates
                 </Link>
               </li>
@@ -65,12 +80,7 @@ const Header = () => {
           ></img>
         </div>
       </header>
-      <AppSidebar
-        open={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        activeState={activeState}
-        setActiveState={setActiveState}
-      />
+      <AppSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
     </>
   )
 }
