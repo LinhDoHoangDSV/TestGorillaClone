@@ -36,7 +36,7 @@ const LoginPage = () => {
         )
         return
       }
-
+      navigate('/')
       dispatch(setIsAuthen({ value: true }))
       dispatch(setIsLoadingFalse())
     }

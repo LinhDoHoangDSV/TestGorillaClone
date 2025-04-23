@@ -10,6 +10,7 @@ import AssessmentViewAndOwn from './assessments/view-and-own'
 import LoginPage from './auth'
 import Candidates from './candidates'
 import Login from './login'
+import Profile from './profile'
 
 const pagesData: RouterType[] = [
   {
@@ -23,6 +24,13 @@ const pagesData: RouterType[] = [
     title: 'assessments',
     path: '/assessments',
     element: <Assessment />,
+    header: <Header />,
+    footer: <Footer />
+  },
+  {
+    title: 'profile',
+    path: '/profile',
+    element: <Profile />,
     header: <Header />,
     footer: <Footer />
   },

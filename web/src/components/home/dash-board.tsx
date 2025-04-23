@@ -3,14 +3,10 @@ import styles from '../../style/components/home/dash-board.module.scss'
 import StatCard from './start-card'
 import { useNavigate } from 'react-router-dom'
 import { RootState } from '../../redux/store'
-import {
-  setActiveState,
-  setToasterAppear
-} from '../../redux/slices/common.slice'
+import { setToasterAppear } from '../../redux/slices/common.slice'
 import { useEffect, useState } from 'react'
 import { StatisticsResponse } from '../../constant/common'
 import { getUserStatistics } from '../../api/statistic.api'
-import { logout } from '../../api/auth.api'
 
 const Dashboard = () => {
   const navigate = useNavigate()
@@ -38,8 +34,6 @@ const Dashboard = () => {
     firstFetch()
   }, [])
 
-  console.log(statistics)
-
   return (
     <div className={styles.dashboard}>
       <div className={styles.dashboard__container}>
@@ -49,10 +43,8 @@ const Dashboard = () => {
           </h1>
           <button
             className={styles.dashboard__createBtn}
-            onClick={async () => {
-              await logout()
-              // dispatch(setActiveState({ value: 1 }))
-              // navigate('/assessments/new')
+            onClick={() => {
+              navigate('/assessments/new')
             }}
           >
             <span className={styles.dashboard__plusIcon}>+</span>

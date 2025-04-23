@@ -6,7 +6,6 @@ import Button from '../../ui/button'
 import { createTest } from '../../../api/tests.api'
 import { useDispatch } from 'react-redux'
 import {
-  setActiveState,
   setIsLoadingFalse,
   setIsLoadingTrue,
   setToasterAppear
@@ -88,7 +87,6 @@ const Content: FC<ContentProps> = ({ title }) => {
       setToasterAppear({ message: 'Create test successfully', type: 'success' })
     )
     dispatch(setIsLoadingFalse())
-    dispatch(setActiveState({ value: 0 }))
     navigate('/')
   }
 

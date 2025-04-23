@@ -4,7 +4,6 @@ import styles from '../../style/components/candidates/candidates.module.scss'
 import { TestResponse } from '../../constant/common'
 import { useDispatch } from 'react-redux'
 import {
-  setActiveState,
   setIsLoadingFalse,
   setIsLoadingTrue,
   setToasterAppear
@@ -101,7 +100,6 @@ const CandidatesComponent = () => {
   }
 
   const handleCreateAssessment = () => {
-    dispatch(setActiveState({ Value: 1 }))
     navigate('/assessments/new')
   }
 
@@ -131,7 +129,6 @@ const CandidatesComponent = () => {
       )
       return
     }
-    dispatch(setActiveState({ value: 1 }))
     navigate(`/assessments/grade/${candidate.id * 300003 + 200003}`)
   }
 

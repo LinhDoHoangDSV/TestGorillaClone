@@ -7,7 +7,7 @@ import { RootState } from './redux/store'
 import Loading from './components/loading'
 import Toaster from './components/ui/toast'
 import { useEffect, useMemo } from 'react'
-import { setToasterAppear } from './redux/slices/common.slice'
+import { setActiveState, setToasterAppear } from './redux/slices/common.slice'
 import { setInitialState, setIsAuthen } from './redux/slices/user.slice'
 import { getInformation } from './api/auth.api'
 
@@ -60,15 +60,24 @@ function App() {
           id: data?.id,
           first_name: data?.first_name,
           last_name: data?.last_name,
-          role_id: data?.role_id
+          role_id: data?.role_id,
+          phone_number: data?.phone_number
         })
       )
     }
 
-    if (!isAuthen) {
+    if (!isAuthen && !location.pathname.includes('assessments/attendance')) {
       checkAuth()
     }
   }, [isAuthen])
+
+  useEffect(() => {
+    if (location.pathname.includes('assessments'))
+      dispatch(setActiveState({ value: 1 }))
+    else if (location.pathname.includes('candidates'))
+      dispatch(setActiveState({ value: 2 }))
+    else if (location.pathname === '/') dispatch(setActiveState({ value: 0 }))
+  }, [location.pathname])
 
   return (
     <>
