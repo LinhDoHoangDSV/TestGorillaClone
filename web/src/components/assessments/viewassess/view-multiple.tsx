@@ -1,10 +1,18 @@
 import { type FC, useEffect, useState } from 'react'
 import styles from '../../../style/components/assessments/new/create-question.module.scss'
 import Button from '../../ui/button'
-import { QuestionDialogProps } from '../../../constant/common'
+import {
+  QuestionDialogProps,
+  UpdateQuestionDto
+} from '../../../constant/common'
 import { useDispatch } from 'react-redux'
-import { setToasterAppear } from '../../../redux/slices/common.slice'
+import {
+  setIsLoadingFalse,
+  setIsLoadingTrue,
+  setToasterAppear
+} from '../../../redux/slices/common.slice'
 import { useLocation } from 'react-router-dom'
+import { updateQuestion } from '../../../api/questions.api'
 
 interface TempType {
   id: string
@@ -50,8 +58,6 @@ const MultipleChoiceDialog: FC<QuestionDialogProps> = ({
   const [score, setScore] = useState<string>(
     rowIndex >= 0 ? questions[rowIndex].score.toString() : '5'
   )
-  console.log(options)
-  console.log('questions', questions)
 
   useEffect(() => {
     if (location.pathname.includes('assessments/new')) setIsViewPage(false)
@@ -112,7 +118,7 @@ const MultipleChoiceDialog: FC<QuestionDialogProps> = ({
     onCancel()
   }
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (!title.trim()) {
       dispatch(
         setToasterAppear({ message: 'Title must not be blank', type: 'error' })
@@ -157,6 +163,8 @@ const MultipleChoiceDialog: FC<QuestionDialogProps> = ({
       return
     }
 
+    dispatch(setIsLoadingTrue())
+
     const answers = options.map((item) => {
       return {
         option_text: item.text,
@@ -169,11 +177,24 @@ const MultipleChoiceDialog: FC<QuestionDialogProps> = ({
     questions[rowIndex].question_text = description
     questions[rowIndex].score = parseInt(score)
 
+    if (isViewPage) {
+      const data: UpdateQuestionDto = {
+        title: questions[rowIndex].title,
+        score: questions[rowIndex].score,
+        question_text: questions[rowIndex].question_text
+      }
+
+      await updateQuestion(questions[rowIndex].id, data)
+    }
+
     setQuestions(questions)
 
     dispatch(setToasterAppear({ message: 'Question updated', type: 'success' }))
+    dispatch(setIsLoadingFalse())
     onCancel()
   }
+
+  console.log('options', options)
 
   return (
     <div className={styles['question-dialog__overlay']}>

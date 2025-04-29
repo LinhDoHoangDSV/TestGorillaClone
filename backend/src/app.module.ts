@@ -20,6 +20,8 @@ import { UserAnswersModule } from './features/user-answers/user-answers.module';
 import { MailServiceModule } from './features/mail-service/mail-service.module';
 import { AuthModule } from './features/auth/auth.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { InitialCodesModule } from './features/initial-codes/initial-codes.module';
+import { TestCasesModule } from './features/test-cases/test-cases.module';
 
 @Module({
   imports: [
@@ -50,6 +52,8 @@ import { ScheduleModule } from '@nestjs/schedule';
     UserAnswersModule,
     MailServiceModule,
     AuthModule,
+    InitialCodesModule,
+    TestCasesModule,
   ],
   controllers: [AppController],
   providers: [

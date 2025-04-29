@@ -1,7 +1,13 @@
 import { useState, type FC } from 'react'
 import styles from '../../../style/components/assessments/new/content.module.scss'
 import QuestionType from './question-type'
-import { ContentProps, Question } from '../../../constant/common'
+import {
+  ContentProps,
+  CreateInitialCodeDto,
+  CreateTestCaseDto,
+  Question,
+  TestCase
+} from '../../../constant/common'
 import Button from '../../ui/button'
 import { createTest } from '../../../api/tests.api'
 import { useDispatch } from 'react-redux'
@@ -18,6 +24,8 @@ import {
 import { createQuestion } from '../../../api/questions.api'
 import { createAnswer } from '../../../api/answers.api'
 import { useNavigate } from 'react-router-dom'
+import { createTestCase } from '../../../api/test-case.api'
+import { createInitialCode } from '../../../api/initial-code.api'
 
 const Content: FC<ContentProps> = ({ title }) => {
   const [totalTime, setTotalTime] = useState<string>('10')
@@ -26,6 +34,7 @@ const Content: FC<ContentProps> = ({ title }) => {
   const [description, setDescription] = useState<string>('')
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  console.log(questions)
 
   const handleCreate = async () => {
     if (!+totalTime) {
@@ -70,7 +79,7 @@ const Content: FC<ContentProps> = ({ title }) => {
 
       const newQuestion: any = await createQuestion(createQuestionDto)
 
-      if (i.answers) {
+      if (i.question_type !== 'coding' && i.answers) {
         for (const j of i.answers) {
           const createAnserDto: CreateAnswerDto = {
             is_correct: j.is_correct,
@@ -80,6 +89,27 @@ const Content: FC<ContentProps> = ({ title }) => {
 
           await createAnswer(createAnserDto)
         }
+      }
+
+      if (i.question_type === 'coding') {
+        for (const testcase of i.testcases) {
+          const createTestCaseDto: CreateTestCaseDto = {
+            expected_output: testcase.expected_output,
+            input: testcase.input,
+            question_id: newQuestion?.data?.data?.id
+          }
+
+          await createTestCase(createTestCaseDto)
+        }
+
+        const createInitialCodeDto: CreateInitialCodeDto = {
+          description: i.initial_code?.description,
+          initial_code: i.initial_code?.initial_code,
+          language_id: i.initial_code?.language_id,
+          question_id: newQuestion?.data?.data?.id
+        }
+
+        await createInitialCode(createInitialCodeDto)
       }
     }
 

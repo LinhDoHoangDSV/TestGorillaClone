@@ -96,6 +96,51 @@ export interface TestAssignment {
   status: string
 }
 
+export interface CreateTestCaseDto {
+  question_id: number
+  input: string
+  expected_output: string
+}
+
+export interface FindTestCaseByCriterias {
+  id?: number
+  question_id?: number
+  input?: string
+  expected_output?: string
+}
+
+export interface CreateInitialCodeDto {
+  question_id: number
+  language_id: number
+  description: string
+  initial_code: string
+}
+
+export interface FindInitialCodeCriteriasDto {
+  question_id?: number
+  language_id?: number
+  description?: string
+  initial_code?: string
+}
+
+export interface TestCase {
+  id?: number
+  input?: string
+  expected_output?: string
+}
+
+export enum LanguageID {
+  JS = 102,
+  PY = 109
+}
+
+export interface InitialCode {
+  id?: number
+  language_id?: number
+  description?: string
+  initial_code?: string
+}
+
 export interface Question {
   id: number
   test_id: number
@@ -104,6 +149,8 @@ export interface Question {
   score: number
   title: string
   answers?: AnswerType[]
+  testcases?: TestCase[]
+  initial_code?: InitialCode
 }
 
 export interface UpdateQuestionDto {

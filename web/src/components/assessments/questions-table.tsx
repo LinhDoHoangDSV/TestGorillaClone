@@ -17,6 +17,7 @@ const QuestionTable: FC<QuestionProps> = ({
   const getTypeName = (question_type: string) => {
     if (question_type === 'essay') return 'Essay'
     else if (question_type === 'multiple_choice') return 'Multiple choice'
+    else if (question_type === 'coding') return 'Coding'
   }
 
   return (

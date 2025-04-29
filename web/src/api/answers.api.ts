@@ -57,3 +57,14 @@ export const getAllAnswerByCriteria = async (
     return error
   }
 }
+
+export const deleteAnswer = async (id: number) => {
+  try {
+    const result = await axiosInstance.delete(`/answers/${id}`)
+    console.log(result)
+    return result
+  } catch (error) {
+    console.log(error)
+    return error
+  }
+}

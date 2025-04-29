@@ -71,12 +71,12 @@ axiosInstance.interceptors.response.use(
           return Promise.reject(refreshError)
         }
       } else {
-        // return new Promise((resolve) => {
-        //   console.log('Queueing request:', originalRequest.url)
-        //   subscribeTokenRefresh(() => {
-        //     resolve(axiosInstance(originalRequest))
-        //   })
-        // })
+        return new Promise((resolve) => {
+          console.log('Queueing request:', originalRequest.url)
+          subscribeTokenRefresh(() => {
+            resolve(axiosInstance(originalRequest))
+          })
+        })
         return Promise.reject(error)
       }
     }

@@ -24,6 +24,7 @@ import { FindUserAnswersCriteriaDto } from './dto/find-user-answer-criteria.dto'
 import { AuthGuard } from 'src/common/guard/jwt_auth.guard';
 import RoleGuard from 'src/common/guard/role.guard';
 import { Roles } from 'src/common/constant';
+import { SubmitCodeDto } from './dto/submit-code.dto';
 
 @Controller('user-answers')
 export class UserAnswersController {
@@ -130,6 +131,33 @@ export class UserAnswersController {
         this.response.initResponse(
           false,
           'System error while creating user_answer',
+          null,
+        );
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(this.response);
+      }
+    }
+  }
+
+  @Post('/submit')
+  async submitCode(@Body() submitCodeDto: SubmitCodeDto, @Res() res) {
+    try {
+      const result = await this.userAnswersService.submitCode(submitCodeDto);
+      const result2 = await this.userAnswersService.getResultCode(
+        result?.token,
+      );
+      console.log(result2);
+      this.logger.debug('Submit code successfully');
+      this.response.initResponse(true, 'Submit code successfully', result2);
+      return res.status(HttpStatus.OK).json(this.response);
+    } catch (error) {
+      this.logger.error('Error while submitting code', error?.stack);
+      if (error instanceof HttpException) {
+        this.response.initResponse(false, error?.message, null);
+        return res.status(error?.getStatus()).json(this.response);
+      } else {
+        this.response.initResponse(
+          false,
+          'System error while submitting code',
           null,
         );
         return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(this.response);

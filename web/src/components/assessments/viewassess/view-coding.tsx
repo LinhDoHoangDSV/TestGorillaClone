@@ -1,15 +1,16 @@
-import { type FC, useState } from 'react'
-import styles from '../../../style/components/assessments/new/create-question.module.scss'
+import { FC, useState } from 'react'
 import {
   InitialCode,
   LanguageID,
-  type QuestionDialogProps
+  QuestionDialogProps
 } from '../../../constant/common'
-import Button from '../../ui/button'
 import { useDispatch } from 'react-redux'
 import { setToasterAppear } from '../../../redux/slices/common.slice'
+import Button from '../../ui/button'
+import styles from '../../../style/components/assessments/new/create-question.module.scss'
 
 const CodingQuestionDialog: FC<QuestionDialogProps> = ({
+  type,
   onCancel,
   setQuestions,
   questions,
@@ -44,6 +45,8 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
           language_id: LanguageID.JS
         }
   )
+
+  console.log(questions)
 
   console.log('title', title)
   console.log('description', description)
@@ -233,6 +236,7 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
                 type='text'
                 className={styles['question-dialog__input']}
                 value={title}
+                disabled={type === 'view'}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder='Enter question title'
                 required
@@ -248,6 +252,7 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
               </label>
               <textarea
                 id='description'
+                disabled={type === 'view'}
                 className={styles['question-dialog__textarea']}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -267,6 +272,7 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
               <input
                 id='score'
                 type='text'
+                disabled={type === 'view'}
                 className={styles['question-dialog__input']}
                 value={score}
                 onChange={(e) => setScore(e.target.value)}
@@ -282,11 +288,12 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
             </h3>
             <div className={styles['question-dialog__form-group']}>
               <textarea
-                id={`starterCode-${initialCodes.language_id}`}
+                id={`starterCode`}
                 className={`${styles['question-dialog__textarea']} ${styles['question-dialog__textarea--code']}`}
                 value={initialCodes.initial_code}
                 onChange={(e) => handleStarterCodeChange(e.target.value)}
                 placeholder='// Provide JavaScript starter code for the candidate'
+                disabled={type === 'view'}
                 rows={6}
               />
             </div>
@@ -313,7 +320,7 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
                     type='button'
                     onClick={() => removeTestCase(testCase.id)}
                     className={styles['question-dialog__remove-button']}
-                    disabled={testCases.length <= 1}
+                    disabled={testCases.length <= 1 || type === 'view'}
                   >
                     <svg
                       viewBox='0 0 24 24'
@@ -338,6 +345,7 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
                       Input
                     </label>
                     <textarea
+                      disabled={type === 'view'}
                       id={`input-${testCase.id}`}
                       className={styles['question-dialog__textarea']}
                       value={testCase.input}
@@ -362,6 +370,7 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
                     </label>
                     <textarea
                       id={`output-${testCase.id}`}
+                      disabled={type === 'view'}
                       className={styles['question-dialog__textarea']}
                       value={testCase.expected_output}
                       onChange={(e) =>
@@ -382,6 +391,7 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
             <button
               type='button'
               onClick={addTestCase}
+              disabled={type === 'view'}
               className={styles['question-dialog__add-button']}
             >
               <svg
@@ -402,6 +412,7 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
 
         <div className={styles['question-dialog__footer']}>
           <Button
+            disabled={type === 'view'}
             variant='secondary'
             onClick={rowIndex >= 0 ? handleDelete : onCancel}
           >
@@ -409,7 +420,7 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
           </Button>
           <Button
             variant='primary'
-            disabled={!title.trim()}
+            disabled={!title.trim() || type === 'view'}
             onClick={rowIndex >= 0 ? handleUpdate : handleSave}
           >
             {rowIndex >= 0 ? 'Update' : 'Save'}
