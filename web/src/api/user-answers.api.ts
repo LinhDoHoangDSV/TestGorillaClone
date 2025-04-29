@@ -46,6 +46,7 @@
 import axiosInstance from './axios.instance'
 import {
   CreateUserAnser,
+  SubmitCodeDto,
   UserAnserCriterias,
   UserAnswerUpdate
 } from '../constant/api'
@@ -75,6 +76,28 @@ export const getUserAnswerByCriterias = async (data: UserAnserCriterias) => {
 export const updateUserAnswer = async (id: number, data: UserAnswerUpdate) => {
   try {
     const result = await axiosInstance.patch(`/user-answers/${id}`, data)
+    console.log(result)
+    return result
+  } catch (error) {
+    console.log(error)
+    return error
+  }
+}
+
+export const submitCode = async (data: SubmitCodeDto) => {
+  try {
+    const result = await axiosInstance.post(`/user-answers/submit`, data)
+    console.log(result)
+    return result
+  } catch (error) {
+    console.log(error)
+    return error
+  }
+}
+
+export const getCodeResult = async (token: string) => {
+  try {
+    const result = await axiosInstance.get(`/user-answers/code-result/${token}`)
     console.log(result)
     return result
   } catch (error) {

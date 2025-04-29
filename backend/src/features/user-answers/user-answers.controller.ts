@@ -142,12 +142,8 @@ export class UserAnswersController {
   async submitCode(@Body() submitCodeDto: SubmitCodeDto, @Res() res) {
     try {
       const result = await this.userAnswersService.submitCode(submitCodeDto);
-      const result2 = await this.userAnswersService.getResultCode(
-        result?.token,
-      );
-      console.log(result2);
       this.logger.debug('Submit code successfully');
-      this.response.initResponse(true, 'Submit code successfully', result2);
+      this.response.initResponse(true, 'Submit code successfully', result);
       return res.status(HttpStatus.OK).json(this.response);
     } catch (error) {
       this.logger.error('Error while submitting code', error?.stack);
@@ -158,6 +154,29 @@ export class UserAnswersController {
         this.response.initResponse(
           false,
           'System error while submitting code',
+          null,
+        );
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(this.response);
+      }
+    }
+  }
+
+  @Get('/code-result/:token')
+  async getCodeResult(@Param('token') token: string, @Res() res) {
+    try {
+      const result = await this.userAnswersService.getCodeResult(token);
+      this.logger.debug('Get code result successfully');
+      this.response.initResponse(true, 'Get code result successfully', result);
+      return res.status(HttpStatus.OK).json(this.response);
+    } catch (error) {
+      this.logger.error('Error while getting code result', error?.stack);
+      if (error instanceof HttpException) {
+        this.response.initResponse(false, error?.message, null);
+        return res.status(error?.getStatus()).json(this.response);
+      } else {
+        this.response.initResponse(
+          false,
+          'System error while getting code result',
           null,
         );
         return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(this.response);

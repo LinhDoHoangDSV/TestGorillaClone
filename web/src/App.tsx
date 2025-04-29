@@ -1,4 +1,4 @@
-import { matchPath, useLocation, useNavigate } from 'react-router-dom'
+import { matchPath, useLocation } from 'react-router-dom'
 import Router from './pages/router'
 import pagesData from './pages/page-data'
 

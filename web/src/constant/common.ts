@@ -229,6 +229,8 @@ export interface QuestionResponse {
   score: number
   title: string
   answers?: AnswerResponse[]
+  testcases?: TestCase[]
+  initial_code?: InitialCode
 }
 
 export interface TestResponse {

@@ -134,7 +134,7 @@ export class UserAnswersService {
     }
   }
 
-  async getResultCode(token: string) {
+  async getCodeResult(token: string) {
     const options = {
       method: 'GET',
       url: `https://judge0-ce.p.rapidapi.com/submissions/${token}`,

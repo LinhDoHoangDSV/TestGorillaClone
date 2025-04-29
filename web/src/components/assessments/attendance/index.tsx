@@ -19,6 +19,8 @@ import {
 import { getTestById } from '../../../api/tests.api'
 import { getAllQuestionsByCriteria } from '../../../api/questions.api'
 import { getAllAnswerByCriteria } from '../../../api/answers.api'
+import { findInitialCodeByCriteria } from '../../../api/initial-code.api'
+import { findTestCaseByCriteria } from '../../../api/test-case.api'
 
 function TakeAssessmentComp() {
   const location = useLocation()
@@ -115,6 +117,15 @@ function TakeAssessmentComp() {
           }
 
           questions[index].answers = answers?.data?.data
+        } else if (questions[index].question_type === 'coding') {
+          const initialCode = await findInitialCodeByCriteria({
+            question_id: questions[index].id
+          })
+          questions[index].initial_code = initialCode?.data?.data[0]
+          const testcases = await findTestCaseByCriteria({
+            question_id: questions[index].id
+          })
+          questions[index].testcases = testcases?.data?.data
         }
       }
 

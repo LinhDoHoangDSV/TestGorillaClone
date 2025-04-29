@@ -83,3 +83,8 @@ export interface UserAnswerUpdate {
   answer_text?: string
   score?: number
 }
+
+export interface SubmitCodeDto {
+  code: string
+  languageId: number
+}

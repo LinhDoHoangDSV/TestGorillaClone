@@ -18,7 +18,8 @@ import {
   updateUserAnswer
 } from '../../../api/user-answers.api'
 import { getAllAnswerByCriteria } from '../../../api/answers.api'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
+import GradeCoding from './grade-coding'
 
 interface Answer {
   id: number
@@ -49,6 +50,7 @@ interface QuesionsInterface {
 const EssayGrading = () => {
   const dispatch = useDispatch()
   const location = useLocation()
+  const navigate = useNavigate()
   const [questions, setQuestions] = useState<QuesionsInterface[]>([])
   const [isCorrectId, setIsCorrectId] = useState<boolean>(true)
   const [marks, setMarks] = useState<CandidateAnswer>([])
@@ -146,6 +148,10 @@ const EssayGrading = () => {
     return differences
   }
 
+  const handleExit = () => {
+    navigate('/candidates')
+  }
+
   const handleSubmit = async () => {
     dispatch(setIsLoadingTrue())
     const differences = compareMarks()
@@ -185,16 +191,21 @@ const EssayGrading = () => {
           </p>
           {thisQuestion.question_type === 'multiple_choice' ? (
             <GradeMultiple question={thisQuestion} />
-          ) : (
+          ) : thisQuestion.question_type === 'essay' ? (
             <GradeEssay
               question={thisQuestion}
               marks={marks}
               setMarks={setMarks}
             />
+          ) : (
+            <GradeCoding question={thisQuestion} />
           )}
         </div>
       ))}
       <div className={styles.grading__submit}>
+        <button className={styles.grading__submitButton} onClick={handleExit}>
+          Exit
+        </button>
         <button className={styles.grading__submitButton} onClick={handleSubmit}>
           Done
         </button>
