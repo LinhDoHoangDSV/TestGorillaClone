@@ -9,6 +9,8 @@ import {
   Res,
   HttpStatus,
   HttpException,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { StatisticsService } from './statistics.service';
 import { CreateStatisticDto } from './dto/create-statistic.dto';
@@ -17,6 +19,9 @@ import { LoggerService } from '../logger/logger.service';
 import { Response } from '../response/response';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { FindStatisticCriteriaDto } from './dto/find-statistic-criteria.dto';
+import { AuthGuard } from 'src/common/guard/jwt_auth.guard';
+import RoleGuard from 'src/common/guard/role.guard';
+import { RequestWithUserDto, Roles } from 'src/common/constant';
 
 @Controller('statistics')
 export class StatisticsController {
@@ -298,10 +303,44 @@ export class StatisticsController {
       },
     },
   })
+  @UseGuards(RoleGuard(Roles.HR))
+  @UseGuards(AuthGuard)
   @Get(':id')
-  async findOne(@Param('id') id: string, @Res() res) {
+  async findOne(@Res() res, @Param('id') id: string) {
     try {
       const statistic = await this.statisticsService.findOne(+id);
+      this.logger.debug('Finding statistic successfully');
+      this.response.initResponse(
+        true,
+        'Finding statistic successfully',
+        statistic,
+      );
+      return res.status(HttpStatus.OK).json(this.response);
+    } catch (error) {
+      this.logger.error('Error while finding statistic', error?.stack);
+      if (error instanceof HttpException) {
+        this.response.initResponse(false, error?.message, null);
+        return res.status(error?.getStatus()).json(this.response);
+      } else {
+        this.response.initResponse(
+          false,
+          'System error while finding statistic',
+          null,
+        );
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(this.response);
+      }
+    }
+  }
+
+  @UseGuards(RoleGuard(Roles.HR))
+  @UseGuards(AuthGuard)
+  @Get('/one/own')
+  async findOneByUser(@Res() res, @Req() request: RequestWithUserDto) {
+    const { user } = request;
+    try {
+      const [statistic] = await this.statisticsService.findByCriterias({
+        user_id: user?.userId,
+      });
       this.logger.debug('Finding statistic successfully');
       this.response.initResponse(
         true,

@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { ChangeEvent, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import type { TestEntity } from '../../constant/common'
-import { getAllTests } from '../../api/tests.api'
+import { getAllOwnTests } from '../../api/tests.api'
 import {
   setIsLoadingFalse,
   setIsLoadingTrue,
@@ -19,7 +19,7 @@ const AssessmentsComponent = () => {
   useEffect(() => {
     const firstFetch = async () => {
       dispatch(setIsLoadingTrue())
-      const result = await getAllTests()
+      const result = await getAllOwnTests()
 
       if (result?.status > 299) {
         dispatch(
@@ -85,7 +85,7 @@ const AssessmentsComponent = () => {
         <table className={styles.assessments__table}>
           <thead>
             <tr>
-              <th>Index</th>
+              <th>#</th>
               <th>Name</th>
               <th>Total Time</th>
               <th>Public</th>

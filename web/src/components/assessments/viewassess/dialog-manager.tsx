@@ -2,6 +2,7 @@ import type { FC } from 'react'
 import EssayQuestionDialog from './view-essay'
 import MultipleChoiceDialog from './view-multiple'
 import { Question } from '../../../constant/common'
+import CodingQuestionDialog from './view-coding'
 
 interface QuestionDialogManagerProps {
   type: string
@@ -34,6 +35,16 @@ const ViewDialogManager: FC<QuestionDialogManagerProps> = ({
     case 'multiple_choice':
       return (
         <MultipleChoiceDialog
+          type={type}
+          onCancel={onCancel}
+          setQuestions={setQuestions}
+          questions={questions}
+          rowIndex={rowIndex}
+        />
+      )
+    case 'coding':
+      return (
+        <CodingQuestionDialog
           type={type}
           onCancel={onCancel}
           setQuestions={setQuestions}

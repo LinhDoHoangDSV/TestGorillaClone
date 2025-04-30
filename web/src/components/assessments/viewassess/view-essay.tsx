@@ -38,7 +38,6 @@ const EssayQuestionDialog: FC<QuestionDialogProps> = ({
     setScore(questions[rowIndex].score.toString())
   }, [location.pathname])
 
-  // Update question
   const handleUpdate = async () => {
     if (!question?.title) {
       dispatch(
@@ -83,7 +82,6 @@ const EssayQuestionDialog: FC<QuestionDialogProps> = ({
       }
 
       await updateQuestion(questions[rowIndex].id, data)
-      console.log('oke')
     }
 
     setQuestions(questions)

@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { DataSource, EntityManager } from 'typeorm';
 import { User } from './entities/user.entity';
 import { FindUserCriteriaDto } from './dto/find-user-criteria.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -13,20 +14,24 @@ export class UsersService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User | null> {
+  async create(
+    createUserDto: CreateUserDto,
+    manager?: EntityManager,
+  ): Promise<User> {
     const {
       role_id,
       email,
-      first_name,
-      last_name,
-      phone_number,
+      first_name = '',
+      last_name = '',
+      phone_number = '',
       refresh_token = null,
     } = createUserDto;
+
     const query = `
-          INSERT INTO users (role_id, email, first_name, last_name,phone_number, refresh_token)
-          VALUES ($1, $2, $3, $4, $5, $6)
-          RETURNING *;
-        `;
+      INSERT INTO users (role_id, email, first_name, last_name, phone_number, refresh_token)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *;
+    `;
     const values = [
       role_id,
       email,
@@ -35,9 +40,71 @@ export class UsersService {
       phone_number,
       refresh_token,
     ];
-    const [result] = await this.dataSource.query(query, values);
-    return result;
+
+    const [result] = manager
+      ? await manager.query(query, values)
+      : await this.dataSource.query(query, values);
+
+    return result as User;
   }
+
+  //   async create(createUserDto: CreateUserDto): Promise<User | null> {
+  //     const {
+  //       role_id,
+  //       email,
+  //       first_name = '',
+  //       last_name = '',
+  //       phone_number = '',
+  //       refresh_token = null,
+  //     } = createUserDto;
+  //     const query = `
+  //           INSERT INTO users (role_id, email, first_name, last_name,phone_number, refresh_token)
+  //           VALUES ($1, $2, $3, $4, $5, $6)
+  //           RETURNING *;
+  //         `;
+  //     const values = [
+  //       role_id,
+  //       email,
+  //       first_name,
+  //       last_name,
+  //       phone_number,
+  //       refresh_token,
+  //     ];
+  //     const [result] = await this.dataSource.query(query, values);
+  //     return result;
+  //   }
+
+  //   async createWithTransaction(createUserDto: CreateUserDto, manager?: EntityManager): Promise<User> {
+  //     const {
+  //       role_id,
+  //       email,
+  //       first_name,
+  //       last_name,
+  //       phone_number,
+  //       refresh_token = null,
+  //     } = createUserDto;
+
+  //     const user = manager
+  //       ? manager.create(User, {
+  //           role_id,
+  //           email,
+  //           first_name,
+  //           last_name,
+  //           phone_number,
+  //           refresh_token,
+  //         })
+  //       : this.userRepository.create({
+  //           role_id,
+  //           email,
+  //           first_name,
+  //           last_name,
+  //           phone_number,
+  //           refresh_token,
+  //         });
+
+  //     return manager ? manager.save(user) : this.userRepository.save(user);
+  //   }
+  // }
 
   async findByCriterias(criteria: FindUserCriteriaDto): Promise<User[]> {
     const conditions: string[] = [];
@@ -98,11 +165,33 @@ export class UsersService {
     return result || null;
   }
 
+  async setCurrentRefreshToken(token: string, id: number) {
+    const currentRefreshToken = await bcrypt.hash(token, 10);
+    await this.update(id, { refresh_token: currentRefreshToken });
+  }
+
   async remove(id: number): Promise<void> {
     const query = `
           DELETE FROM users
           WHERE id = $1;
         `;
     await this.dataSource.query(query, [id]);
+  }
+
+  async getUserIfRefreshTokenMatches(token: string, userId: number) {
+    const user = await this.findOne(userId);
+
+    if (!user) {
+      return null;
+    }
+
+    const isRefreshTokenMatching = await bcrypt.compare(
+      token,
+      user.refresh_token,
+    );
+
+    if (isRefreshTokenMatching) {
+      return user;
+    }
   }
 }

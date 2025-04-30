@@ -37,14 +37,20 @@ export class AnswersService {
     const whereClause =
       conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
-    const query = `SELECT * FROM answers ${whereClause}`;
+    const query = `SELECT * FROM answers
+    ${whereClause}
+    ORDER BY id;
+    `;
 
     const result = await this.dataSource.query(query, values);
     return result;
   }
 
   async findAll(): Promise<Answer[]> {
-    const query = `SELECT * FROM answers;`;
+    const query = `
+    SELECT * FROM answers
+    ORDER BY id;
+    `;
     const result = await this.dataSource.query(query);
     return result;
   }

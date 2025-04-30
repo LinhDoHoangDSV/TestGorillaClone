@@ -10,6 +10,7 @@ import {
   HttpStatus,
   HttpException,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { AnswersService } from './answers.service';
 import { CreateAnswerDto } from './dto/create-answer.dto';
@@ -25,6 +26,9 @@ import {
 } from '@nestjs/swagger';
 import { QuestionsService } from '../questions/questions.service';
 import { FindCriteriasDto } from './dto/find-criterias.dto';
+import { AuthGuard } from 'src/common/guard/jwt_auth.guard';
+import RoleGuard from 'src/common/guard/role.guard';
+import { Roles } from 'src/common/constant';
 
 @ApiTags('Answers')
 @Controller('answers')
@@ -97,6 +101,8 @@ export class AnswersController {
       },
     },
   })
+  @UseGuards(RoleGuard(Roles.HR))
+  @UseGuards(AuthGuard)
   @Post()
   async create(@Body() createAnswerDto: CreateAnswerDto, @Res() res) {
     try {

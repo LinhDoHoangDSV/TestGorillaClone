@@ -1,82 +1,204 @@
 import { type FC, useState } from 'react'
 import styles from '../../../style/components/assessments/new/create-question.module.scss'
+import {
+  InitialCode,
+  LanguageID,
+  type QuestionDialogProps
+} from '../../../constant/common'
 import Button from '../../ui/button'
-import { QuestionDialogProps } from '../../../constant/common'
+import { useDispatch } from 'react-redux'
+import { setToasterAppear } from '../../../redux/slices/common.slice'
 
 const CodingQuestionDialog: FC<QuestionDialogProps> = ({
-  // onSave,
-  onCancel
+  onCancel,
+  setQuestions,
+  questions,
+  rowIndex
 }) => {
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [timeLimit, setTimeLimit] = useState(30) // Default 30 minutes
-  const [programmingLanguage, setProgrammingLanguage] = useState('javascript')
-  const [starterCode, setStarterCode] = useState('')
-  const [testCases, setTestCases] = useState([
-    { id: '1', input: '', expectedOutput: '', isHidden: false }
-  ])
-  const [evaluationCriteria, setEvaluationCriteria] = useState('')
+  const dispatch = useDispatch()
+  const [title, setTitle] = useState<string>(
+    rowIndex >= 0 ? questions[rowIndex]?.title : ''
+  )
+  const [description, setDescription] = useState<string>(
+    rowIndex >= 0 ? questions[rowIndex]?.question_text : ''
+  )
+  const [score, setScore] = useState<string>(
+    rowIndex >= 0 ? questions[rowIndex]?.score.toString() : '5'
+  )
+  const [counterTestCases, setCounterTestCases] = useState<number>(
+    rowIndex >= 0 && questions[rowIndex]?.testcases?.length
+      ? Math.max(...questions[rowIndex].testcases.map((item) => item.id)) + 1
+      : 1
+  )
+  const [testCases, setTestCases] = useState(
+    rowIndex >= 0
+      ? questions[rowIndex]?.testcases
+      : [{ id: 0, input: '', expected_output: '' }]
+  )
+  const [initialCodes, setInitialCodes] = useState<InitialCode>(
+    rowIndex >= 0
+      ? questions[rowIndex]?.initial_code
+      : {
+          description: '',
+          initial_code: '',
+          language_id: LanguageID.JS
+        }
+  )
 
-  const languageOptions = [
-    { value: 'javascript', label: 'JavaScript' },
-    { value: 'python', label: 'Python' },
-    { value: 'java', label: 'Java' },
-    { value: 'csharp', label: 'C#' },
-    { value: 'cpp', label: 'C++' },
-    { value: 'php', label: 'PHP' },
-    { value: 'ruby', label: 'Ruby' },
-    { value: 'swift', label: 'Swift' },
-    { value: 'go', label: 'Go' }
-  ]
+  console.log('title', title)
+  console.log('description', description)
+  console.log('initialCodes', initialCodes)
+  console.log('testCases', testCases)
+
+  const handleDelete = () => {
+    if (rowIndex >= 0) {
+      setQuestions(questions.filter((_, index) => index !== rowIndex))
+      dispatch(
+        setToasterAppear({ message: 'Question deleted', type: 'success' })
+      )
+      onCancel()
+    }
+  }
+
+  const handleUpdate = () => {
+    if (!title.trim()) {
+      dispatch(
+        setToasterAppear({ message: 'Title must not be blank', type: 'error' })
+      )
+      return
+    }
+
+    if (!description.trim()) {
+      dispatch(
+        setToasterAppear({
+          message: 'Description must not be blank',
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    if (!+score) {
+      dispatch(
+        setToasterAppear({ message: 'Score must be a number', type: 'error' })
+      )
+      return
+    }
+
+    if (testCases?.length === 0) {
+      dispatch(
+        setToasterAppear({
+          message: 'You must provide some testcases',
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    const updatedQuestions = [...questions]
+    updatedQuestions[rowIndex] = {
+      question_type: 'coding',
+      question_text: description,
+      title,
+      score: parseInt(score),
+      testcases: testCases,
+      initial_code: initialCodes
+    }
+
+    setQuestions(updatedQuestions)
+    dispatch(setToasterAppear({ message: 'Question updated', type: 'success' }))
+    onCancel()
+  }
+
+  const handleSave = () => {
+    if (!title.trim()) {
+      dispatch(
+        setToasterAppear({ message: 'Title must not be blank', type: 'error' })
+      )
+      return
+    }
+
+    if (!description.trim()) {
+      dispatch(
+        setToasterAppear({
+          message: 'Description must not be blank',
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    if (!+score) {
+      dispatch(
+        setToasterAppear({ message: 'Score must be a number', type: 'error' })
+      )
+      return
+    }
+
+    if (testCases?.length === 0) {
+      dispatch(
+        setToasterAppear({
+          message: 'You must provide some testcases',
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    setQuestions([
+      ...questions,
+      {
+        question_type: 'coding',
+        question_text: description,
+        title,
+        score: parseInt(score),
+        testcases: testCases,
+        initial_code: initialCodes
+      }
+    ])
+
+    dispatch(setToasterAppear({ message: 'Question added', type: 'success' }))
+    onCancel()
+  }
+
+  const handleStarterCodeChange = (code: string) => {
+    setInitialCodes((prev) => ({
+      ...prev,
+      initial_code: code
+    }))
+  }
 
   const handleTestCaseChange = (
-    id: string,
-    field: 'input' | 'expectedOutput' | 'isHidden',
-    value: string | boolean
+    id: number,
+    field: 'input' | 'expected_output',
+    value: string
   ) => {
-    setTestCases(
-      testCases.map((testCase) =>
+    setTestCases((prev) =>
+      prev.map((testCase) =>
         testCase.id === id ? { ...testCase, [field]: value } : testCase
       )
     )
   }
 
   const addTestCase = () => {
-    const newId = (testCases.length + 1).toString()
-    setTestCases([
-      ...testCases,
-      { id: newId, input: '', expectedOutput: '', isHidden: false }
+    setTestCases((prev) => [
+      ...prev,
+      { id: counterTestCases, input: '', expected_output: '' }
     ])
+    setCounterTestCases((prev) => prev + 1)
   }
 
-  const removeTestCase = (id: string) => {
-    if (testCases.length <= 1) return // Keep at least one test case
-    setTestCases(testCases.filter((testCase) => testCase.id !== id))
+  const removeTestCase = (id: number) => {
+    if (testCases.length <= 1) return
+    setTestCases((prev) => prev.filter((testCase) => testCase.id !== id))
   }
-
-  // const handleSave = () => {
-  //   if (!title.trim()) {
-  //     return // Validate required fields
-  //   }
-
-  //   onSave({
-  //     type: 'coding',
-  //     title,
-  //     description,
-  //     timeLimit,
-  //     programmingLanguage,
-  //     starterCode,
-  //     testCases,
-  //     evaluationCriteria
-  //   })
-  // }
 
   return (
     <div className={styles['question-dialog__overlay']}>
       <div className={styles['question-dialog']}>
         <div className={styles['question-dialog__header']}>
           <h2 className={styles['question-dialog__title']}>
-            New Coding Question
+            {rowIndex >= 0 ? 'Edit Coding Question' : 'New Coding Question'}
           </h2>
           <button
             className={styles['question-dialog__close-button']}
@@ -98,9 +220,6 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
 
         <div className={styles['question-dialog__content']}>
           <div className={styles['question-dialog__section']}>
-            <h3 className={styles['question-dialog__section-title']}>
-              Question
-            </h3>
             <div className={styles['question-dialog__form-group']}>
               <label
                 className={styles['question-dialog__label']}
@@ -136,63 +255,38 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
                 rows={5}
               />
             </div>
+
+            <div className={styles['question-dialog__form-group']}>
+              <label
+                className={styles['question-dialog__label']}
+                htmlFor='score'
+              >
+                Score{' '}
+                <span className={styles['question-dialog__required']}>*</span>
+              </label>
+              <input
+                id='score'
+                type='text'
+                className={styles['question-dialog__input']}
+                value={score}
+                onChange={(e) => setScore(e.target.value)}
+                placeholder='Enter question score'
+                required
+              />
+            </div>
           </div>
 
           <div className={styles['question-dialog__section']}>
             <h3 className={styles['question-dialog__section-title']}>
-              Settings
+              JavaScript Starter Code
             </h3>
             <div className={styles['question-dialog__form-group']}>
-              <label
-                className={styles['question-dialog__label']}
-                htmlFor='timeLimit'
-              >
-                Time limit (minutes)
-              </label>
-              <input
-                id='timeLimit'
-                type='number'
-                className={styles['question-dialog__input']}
-                value={timeLimit}
-                onChange={(e) => setTimeLimit(Number(e.target.value))}
-                min={5}
-              />
-            </div>
-
-            <div className={styles['question-dialog__form-group']}>
-              <label
-                className={styles['question-dialog__label']}
-                htmlFor='programmingLanguage'
-              >
-                Programming language
-              </label>
-              <select
-                id='programmingLanguage'
-                className={styles['question-dialog__select']}
-                value={programmingLanguage}
-                onChange={(e) => setProgrammingLanguage(e.target.value)}
-              >
-                {languageOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles['question-dialog__form-group']}>
-              <label
-                className={styles['question-dialog__label']}
-                htmlFor='starterCode'
-              >
-                Starter code (optional)
-              </label>
               <textarea
-                id='starterCode'
+                id={`starterCode-${initialCodes.language_id}`}
                 className={`${styles['question-dialog__textarea']} ${styles['question-dialog__textarea--code']}`}
-                value={starterCode}
-                onChange={(e) => setStarterCode(e.target.value)}
-                placeholder='// Provide starter code for the candidate'
+                value={initialCodes.initial_code}
+                onChange={(e) => handleStarterCodeChange(e.target.value)}
+                placeholder='// Provide JavaScript starter code for the candidate'
                 rows={6}
               />
             </div>
@@ -269,39 +363,17 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
                     <textarea
                       id={`output-${testCase.id}`}
                       className={styles['question-dialog__textarea']}
-                      value={testCase.expectedOutput}
+                      value={testCase.expected_output}
                       onChange={(e) =>
                         handleTestCaseChange(
                           testCase.id,
-                          'expectedOutput',
+                          'expected_output',
                           e.target.value
                         )
                       }
                       placeholder='Enter expected output'
                       rows={2}
                     />
-                  </div>
-
-                  <div className={styles['question-dialog__checkbox-group']}>
-                    <input
-                      type='checkbox'
-                      id={`hidden-${testCase.id}`}
-                      checked={testCase.isHidden}
-                      onChange={(e) =>
-                        handleTestCaseChange(
-                          testCase.id,
-                          'isHidden',
-                          e.target.checked
-                        )
-                      }
-                      className={styles['question-dialog__checkbox']}
-                    />
-                    <label
-                      htmlFor={`hidden-${testCase.id}`}
-                      className={styles['question-dialog__checkbox-label']}
-                    >
-                      Hidden test case (not visible to candidate)
-                    </label>
                   </div>
                 </div>
               </div>
@@ -326,43 +398,21 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
               Add test case
             </button>
           </div>
-
-          <div className={styles['question-dialog__section']}>
-            <h3 className={styles['question-dialog__section-title']}>
-              Information for your team
-            </h3>
-            <div className={styles['question-dialog__form-group']}>
-              <label
-                className={styles['question-dialog__label']}
-                htmlFor='evaluationCriteria'
-              >
-                What to look for in the solution?
-              </label>
-              <textarea
-                id='evaluationCriteria'
-                className={styles['question-dialog__textarea']}
-                value={evaluationCriteria}
-                onChange={(e) => setEvaluationCriteria(e.target.value)}
-                placeholder='Enter evaluation criteria (not shown to candidates)'
-                rows={4}
-              />
-              <p className={styles['question-dialog__hint']}>
-                This information will not be shown to candidates.
-              </p>
-            </div>
-          </div>
         </div>
 
         <div className={styles['question-dialog__footer']}>
-          <Button variant='secondary' onClick={onCancel}>
-            Cancel
+          <Button
+            variant='secondary'
+            onClick={rowIndex >= 0 ? handleDelete : onCancel}
+          >
+            {rowIndex >= 0 ? 'Delete' : 'Cancel'}
           </Button>
           <Button
             variant='primary'
-            // onClick={handleSave}
             disabled={!title.trim()}
+            onClick={rowIndex >= 0 ? handleUpdate : handleSave}
           >
-            Save
+            {rowIndex >= 0 ? 'Update' : 'Save'}
           </Button>
         </div>
       </div>

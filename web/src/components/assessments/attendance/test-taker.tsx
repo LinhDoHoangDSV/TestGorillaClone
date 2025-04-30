@@ -12,6 +12,7 @@ import {
 import { createUserAnsers } from '../../../api/user-answers.api'
 import { CreateUserAnser } from '../../../constant/api'
 import { increaseScoreTestAssignment } from '../../../api/test-assignment.api'
+import CodingQuestion from './coding'
 
 interface TestTakerProps {
   seconds: number
@@ -75,6 +76,15 @@ const TestTaker: FC<TestTakerProps> = ({
             answer={answer}
             setAnswer={setAnswer}
             question={question}
+          />
+        )
+      case 'coding':
+        return (
+          <CodingQuestion
+            answer={answer}
+            setAnswer={setAnswer}
+            question={question}
+            setScore={setScore}
           />
         )
       default:

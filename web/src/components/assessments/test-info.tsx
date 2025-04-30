@@ -23,6 +23,11 @@ import { getAllTestAssignmentByCriteria } from '../../api/test-assignment.api'
 import { createAnswer, getAllAnswerByCriteria } from '../../api/answers.api'
 import InviteDialog from './attendance/invite-dialog'
 import { useNavigate } from 'react-router-dom'
+import {
+  createInitialCode,
+  findInitialCodeByCriteria
+} from '../../api/initial-code.api'
+import { createTestCase, findTestCaseByCriteria } from '../../api/test-case.api'
 
 const TestInfo: FC<TestInfoProps> = ({ testId, type }) => {
   const dispatch = useDispatch()
@@ -67,6 +72,17 @@ const TestInfo: FC<TestInfoProps> = ({ testId, type }) => {
             question_id: questionsData[i].id
           })
           questionsData[i].answers = answers?.data?.data
+        } else if (questionsData[i].question_type === 'coding') {
+          const initialCode = await findInitialCodeByCriteria({
+            question_id: questionsData[i].id
+          })
+
+          questionsData[i].initial_code = initialCode?.data?.data[0]
+
+          const testCases = await findTestCaseByCriteria({
+            question_id: questionsData[i].id
+          })
+          questionsData[i].testcases = testCases?.data?.data
         }
       }
 
@@ -88,7 +104,7 @@ const TestInfo: FC<TestInfoProps> = ({ testId, type }) => {
   const handleCloneTest = async () => {
     dispatch(setIsLoadingTrue())
 
-    const { id, ...testData } = test
+    const { id, owner_id, ...testData } = test
     const newTest = await createTest({
       ...testData,
       title: `${testData?.title} clone`
@@ -105,7 +121,13 @@ const TestInfo: FC<TestInfoProps> = ({ testId, type }) => {
     }
 
     for (const question of questions) {
-      const { id, answers = null, ...questionData } = question
+      const {
+        id,
+        answers = null,
+        testcases = null,
+        initial_code = null,
+        ...questionData
+      } = question
       const newQuestion = await createQuestion({
         ...questionData,
         test_id: newTest?.data?.data?.id
@@ -119,9 +141,26 @@ const TestInfo: FC<TestInfoProps> = ({ testId, type }) => {
             question_id: newQuestion?.data?.data?.id
           })
         }
+      } else if (question?.question_type === 'coding') {
+        await createInitialCode({
+          initial_code: initial_code?.initial_code,
+          language_id: initial_code?.language_id,
+          question_id: newQuestion?.data?.data?.id
+        })
+
+        for (const testcase of testcases) {
+          await createTestCase({
+            expected_output: testcase.expected_output,
+            input: testcase.input,
+            question_id: newQuestion?.data?.data?.id
+          })
+        }
       }
     }
 
+    dispatch(
+      setToasterAppear({ message: 'Clone test successfully', type: 'success' })
+    )
     navigate(`/assessments/${newTest?.data?.data?.id * 300003 + 200003}`)
     dispatch(setIsLoadingFalse())
   }
@@ -171,7 +210,12 @@ const TestInfo: FC<TestInfoProps> = ({ testId, type }) => {
     }
 
     setTest(result?.data?.data)
-
+    dispatch(
+      setToasterAppear({
+        message: 'Updating test successfully',
+        type: 'success'
+      })
+    )
     dispatch(setIsLoadingFalse())
   }
 

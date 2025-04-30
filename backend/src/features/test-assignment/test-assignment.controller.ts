@@ -10,6 +10,8 @@ import {
   BadRequestException,
   HttpStatus,
   HttpException,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { TestAssignmentService } from './test-assignment.service';
 import { CreateTestAssignmentDto } from './dto/create-test-assignment.dto';
@@ -23,6 +25,16 @@ import { InviteTestDto } from './dto/invite-test.dto';
 import { SendRequestDto } from '../mail-service/dto/send-request.dto';
 import { MailService } from '../mail-service/mail-service.service';
 import { AdjustScoreDto } from './dto/adjust-score.dto';
+import { AuthGuard } from 'src/common/guard/jwt_auth.guard';
+import RoleGuard from 'src/common/guard/role.guard';
+import {
+  RequestWithUserDto,
+  Roles,
+  TestAssignmentStatus,
+} from 'src/common/constant';
+import { StatisticsService } from '../statistics/statistics.service';
+import { SchedulerRegistry } from '@nestjs/schedule';
+import { CronJob } from 'cron';
 
 @Controller('test-assignment')
 export class TestAssignmentController {
@@ -30,6 +42,8 @@ export class TestAssignmentController {
     private readonly testAssignmentService: TestAssignmentService,
     private readonly testsService: TestsService,
     private readonly mailService: MailService,
+    private readonly statisticsService: StatisticsService,
+    private readonly schedulerRegistry: SchedulerRegistry,
     private readonly logger: LoggerService,
     private readonly response: Response,
   ) {}
@@ -225,18 +239,27 @@ export class TestAssignmentController {
     }
   }
 
+  @UseGuards(RoleGuard(Roles.HR))
+  @UseGuards(AuthGuard)
   @Post('/invite')
-  async inviteTest(@Body() inviteTestDto: InviteTestDto, @Res() res) {
+  async inviteTest(
+    @Body() inviteTestDto: InviteTestDto,
+    @Res() res,
+    @Req() request: RequestWithUserDto,
+  ) {
+    const { user } = request;
     try {
       const existingTest = await this.testsService.findOne(
         inviteTestDto.test_id,
       );
 
       if (!existingTest) throw new BadRequestException('Do not exist test');
-
+      let countEmail: number = 0;
       const { emails, ...createTestAssignmentDto } = inviteTestDto;
 
       emails.split(',').map(async (email) => {
+        if (email.trim() === '') return;
+        countEmail++;
         const code = Math.floor(Math.random() * 1000000)
           .toString()
           .padStart(6, '0');
@@ -255,6 +278,14 @@ export class TestAssignmentController {
         await this.mailService.requestTest(emailRequest);
       });
 
+      const [existingStatistics] = await this.statisticsService.findByCriterias(
+        { user_id: user.userId },
+      );
+
+      await this.statisticsService.update(existingStatistics.id, {
+        total_invitation: existingStatistics.total_invitation + countEmail,
+      });
+
       this.logger.debug('Sending requests successfully');
       this.response.initResponse(true, 'Sending requests successfully', null);
       return res.status(HttpStatus.OK).json(this.response);
@@ -267,6 +298,92 @@ export class TestAssignmentController {
         this.response.initResponse(
           false,
           'System error while sending requests',
+          null,
+        );
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(this.response);
+      }
+    }
+  }
+
+  @Get('/start/:id')
+  async startTestAssignment(@Res() res, @Param('id') id: string) {
+    try {
+      const existingTestAssessment =
+        await this.testAssignmentService.findOne(+id);
+
+      if (!existingTestAssessment) {
+        throw new BadRequestException('Test assessment not found');
+      }
+
+      const existingTest = await this.testsService.findOne(
+        existingTestAssessment.test_id,
+      );
+
+      if (!existingTest) {
+        throw new BadRequestException('Test not found');
+      }
+      const date = new Date();
+      date.setMinutes(date.getMinutes() + existingTest?.test_time);
+
+      const job = new CronJob(date, async () => {
+        await this.testAssignmentService.update(+id, {
+          status: TestAssignmentStatus.COMPLETED,
+        });
+        const [existingStatistics] =
+          await this.statisticsService.findByCriterias({
+            user_id: existingTest.owner_id,
+          });
+        await this.statisticsService.update(existingStatistics.id, {
+          total_assess_complete: existingStatistics.total_assess_complete + 1,
+        });
+      });
+
+      this.schedulerRegistry.addCronJob(`Assessment-${id}`, job);
+      job.start();
+
+      this.logger.debug('Start assessment successfully');
+      this.response.initResponse(true, 'Start assessment successfully', null);
+      return res.status(HttpStatus.OK).json(this.response);
+    } catch (error) {
+      this.logger.error('Error starting assignment', error?.stack);
+      if (error instanceof HttpException) {
+        this.response.initResponse(false, error?.message, null);
+        return res.status(error?.getStatus()).json(this.response);
+      } else {
+        this.response.initResponse(
+          false,
+          'System error while starting assignment',
+          null,
+        );
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(this.response);
+      }
+    }
+  }
+
+  @Get('/complete/:id')
+  async completeTestAssignment(@Res() res, @Param('id') id: string) {
+    try {
+      const jobName = `Assessment-${id}`;
+      const existingCronJob: CronJob =
+        this.schedulerRegistry.getCronJob(jobName);
+
+      if (existingCronJob) {
+        existingCronJob.fireOnTick();
+        this.schedulerRegistry.deleteCronJob(jobName);
+      }
+
+      this.logger.debug('Complete assessment');
+      this.response.initResponse(true, 'Complete assessment', null);
+      return res.status(HttpStatus.OK).json(this.response);
+    } catch (error) {
+      this.logger.error('Error compelting assignment', error?.stack);
+      if (error instanceof HttpException) {
+        this.response.initResponse(false, error?.message, null);
+        return res.status(error?.getStatus()).json(this.response);
+      } else {
+        this.response.initResponse(
+          false,
+          'System error while completing assignment',
           null,
         );
         return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(this.response);

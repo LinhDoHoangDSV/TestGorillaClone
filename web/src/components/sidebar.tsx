@@ -1,24 +1,38 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import styles from '../style/components/sidebar.module.scss'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from '../redux/store'
+import {
+  setIsLoadingFalse,
+  setIsLoadingTrue
+} from '../redux/slices/common.slice'
+import { logout } from '../api/auth.api'
+import { clearAuth } from '../redux/slices/user.slice'
 
 type SidebarProps = {
   open: boolean
   onClose: () => void
-  activeState: number
-  setActiveState: (state: number) => void
 }
 
-export const AppSidebar = ({
-  open,
-  onClose,
-  activeState,
-  setActiveState
-}: SidebarProps) => {
+export const AppSidebar = ({ open, onClose }: SidebarProps) => {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const activeState = useSelector(
+    (state: RootState) => state.common.activeState
+  )
+  const userState = useSelector((state: RootState) => state.user)
   const navItems = [
     { title: 'Home', path: '/', id: 0 },
     { title: 'Assessments', path: '/assessments', id: 1 },
     { title: 'Candidates', path: '/candidates', id: 2 }
   ]
+
+  const handleLogout = async () => {
+    dispatch(setIsLoadingTrue())
+    await logout()
+    dispatch(clearAuth())
+    dispatch(setIsLoadingFalse())
+  }
 
   return (
     <>
@@ -67,7 +81,6 @@ export const AppSidebar = ({
                 <Link
                   to={item.path}
                   onClick={() => {
-                    setActiveState(item.id)
                     onClose()
                   }}
                 >
@@ -86,12 +99,20 @@ export const AppSidebar = ({
 
         <div className={styles.sidebar__footer}>
           <div className={styles.sidebar__user}>
-            <div className={styles.sidebar__userInitials}>LH</div>
+            <div
+              onClick={() => navigate('/profile')}
+              className={styles.sidebar__userInitials}
+            >{`${userState.last_name.slice(0, 1)}${userState.first_name.slice(0, 1)}`}</div>
             <div className={styles.sidebar__userInfo}>
-              <p className={styles.sidebar__userName}>Linh Do Hoang</p>
-              <p className={styles.sidebar__userEmail}>linhdo@example.co</p>
+              <p
+                className={styles.sidebar__userName}
+              >{`${userState.last_name} ${userState.first_name}`}</p>
+              <p className={styles.sidebar__userEmail}>{userState.email}</p>
             </div>
-            <button className={styles.sidebar__signOutBtn}>
+            <button
+              className={styles.sidebar__signOutBtn}
+              onClick={handleLogout}
+            >
               <svg
                 width='20'
                 height='20'

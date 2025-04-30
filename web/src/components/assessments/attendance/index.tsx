@@ -11,12 +11,16 @@ import {
   setToasterAppear
 } from '../../../redux/slices/common.slice'
 import {
+  completeAssessment,
   getTestAssignmentById,
+  startAssessment,
   updateTestAssignment
 } from '../../../api/test-assignment.api'
 import { getTestById } from '../../../api/tests.api'
 import { getAllQuestionsByCriteria } from '../../../api/questions.api'
 import { getAllAnswerByCriteria } from '../../../api/answers.api'
+import { findInitialCodeByCriteria } from '../../../api/initial-code.api'
+import { findTestCaseByCriteria } from '../../../api/test-case.api'
 
 function TakeAssessmentComp() {
   const location = useLocation()
@@ -113,6 +117,15 @@ function TakeAssessmentComp() {
           }
 
           questions[index].answers = answers?.data?.data
+        } else if (questions[index].question_type === 'coding') {
+          const initialCode = await findInitialCodeByCriteria({
+            question_id: questions[index].id
+          })
+          questions[index].initial_code = initialCode?.data?.data[0]
+          const testcases = await findTestCaseByCriteria({
+            question_id: questions[index].id
+          })
+          questions[index].testcases = testcases?.data?.data
         }
       }
 
@@ -137,7 +150,7 @@ function TakeAssessmentComp() {
       setSeconds((prev) => {
         if (prev <= 1) {
           clearInterval(timer)
-          handleTestComplete()
+          handleTestComplete('timeout')
           return 0
         }
         return (
@@ -255,14 +268,17 @@ function TakeAssessmentComp() {
     }
 
     setStartTime(testAssessment?.started_at ?? new Date())
+    await startAssessment(testAssessment?.id)
 
     dispatch(setIsLoadingFalse())
     setIsAuthenticated(true)
   }
 
-  const handleTestComplete = async () => {
+  const handleTestComplete = async (status?: string) => {
     dispatch(setIsLoadingTrue())
-    await updateTestAssignment({ status: 'completed' }, testAssessment?.id)
+    if (status !== 'timeout') {
+      await completeAssessment(testAssessment?.id)
+    }
     setTestCompleted(true)
     dispatch(setIsLoadingFalse())
   }

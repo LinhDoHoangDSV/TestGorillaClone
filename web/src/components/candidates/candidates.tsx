@@ -8,7 +8,7 @@ import {
   setIsLoadingTrue,
   setToasterAppear
 } from '../../redux/slices/common.slice'
-import { getAllTestsByCriteria } from '../../api/tests.api'
+import { getAllOwnTests } from '../../api/tests.api'
 import { getAllTestAssignmentByCriteria } from '../../api/test-assignment.api'
 
 interface CandidateEntity {
@@ -36,10 +36,10 @@ const CandidatesComponent = () => {
         setIsLoading(true)
         dispatch(setIsLoadingTrue())
 
-        const testResponse = await getAllTestsByCriteria({ owner_id: 1 })
+        const testResponse = await getAllOwnTests()
 
         if (testResponse?.status > 299) {
-          throw new Error('Failed to fetch tests')
+          throw new Error('Failed to get tests')
         }
 
         const tempTests = testResponse?.data?.data || []
@@ -120,7 +120,22 @@ const CandidatesComponent = () => {
   }
 
   const handleClickRow = (candidate) => {
+    if (candidate?.status !== 'completed') {
+      dispatch(
+        setToasterAppear({
+          message: 'Can not grade an uncompleted assessment',
+          type: 'error'
+        })
+      )
+      return
+    }
     navigate(`/assessments/grade/${candidate.id * 300003 + 200003}`)
+  }
+
+  const changeStatus = (assessStatus: string) => {
+    if (assessStatus === 'completed') return 'Completed'
+    else if (assessStatus === 'in_progress') return 'In progress'
+    else return 'Not started'
   }
 
   return (
@@ -195,7 +210,7 @@ const CandidatesComponent = () => {
                   <td>{candidate.candidate_email}</td>
                   <td>{candidate.testTitle}</td>
                   <td>{candidate.score ?? 'N/A'}</td>
-                  <td>{candidate.status}</td>
+                  <td>{changeStatus(candidate.status)}</td>
                 </tr>
               ))}
             </tbody>

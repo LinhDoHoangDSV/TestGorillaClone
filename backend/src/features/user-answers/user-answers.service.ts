@@ -5,6 +5,8 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { UserAnswer } from './entities/user-answer.entity';
 import { FindUserAnswersCriteriaDto } from './dto/find-user-answer-criteria.dto';
+import { SubmitCodeDto } from './dto/submit-code.dto';
+import axios from 'axios';
 
 @Injectable()
 export class UserAnswersService {
@@ -102,5 +104,55 @@ export class UserAnswersService {
             WHERE id = $1;
           `;
     await this.dataSource.query(query, [id]);
+  }
+
+  async submitCode(submitCodeDto: SubmitCodeDto) {
+    const options = {
+      method: 'POST',
+      url: 'https://judge0-ce.p.rapidapi.com/submissions',
+      params: {
+        base64_encoded: 'true',
+        wait: 'false',
+        fields: '*',
+      },
+      headers: {
+        'x-rapidapi-key': '30749e1c96msh1fb3c0912427faep145451jsn636550b1927b',
+        'x-rapidapi-host': 'judge0-ce.p.rapidapi.com',
+        'Content-Type': 'application/json',
+      },
+      data: {
+        language_id: submitCodeDto.languageId,
+        source_code: btoa(submitCodeDto.code),
+      },
+    };
+
+    try {
+      const response = await axios.request(options);
+      return response.data;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  async getCodeResult(token: string) {
+    const options = {
+      method: 'GET',
+      url: `https://judge0-ce.p.rapidapi.com/submissions/${token}`,
+      params: {
+        base64_encoded: 'true',
+        fields: '*',
+      },
+      headers: {
+        'x-rapidapi-key': '30749e1c96msh1fb3c0912427faep145451jsn636550b1927b',
+        'x-rapidapi-host': 'judge0-ce.p.rapidapi.com',
+      },
+    };
+
+    try {
+      const response = await axios.request(options);
+      return response.data;
+    } catch (error) {
+      return error;
+    }
   }
 }

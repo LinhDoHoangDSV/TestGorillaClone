@@ -1,7 +1,7 @@
 export const serverBaseUrl = 'VITE_SERVER_URL'
 
 export interface CreateTestDto {
-  owner_id: number
+  owner_id?: number
   title: string
   description: string
   test_time: number
@@ -82,4 +82,9 @@ export interface UserAnswerUpdate {
   question_id?: number
   answer_text?: string
   score?: number
+}
+
+export interface SubmitCodeDto {
+  code: string
+  languageId: number
 }

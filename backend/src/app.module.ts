@@ -18,6 +18,10 @@ import { RolesModule } from './features/roles/roles.module';
 import { TestAssignmentModule } from './features/test-assignment/test-assignment.module';
 import { UserAnswersModule } from './features/user-answers/user-answers.module';
 import { MailServiceModule } from './features/mail-service/mail-service.module';
+import { AuthModule } from './features/auth/auth.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { InitialCodesModule } from './features/initial-codes/initial-codes.module';
+import { TestCasesModule } from './features/test-cases/test-cases.module';
 
 @Module({
   imports: [
@@ -34,6 +38,7 @@ import { MailServiceModule } from './features/mail-service/mail-service.module';
         JWT_ACCESS_TOKEN_EXPIRATION_TIME: Joi.string().required(),
       }),
     }),
+    ScheduleModule.forRoot(),
     DatabaseModule,
     LoggerModule,
     ResponseModule,
@@ -46,6 +51,9 @@ import { MailServiceModule } from './features/mail-service/mail-service.module';
     TestAssignmentModule,
     UserAnswersModule,
     MailServiceModule,
+    AuthModule,
+    InitialCodesModule,
+    TestCasesModule,
   ],
   controllers: [AppController],
   providers: [

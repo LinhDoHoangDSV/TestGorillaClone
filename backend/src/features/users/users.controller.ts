@@ -9,6 +9,8 @@ import {
   Res,
   HttpStatus,
   HttpException,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -17,6 +19,9 @@ import { LoggerService } from '../logger/logger.service';
 import { Response } from '../response/response';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { FindUserCriteriaDto } from './dto/find-user-criteria.dto';
+import { RequestWithUserDto, Roles } from 'src/common/constant';
+import { AuthGuard } from 'src/common/guard/jwt_auth.guard';
+import RoleGuard from 'src/common/guard/role.guard';
 
 @Controller('users')
 export class UsersController {
@@ -304,14 +309,20 @@ export class UsersController {
       },
     },
   })
-  @Patch(':id')
+  @UseGuards(RoleGuard(Roles.HR))
+  @UseGuards(AuthGuard)
+  @Patch('update')
   async update(
-    @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
     @Res() res,
+    @Req() request: RequestWithUserDto,
   ) {
+    const { user } = request;
     try {
-      const updatedUser = await this.usersService.update(+id, updateUserDto);
+      const updatedUser = await this.usersService.update(
+        user.userId,
+        updateUserDto,
+      );
       this.logger.debug('Updating user successfully');
       this.response.initResponse(
         true,

@@ -5,13 +5,15 @@ interface commonState {
   toasterMessage: string
   toasterType: string
   toaster: boolean
+  activeState: number
 }
 
 const initialState: commonState = {
   isLoading: false,
   toasterMessage: '',
   toasterType: '',
-  toaster: false
+  toaster: false,
+  activeState: 0
 }
 
 const commonSlice = createSlice({
@@ -33,6 +35,9 @@ const commonSlice = createSlice({
       state.toasterMessage = ''
       state.toasterType = ''
       state.toaster = false
+    },
+    setActiveState: (state, action) => {
+      state.activeState = action.payload.value
     }
   }
 })
@@ -41,6 +46,7 @@ export const {
   setIsLoadingFalse,
   setIsLoadingTrue,
   setToasterDissappear,
-  setToasterAppear
+  setToasterAppear,
+  setActiveState
 } = commonSlice.actions
 export default commonSlice.reducer

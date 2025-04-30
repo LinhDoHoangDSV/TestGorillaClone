@@ -10,6 +10,7 @@ import {
   Res,
   HttpStatus,
   HttpException,
+  UseGuards,
 } from '@nestjs/common';
 import { UserAnswersService } from './user-answers.service';
 import { CreateUserAnswerDto } from './dto/create-user-answer.dto';
@@ -20,6 +21,10 @@ import { TestAssignmentService } from '../test-assignment/test-assignment.servic
 import { LoggerService } from '../logger/logger.service';
 import { Response } from '../response/response';
 import { FindUserAnswersCriteriaDto } from './dto/find-user-answer-criteria.dto';
+import { AuthGuard } from 'src/common/guard/jwt_auth.guard';
+import RoleGuard from 'src/common/guard/role.guard';
+import { Roles } from 'src/common/constant';
+import { SubmitCodeDto } from './dto/submit-code.dto';
 
 @Controller('user-answers')
 export class UserAnswersController {
@@ -133,6 +138,52 @@ export class UserAnswersController {
     }
   }
 
+  @Post('/submit')
+  async submitCode(@Body() submitCodeDto: SubmitCodeDto, @Res() res) {
+    try {
+      const result = await this.userAnswersService.submitCode(submitCodeDto);
+      this.logger.debug('Submit code successfully');
+      this.response.initResponse(true, 'Submit code successfully', result);
+      return res.status(HttpStatus.OK).json(this.response);
+    } catch (error) {
+      this.logger.error('Error while submitting code', error?.stack);
+      if (error instanceof HttpException) {
+        this.response.initResponse(false, error?.message, null);
+        return res.status(error?.getStatus()).json(this.response);
+      } else {
+        this.response.initResponse(
+          false,
+          'System error while submitting code',
+          null,
+        );
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(this.response);
+      }
+    }
+  }
+
+  @Get('/code-result/:token')
+  async getCodeResult(@Param('token') token: string, @Res() res) {
+    try {
+      const result = await this.userAnswersService.getCodeResult(token);
+      this.logger.debug('Get code result successfully');
+      this.response.initResponse(true, 'Get code result successfully', result);
+      return res.status(HttpStatus.OK).json(this.response);
+    } catch (error) {
+      this.logger.error('Error while getting code result', error?.stack);
+      if (error instanceof HttpException) {
+        this.response.initResponse(false, error?.message, null);
+        return res.status(error?.getStatus()).json(this.response);
+      } else {
+        this.response.initResponse(
+          false,
+          'System error while getting code result',
+          null,
+        );
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(this.response);
+      }
+    }
+  }
+
   @ApiOperation({
     summary: 'Find roles by criteria',
   })
@@ -194,6 +245,8 @@ export class UserAnswersController {
       },
     },
   })
+  @UseGuards(RoleGuard(Roles.HR))
+  @UseGuards(AuthGuard)
   @Post('/criterias')
   async findByCriterias(
     @Body() findUserAnswersCriteriaDto: FindUserAnswersCriteriaDto,

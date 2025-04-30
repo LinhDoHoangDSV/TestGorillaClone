@@ -8,5 +8,6 @@ import { ResponseModule } from '../response/response.module';
   controllers: [StatisticsController],
   providers: [StatisticsService],
   imports: [LoggerModule, ResponseModule],
+  exports: [StatisticsService],
 })
 export class StatisticsModule {}

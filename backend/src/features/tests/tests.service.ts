@@ -59,13 +59,19 @@ export class TestsService {
 
     const whereClause =
       conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-    const query = `SELECT * FROM tests ${whereClause} ${limitQuery}`;
+    const query = `
+    SELECT * FROM tests 
+    ${whereClause} 
+    ORDER BY id
+    ${limitQuery};`;
     const result = await this.dataSource.query(query, values);
     return result;
   }
 
   async findAll(): Promise<Test[]> {
-    const query = `SELECT * FROM tests;`;
+    const query = `
+    SELECT * FROM tests
+    ORDER BY id;`;
     const result = await this.dataSource.query(query);
     return result;
   }
