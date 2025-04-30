@@ -90,7 +90,7 @@ export class AuthController {
 
       request.res.cookie('sid', accessToken, {
         maxAge: maxAgeAccessToken,
-        sameSite: 'lax',
+        sameSite: 'none',
         secure: true,
         httpOnly: true,
         path: '/',
@@ -98,7 +98,7 @@ export class AuthController {
 
       request.res.cookie('refresh_token', refreshToken, {
         maxAge: maxAgeRefreshToken,
-        sameSite: 'lax',
+        sameSite: 'none',
         secure: true,
         httpOnly: true,
         path: '/',
