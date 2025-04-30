@@ -1,4 +1,4 @@
-import { FC, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import styles from '../../../style/components/assessments/attendance/coding.module.scss'
 import { LanguageID, QuestionResponse } from '../../../constant/common'
 import { getCodeResult, submitCode } from '../../../api/user-answers.api'
@@ -25,13 +25,21 @@ const CodingQuestion: FC<CodingQuestionProps> = ({
   question,
   setScore
 }) => {
-  const initialCode = question.initial_code?.initial_code
   const dispatch = useDispatch()
+  const [initialCode, setInitialCode] = useState<string>(
+    question.initial_code?.initial_code
+  )
   const [userCode, setUserCode] = useState<string>(initialCode)
   const [runningTests, setRunningTests] = useState<boolean>(false)
   const [testResults, setTestResults] = useState<TestCase[]>([
     ...question.testcases
   ])
+
+  useEffect(() => {
+    setInitialCode(question.initial_code?.initial_code)
+    setUserCode(question.initial_code?.initial_code)
+    setTestResults([...question.testcases])
+  }, [question])
 
   const runTests = async () => {
     setRunningTests(true)
