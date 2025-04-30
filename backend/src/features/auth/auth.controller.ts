@@ -88,6 +88,8 @@ export class AuthController {
         existingUser.id,
       );
 
+      console.log('maxAgeAccessToken', maxAgeAccessToken);
+
       request.res.cookie('sid', accessToken, {
         maxAge: maxAgeAccessToken,
         sameSite: 'none',
@@ -188,9 +190,11 @@ export class AuthController {
         1000 *
         60;
 
+      console.log('maxAgeAccessToken', maxAgeAccessToken);
+
       request.res.cookie('sid', accessToken, {
         maxAge: maxAgeAccessToken,
-        sameSite: 'lax',
+        sameSite: 'none',
         secure: true,
         httpOnly: true,
         path: '/',
