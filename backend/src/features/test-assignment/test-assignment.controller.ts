@@ -35,6 +35,7 @@ import {
 import { StatisticsService } from '../statistics/statistics.service';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('test-assignment')
 export class TestAssignmentController {
@@ -44,6 +45,7 @@ export class TestAssignmentController {
     private readonly mailService: MailService,
     private readonly statisticsService: StatisticsService,
     private readonly schedulerRegistry: SchedulerRegistry,
+    private readonly configService: ConfigService,
     private readonly logger: LoggerService,
     private readonly response: Response,
   ) {}
@@ -272,7 +274,9 @@ export class TestAssignmentController {
         const emailRequest: SendRequestDto = {
           code,
           email: email.trim(),
-          url: `https://testgorillaclonefe.web.app/assessments/attendance/${newTestAssignment.id * 300003 + 200003}`,
+          url: `${this.configService.get<string>(
+            'FE_URL',
+          )}/assessments/attendance/${newTestAssignment.id * 300003 + 200003}`,
         };
 
         await this.mailService.requestTest(emailRequest);
