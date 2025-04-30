@@ -7,13 +7,20 @@ import {
   sampleEssayQuestion
 } from '../../../constant/common'
 import { useDispatch } from 'react-redux'
-import { setToasterAppear } from '../../../redux/slices/common.slice'
+import {
+  setIsLoadingFalse,
+  setIsLoadingTrue,
+  setToasterAppear
+} from '../../../redux/slices/common.slice'
+import { createQuestion } from '../../../api/questions.api'
 
 const EssayQuestionDialog: FC<QuestionDialogProps> = ({
   onCancel,
   setQuestions,
   questions,
-  rowIndex
+  rowIndex,
+  actionType,
+  testId
 }) => {
   const [question, setQuestion] = useState<QuestionsType>(
     rowIndex >= 0 ? questions[rowIndex] : sampleEssayQuestion
@@ -96,6 +103,67 @@ const EssayQuestionDialog: FC<QuestionDialogProps> = ({
     setQuestion(sampleEssayQuestion)
     onCancel()
   }
+
+  const handleAdd = async () => {
+    if (!question?.title) {
+      dispatch(
+        setToasterAppear({ message: 'Title must not be blank', type: 'error' })
+      )
+      return
+    } else if (!question?.question_text) {
+      dispatch(
+        setToasterAppear({
+          message: "Quenstion's description must not be blank",
+          type: 'error'
+        })
+      )
+      return
+    } else if (!+score) {
+      dispatch(
+        setToasterAppear({
+          message: 'Score must be a number',
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    const newQuestion = await createQuestion({
+      question_text: question.question_text,
+      question_type: question.question_type,
+      title: question.title,
+      score: parseInt(score),
+      test_id: testId
+    })
+
+    dispatch(setIsLoadingTrue())
+
+    if (newQuestion?.status > 299) {
+      dispatch(
+        setToasterAppear({
+          message: 'Failed to add question',
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    dispatch(
+      setToasterAppear({
+        message: 'Question is added',
+        type: 'success'
+      })
+    )
+    setQuestions([
+      ...questions,
+      { ...question, score: parseInt(score), test_id: testId }
+    ])
+    setQuestion(sampleEssayQuestion)
+    dispatch(setIsLoadingFalse())
+    onCancel()
+  }
+
+  const handleUpdateExisting = async () => {}
 
   const handleDelete = () => {
     dispatch(
@@ -213,7 +281,15 @@ const EssayQuestionDialog: FC<QuestionDialogProps> = ({
           </Button>
           <Button
             variant='primary'
-            onClick={rowIndex >= 0 ? handleUpdate : handleSubmit}
+            onClick={
+              rowIndex >= 0
+                ? handleUpdate
+                : actionType === null
+                  ? handleSubmit
+                  : actionType === 'add'
+                    ? handleAdd
+                    : handleUpdateExisting
+            }
           >
             {rowIndex >= 0 ? 'Update' : 'Save'}
           </Button>

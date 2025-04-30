@@ -194,8 +194,6 @@ const MultipleChoiceDialog: FC<QuestionDialogProps> = ({
     onCancel()
   }
 
-  console.log('options', options)
-
   return (
     <div className={styles['question-dialog__overlay']}>
       <div className={styles['question-dialog']}>

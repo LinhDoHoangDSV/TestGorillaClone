@@ -137,6 +137,7 @@ const QuestionType: FC<QuestionTypeProps> = ({ questions, setQuestions }) => {
           setQuestions={setQuestions}
           questionType={questions[rowIndex].question_type}
           onCancel={handleCancelDialogEdit}
+          actionType={null}
           rowIndex={rowIndex}
         />
       )}
@@ -146,6 +147,7 @@ const QuestionType: FC<QuestionTypeProps> = ({ questions, setQuestions }) => {
           questions={questions}
           setQuestions={setQuestions}
           questionType={activeQuestionType}
+          actionType={null}
           onCancel={handleCancelDialog}
           rowIndex={rowIndex}
         />

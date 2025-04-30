@@ -3,7 +3,14 @@ import styles from '../../../style/components/assessments/new/create-question.mo
 import Button from '../../ui/button'
 import { QuestionDialogProps } from '../../../constant/common'
 import { useDispatch } from 'react-redux'
-import { setToasterAppear } from '../../../redux/slices/common.slice'
+import {
+  setIsLoadingFalse,
+  setIsLoadingTrue,
+  setToasterAppear
+} from '../../../redux/slices/common.slice'
+import { CreateAnswerDto, CreateQuestionDto } from '../../../constant/api'
+import { createQuestion } from '../../../api/questions.api'
+import { createAnswer, getAllAnswerByCriteria } from '../../../api/answers.api'
 
 interface TempType {
   id: string
@@ -15,7 +22,9 @@ const MultipleChoiceDialog: FC<QuestionDialogProps> = ({
   onCancel,
   setQuestions,
   questions,
-  rowIndex
+  rowIndex,
+  actionType,
+  testId
 }) => {
   const dispatch = useDispatch()
   const [title, setTitle] = useState(
@@ -150,6 +159,109 @@ const MultipleChoiceDialog: FC<QuestionDialogProps> = ({
     dispatch(setToasterAppear({ message: 'Question added', type: 'success' }))
     onCancel()
   }
+
+  const handleAdd = async () => {
+    if (!title.trim()) {
+      dispatch(
+        setToasterAppear({ message: 'Title must not be blank', type: 'error' })
+      )
+      return
+    }
+
+    if (!+score) {
+      dispatch(
+        setToasterAppear({ message: 'Score must be a number', type: 'error' })
+      )
+      return
+    }
+
+    if (!description.trim()) {
+      dispatch(
+        setToasterAppear({
+          message: 'Description must not be blank',
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    if (!options.some((option) => option.isCorrect)) {
+      dispatch(
+        setToasterAppear({
+          message: 'Must provide correct answer',
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    if (!options.every((option) => option.text.trim())) {
+      dispatch(
+        setToasterAppear({
+          message: 'Answer mus not be blank',
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    dispatch(setIsLoadingTrue())
+
+    const answers = options.map((item) => {
+      return {
+        option_text: item.text,
+        is_correct: item.isCorrect
+      }
+    })
+
+    const createQuestionDto: CreateQuestionDto = {
+      question_text: description,
+      question_type: 'multiple_choice',
+      score: +score,
+      test_id: testId,
+      title: title
+    }
+
+    const newQuestion = await createQuestion(createQuestionDto)
+
+    if (newQuestion?.status > 299) {
+      dispatch(
+        setToasterAppear({
+          message: 'Error while creating question',
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    for (const answer of answers) {
+      const createAnserDto: CreateAnswerDto = {
+        is_correct: answer.is_correct,
+        option_text: answer.option_text,
+        question_id: newQuestion?.data?.data?.id
+      }
+
+      await createAnswer(createAnserDto)
+    }
+
+    const listAnswers = await getAllAnswerByCriteria({
+      question_id: newQuestion?.data?.data?.id
+    })
+
+    setQuestions([
+      ...questions,
+      {
+        ...newQuestion?.data?.data,
+        answers: listAnswers?.data?.data
+      }
+    ])
+
+    dispatch(setToasterAppear({ message: 'Question added', type: 'success' }))
+    dispatch(setIsLoadingFalse())
+    onCancel()
+  }
+
+  const handleUpdateExisting = async () => {}
 
   const handleDelete = () => {
     dispatch(
@@ -439,7 +551,15 @@ const MultipleChoiceDialog: FC<QuestionDialogProps> = ({
           </Button>
           <Button
             variant='primary'
-            onClick={rowIndex >= 0 ? handleUpdate : handleSave}
+            onClick={
+              rowIndex >= 0
+                ? handleUpdate
+                : actionType === null
+                  ? handleSave
+                  : actionType === 'add'
+                    ? handleAdd
+                    : handleUpdateExisting
+            }
           >
             {rowIndex >= 0 ? 'Update' : 'Save'}
           </Button>

@@ -275,7 +275,7 @@ export class TestAssignmentController {
           code,
           email: email.trim(),
           url: `${this.configService.get<string>(
-            'FE_URL',
+            'FE_LOCAL_URL',
           )}/assessments/attendance/${newTestAssignment.id * 300003 + 200003}`,
         };
 

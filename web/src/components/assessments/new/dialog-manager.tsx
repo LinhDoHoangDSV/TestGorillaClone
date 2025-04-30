@@ -10,6 +10,8 @@ interface QuestionDialogManagerProps {
   setQuestions: (questions: Question[]) => void
   questions: Question[]
   rowIndex: number
+  actionType: string | null
+  testId?: number
 }
 
 const QuestionDialogManager: FC<QuestionDialogManagerProps> = ({
@@ -17,7 +19,9 @@ const QuestionDialogManager: FC<QuestionDialogManagerProps> = ({
   questionType,
   setQuestions,
   questions,
-  rowIndex
+  rowIndex,
+  actionType,
+  testId
 }) => {
   switch (questionType) {
     case 'essay':
@@ -27,6 +31,8 @@ const QuestionDialogManager: FC<QuestionDialogManagerProps> = ({
           setQuestions={setQuestions}
           questions={questions}
           rowIndex={rowIndex}
+          actionType={actionType}
+          testId={testId}
         />
       )
     case 'multiple_choice':
@@ -36,6 +42,8 @@ const QuestionDialogManager: FC<QuestionDialogManagerProps> = ({
           setQuestions={setQuestions}
           questions={questions}
           rowIndex={rowIndex}
+          actionType={actionType}
+          testId={testId}
         />
       )
     case 'coding':
@@ -45,6 +53,8 @@ const QuestionDialogManager: FC<QuestionDialogManagerProps> = ({
           setQuestions={setQuestions}
           questions={questions}
           rowIndex={rowIndex}
+          actionType={actionType}
+          testId={testId}
         />
       )
     default:

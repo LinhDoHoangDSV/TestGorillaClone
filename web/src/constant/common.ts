@@ -49,6 +49,8 @@ export interface QuestionDialogProps {
   setQuestions: (questions: Question[]) => void
   questions: Question[]
   rowIndex: number
+  actionType: string | null
+  testId?: number
 }
 
 export const sampleEssayQuestion: QuestionsType = {

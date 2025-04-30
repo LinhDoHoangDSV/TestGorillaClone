@@ -5,8 +5,7 @@ import {
   ContentProps,
   CreateInitialCodeDto,
   CreateTestCaseDto,
-  Question,
-  TestCase
+  Question
 } from '../../../constant/common'
 import Button from '../../ui/button'
 import { createTest } from '../../../api/tests.api'
