@@ -104,6 +104,12 @@ export interface CreateTestCaseDto {
   expected_output: string
 }
 
+export interface UpdateTestCaseDto {
+  question_id?: number
+  input?: string
+  expected_output?: string
+}
+
 export interface FindTestCaseByCriterias {
   id?: number
   question_id?: number
@@ -119,6 +125,13 @@ export interface CreateInitialCodeDto {
 }
 
 export interface FindInitialCodeCriteriasDto {
+  question_id?: number
+  language_id?: number
+  description?: string
+  initial_code?: string
+}
+
+export interface UpdateInitialCodeDto {
   question_id?: number
   language_id?: number
   description?: string

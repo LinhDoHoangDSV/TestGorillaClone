@@ -12,7 +12,12 @@ import {
   setToasterAppear
 } from '../../../redux/slices/common.slice'
 import { useLocation } from 'react-router-dom'
-import { updateQuestion } from '../../../api/questions.api'
+import { deleteQuestion, updateQuestion } from '../../../api/questions.api'
+import {
+  createAnswer,
+  deleteAnswer,
+  updateAnswer
+} from '../../../api/answers.api'
 
 interface TempType {
   id: string
@@ -40,10 +45,10 @@ const MultipleChoiceDialog: FC<QuestionDialogProps> = ({
     rowIndex >= 0 ? questions[rowIndex].answers.length + 1 : 3
   )
   const [options, setOptions] = useState<TempType[]>(
-    rowIndex >= 0 && questions[rowIndex]?.answers
+    rowIndex >= 0 && questions[rowIndex]?.answers && !isViewPage
       ? questions[rowIndex]?.answers.map((item, index) => {
           return {
-            id: (index + 1).toString(),
+            id: (item?.id || index + 1).toString(),
             text: item.option_text,
             isCorrect: item.is_correct
           }
@@ -70,15 +75,36 @@ const MultipleChoiceDialog: FC<QuestionDialogProps> = ({
     )
   }
 
-  const handleCorrectChange = (id: string) => {
-    if (allowMultipleCorrect) {
-      setOptions(
-        options.map((option) =>
-          option.id === id
-            ? { ...option, isCorrect: !option.isCorrect }
-            : option
-        )
+  const handleCorrectChange = async (id: string) => {
+    if (isViewPage) {
+      dispatch(setIsLoadingTrue())
+      const trueOldAnswer = options.find((option) => option.isCorrect)
+      await updateAnswer(+trueOldAnswer?.id, { is_correct: false })
+      await updateAnswer(+id, { is_correct: true })
+      for (const index in options) {
+        if (options[index].id === id) {
+          options[index].isCorrect = true
+        } else if (options[index].id === trueOldAnswer?.id) {
+          options[index].isCorrect = false
+        }
+      }
+      setQuestions(
+        questions.map((question, index) => {
+          if (index === rowIndex) {
+            return {
+              ...question,
+              answers: options.map((item) => ({
+                id: +item.id,
+                option_text: item.text,
+                is_correct: item.isCorrect
+              }))
+            }
+          }
+          return question
+        })
       )
+      dispatch(setIsLoadingFalse())
+      setOptions(options)
     } else {
       setOptions(
         options.map((option) => ({
@@ -89,33 +115,144 @@ const MultipleChoiceDialog: FC<QuestionDialogProps> = ({
     }
   }
 
-  const addOption = () => {
-    const newId = counter.toString()
-    setOptions([...options, { id: newId, text: '', isCorrect: false }])
-    setCounter(counter + 1)
+  const addOption = async () => {
+    if (isViewPage) {
+      dispatch(setIsLoadingTrue())
+      const newOption = await createAnswer({
+        is_correct: false,
+        option_text: 'new answer',
+        question_id: questions[rowIndex].id
+      })
+
+      if (newOption?.status > 299) {
+        dispatch(
+          setToasterAppear({ message: 'Failed to add option', type: 'error' })
+        )
+        return
+      }
+
+      const optionData = newOption?.data?.data
+
+      setQuestions(
+        questions.map((question, index) => {
+          if (index === rowIndex) {
+            return {
+              ...question,
+              answers: [...question.answers, optionData]
+            }
+          }
+          return question
+        })
+      )
+
+      setOptions([
+        ...options,
+        {
+          id: optionData?.id.toString(),
+          isCorrect: optionData?.is_correct,
+          text: optionData?.option_text
+        }
+      ])
+      dispatch(setIsLoadingFalse())
+    } else {
+      const newId = counter.toString()
+      setOptions([...options, { id: newId, text: '', isCorrect: false }])
+      setCounter(counter + 1)
+    }
   }
 
-  const removeOption = (id: string) => {
+  const removeOption = async (id: string) => {
     if (options.length <= 2) return
+
+    if (isViewPage) {
+      dispatch(setIsLoadingTrue())
+      const result = await deleteAnswer(+id)
+
+      if (result?.status > 299) {
+        dispatch(
+          setToasterAppear({
+            message: 'Failed to delete option',
+            type: 'error'
+          })
+        )
+        return
+      }
+      const listAnswer = questions[rowIndex].answers.filter(
+        (answer) => answer.id !== +id
+      )
+      setQuestions(
+        questions.map((question, index) => {
+          if (index === rowIndex) {
+            return {
+              ...question,
+              answers: listAnswer
+            }
+          }
+          return question
+        })
+      )
+      dispatch(setIsLoadingFalse())
+    }
     setOptions(options.filter((option) => option.id !== id))
   }
 
-  const handleDelete = () => {
-    dispatch(
-      setToasterAppear({
-        message: 'Question is deleted',
-        type: 'success'
-      })
-    )
+  const handleDelete = async () => {
+    if (isViewPage) {
+      dispatch(setIsLoadingTrue())
+      for (const option of options) {
+        await deleteAnswer(+option.id)
+      }
 
-    const temp = questions.filter((item, index) => {
-      console.log(item)
+      const result = await deleteQuestion(questions[rowIndex].id)
 
+      if (result?.status > 299) {
+        dispatch(
+          setToasterAppear({
+            message: 'Failed to delete question',
+            type: 'error'
+          })
+        )
+        return
+      }
+      setQuestions(questions.filter((_, index) => index !== rowIndex))
+      dispatch(setIsLoadingFalse())
+    } else {
+      dispatch(
+        setToasterAppear({
+          message: 'Question is deleted',
+          type: 'success'
+        })
+      )
+    }
+    const temp = questions.filter((_, index) => {
       return index !== rowIndex
     })
 
     setQuestions(temp)
     onCancel()
+  }
+
+  const handleBlurInput = async (id: string) => {
+    if (isViewPage) {
+      const option = options.find((item) => item.id === id)
+      await updateAnswer(+id, { option_text: option?.text })
+      setQuestions(
+        questions.map((question, index) => {
+          if (index === rowIndex) {
+            return {
+              ...question,
+              answers: question.answers.map((item) => {
+                if (item.id === +id) {
+                  return { ...item, option_text: option?.text }
+                }
+                return item
+              })
+            }
+          }
+          return question
+        })
+      )
+    }
   }
 
   const handleUpdate = async () => {
@@ -314,6 +451,7 @@ const MultipleChoiceDialog: FC<QuestionDialogProps> = ({
                       onChange={(e) =>
                         handleOptionChange(option.id, e.target.value)
                       }
+                      onBlur={() => handleBlurInput(option.id)}
                       placeholder='Enter option text'
                       className={styles['question-dialog__input']}
                     />
