@@ -158,8 +158,6 @@ export class AuthController {
   async refresh(@Req() request: RequestWithUserDto, @Res() res) {
     const { user } = request;
     try {
-      console.log(user);
-
       const existingUser = await this.userService.findOne(user.userId);
 
       if (!existingUser) {
@@ -206,7 +204,7 @@ export class AuthController {
 
       if (error instanceof HttpException) {
         this.response.initResponse(false, error?.message, null);
-        return res.status(error?.getStatus()).json(this.response);
+        return res.status(419).json(this.response);
       } else {
         this.response.initResponse(
           false,

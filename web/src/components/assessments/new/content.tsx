@@ -116,7 +116,7 @@ const Content: FC<ContentProps> = ({ title }) => {
       setToasterAppear({ message: 'Create test successfully', type: 'success' })
     )
     dispatch(setIsLoadingFalse())
-    navigate('/')
+    navigate(`/assessments/${300003 * newTest?.data?.data?.id + 200003}`)
   }
 
   return (

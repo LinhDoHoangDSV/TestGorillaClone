@@ -40,14 +40,8 @@ function App() {
     const checkAuth = async () => {
       const userInformation = await getInformation()
 
-      if (userInformation?.status > 299) {
+      if (userInformation?.status > 299 && window.location.href !== '/login') {
         dispatch(setIsAuthen({ value: false }))
-        dispatch(
-          setToasterAppear({
-            message: "Fail to get user's information",
-            type: 'error'
-          })
-        )
         return
       }
 
