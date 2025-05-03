@@ -17,12 +17,20 @@ import { CreateStatisticDto } from './dto/create-statistic.dto';
 import { UpdateStatisticDto } from './dto/update-statistic.dto';
 import { LoggerService } from '../logger/logger.service';
 import { Response } from '../response/response';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { FindStatisticCriteriaDto } from './dto/find-statistic-criteria.dto';
 import { AuthGuard } from 'src/common/guard/jwt_auth.guard';
 import RoleGuard from 'src/common/guard/role.guard';
 import { RequestWithUserDto, Roles } from 'src/common/constant';
+import { ValidationIDPipe } from 'src/common/pipe/validation-id.pipe';
 
+@ApiTags("'Statistics'")
 @Controller('statistics')
 export class StatisticsController {
   constructor(
@@ -32,34 +40,36 @@ export class StatisticsController {
   ) {}
 
   @ApiOperation({
-    summary: 'Create a new role',
+    summary: 'Create a new statistic',
   })
   @ApiResponse({
     status: 201,
-    description: 'Creating role successfully',
+    description: 'Creating statistic successfully',
     schema: {
       example: {
         success: true,
-        message: 'Creating role successfully',
+        message: 'Creating statistic successfully',
         data: {
-          id: 1,
-          name: 'HR',
-          description: 'Some one called HR',
+          id: 4,
+          user_id: 5,
+          total_invitation: 0,
+          active_assess: 1,
+          total_assess_complete: 0,
         },
       },
     },
   })
   @ApiResponse({
     status: 400,
-    description: 'Bad request from user',
+    description: 'Invalid input data',
     schema: {
       example: {
         success: false,
         message: 'Invalid input data',
-        errors: [
+        data: [
           {
-            property: 'question_text',
-            constraints: 'Attribute question_text is not allowed',
+            property: 'user_id',
+            constraints: 'Attribute user_id must exist',
           },
         ],
       },
@@ -71,8 +81,8 @@ export class StatisticsController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while creating statistic',
+        data: null,
       },
     },
   })
@@ -80,12 +90,14 @@ export class StatisticsController {
     type: CreateStatisticDto,
     required: true,
     examples: {
-      user_1: {
-        summary: 'Create a new role',
-        description: 'Create a new role',
+      createDto: {
+        summary: 'DTO for creating a new statistic',
+        description: 'user_id is required',
         value: {
-          name: 'HR',
-          description: 'Some one called HR',
+          user_id: 1,
+          total_invitation: 1,
+          active_assess: 1,
+          total_assess_complete: 1,
         },
       },
     },
@@ -119,36 +131,22 @@ export class StatisticsController {
   }
 
   @ApiOperation({
-    summary: 'Find roles by criteria',
+    summary: 'Find statistics by criteria',
   })
   @ApiResponse({
-    status: 201,
-    description: 'Finding roles successfully',
+    status: 200,
+    description: 'Finding statistics successfully',
     schema: {
       example: {
         success: true,
-        message: 'Finding roles successfully',
+        message: 'Finding statistics successfully',
         data: [
           {
-            id: 1,
-            name: 'HR',
-            description: 'Some one called HR',
-          },
-        ],
-      },
-    },
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad request from user',
-    schema: {
-      example: {
-        success: false,
-        message: 'Invalid input data',
-        errors: [
-          {
-            property: 'question_text',
-            constraints: 'Attribute question_text is not allowed',
+            id: 3,
+            user_id: 4,
+            total_invitation: 27,
+            active_assess: 18,
+            total_assess_complete: 22,
           },
         ],
       },
@@ -160,21 +158,23 @@ export class StatisticsController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while finding statistics',
+        data: null,
       },
     },
   })
   @ApiBody({
     type: FindStatisticCriteriaDto,
-    required: false,
+    required: true,
     examples: {
       user_1: {
-        summary: 'Find roles by criterias',
-        description: 'Find roles by criterias',
+        summary: 'DTO for finding statistics by criteria',
+        description: 'All fields are optional',
         value: {
-          name: 'HR',
-          description: 'Some one called HR',
+          user_id: 1,
+          total_invitation: 1,
+          active_assess: 1,
+          total_assess_complete: 1,
         },
       },
     },
@@ -212,20 +212,22 @@ export class StatisticsController {
   }
 
   @ApiOperation({
-    summary: 'Get all roles',
+    summary: 'Find all statistics',
   })
   @ApiResponse({
     status: 200,
-    description: 'Finding all roles successfully',
+    description: 'Finding all statistics successfully',
     schema: {
       example: {
         success: true,
-        message: 'Finding all roles successfully',
+        message: 'Finding all statistics successfully',
         data: [
           {
-            id: 1,
-            name: 'HR',
-            description: 'Some one called HR',
+            id: 3,
+            user_id: 4,
+            total_invitation: 27,
+            active_assess: 18,
+            total_assess_complete: 22,
           },
         ],
       },
@@ -237,8 +239,8 @@ export class StatisticsController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while finding all statistics',
+        data: null,
       },
     },
   })
@@ -270,25 +272,38 @@ export class StatisticsController {
   }
 
   @ApiOperation({
-    summary: 'Get role by ID',
+    summary: 'Find statistic by ID',
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the role to retrieve',
+    description: 'ID of the statistic to retrieve',
     type: Number,
   })
   @ApiResponse({
     status: 200,
-    description: 'Finding role successfully',
+    description: 'Finding statistic successfully',
     schema: {
       example: {
         success: true,
-        message: 'Finding role successfully',
+        message: 'Finding statistic successfully',
         data: {
-          id: 1,
-          name: 'HR',
-          description: 'Some one called HR',
+          id: 3,
+          user_id: 4,
+          total_invitation: 27,
+          active_assess: 18,
+          total_assess_complete: 22,
         },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'ID must be a number',
+    schema: {
+      example: {
+        success: false,
+        message: 'ID must be a number',
+        data: 'Bad Request',
       },
     },
   })
@@ -299,14 +314,14 @@ export class StatisticsController {
       example: {
         success: false,
         message: 'System error',
-        errors: null,
+        data: null,
       },
     },
   })
   @UseGuards(RoleGuard(Roles.HR))
   @UseGuards(AuthGuard)
   @Get(':id')
-  async findOne(@Res() res, @Param('id') id: string) {
+  async findOne(@Res() res, @Param('id', ValidationIDPipe) id: string) {
     try {
       const statistic = await this.statisticsService.findOne(+id);
       this.logger.debug('Finding statistic successfully');
@@ -332,6 +347,44 @@ export class StatisticsController {
     }
   }
 
+  @ApiOperation({
+    summary: 'Find statistics of user',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID of the statistics to retrieve',
+    type: Number,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Finding statistic successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Finding statistic successfully',
+        data: [
+          {
+            id: 3,
+            user_id: 4,
+            total_invitation: 27,
+            active_assess: 18,
+            total_assess_complete: 22,
+          },
+        ],
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'System error',
+    schema: {
+      example: {
+        success: false,
+        message: 'System error while finding statistic',
+        data: null,
+      },
+    },
+  })
   @UseGuards(RoleGuard(Roles.HR))
   @UseGuards(AuthGuard)
   @Get('/one/own')
@@ -365,25 +418,38 @@ export class StatisticsController {
   }
 
   @ApiOperation({
-    summary: 'Update role by ID',
+    summary: 'Update statistic by ID',
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the role to be updated',
+    description: 'ID of the statistic to be updated',
     type: Number,
   })
   @ApiResponse({
     status: 200,
-    description: 'Updating role successfully',
+    description: 'Updating statistic successfully',
     schema: {
       example: {
         success: true,
-        message: 'Updating role successfully',
+        message: 'Updating statistic successfully',
         data: {
-          id: 1,
-          name: 'HR',
-          description: 'Some one called HR',
+          id: 3,
+          user_id: 4,
+          total_invitation: 27,
+          active_assess: 18,
+          total_assess_complete: 22,
         },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'ID must be a number',
+    schema: {
+      example: {
+        success: false,
+        message: 'ID must be a number',
+        data: 'Bad Request',
       },
     },
   })
@@ -393,27 +459,30 @@ export class StatisticsController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while updating statistic',
+        data: null,
       },
     },
   })
   @ApiBody({
     type: UpdateStatisticDto,
-    required: false,
+    required: true,
     examples: {
       user_1: {
-        summary: 'Update an existing role',
-        description: 'Update an existing role',
+        summary: 'DTO for updating a statistic',
+        description: 'All fields are optional',
         value: {
-          name: 'HR',
+          user_id: 1,
+          total_invitation: 1,
+          active_assess: 1,
+          total_assess_complete: 1,
         },
       },
     },
   })
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id', ValidationIDPipe) id: string,
     @Body() updateStatisticDto: UpdateStatisticDto,
     @Res() res,
   ) {
@@ -446,20 +515,20 @@ export class StatisticsController {
   }
 
   @ApiOperation({
-    summary: 'Delete role by ID',
+    summary: 'Delete statistic by ID',
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the role to be deleted',
+    description: 'ID of the statistic to be deleted',
     type: Number,
   })
   @ApiResponse({
     status: 200,
-    description: 'Deleting role successfully',
+    description: 'Deleting statistic successfully',
     schema: {
       example: {
         success: true,
-        message: 'Deleting role successfully',
+        message: 'Deleting statistic successfully',
       },
     },
   })
@@ -469,8 +538,8 @@ export class StatisticsController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while deleting statistic',
+        data: null,
       },
     },
   })

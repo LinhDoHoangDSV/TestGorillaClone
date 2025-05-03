@@ -51,7 +51,7 @@ const GradeEssay = ({ question, marks, setMarks }) => {
             max={question?.score}
             min={0}
             value={
-              marks.find((mark) => mark.id === question?.candidate_answer?.id)
+              marks.find((mark) => mark?.id === question?.candidate_answer?.id)
                 ?.score || 0
             }
             disabled={!question?.candidate_answer}

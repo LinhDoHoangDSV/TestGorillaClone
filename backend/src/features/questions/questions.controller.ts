@@ -31,6 +31,7 @@ import { FindQuestionCriteriasDto } from './dto/find-question-criterias.dto';
 import { AuthGuard } from 'src/common/guard/jwt_auth.guard';
 import RoleGuard from 'src/common/guard/role.guard';
 import { Roles } from 'src/common/constant';
+import { ValidationIDPipe } from 'src/common/pipe/validation-id.pipe';
 
 @ApiTags('Questions')
 @Controller('questions')
@@ -68,7 +69,7 @@ export class QuestionsController {
       example: {
         success: false,
         message: 'Invalid input data',
-        errors: [
+        data: [
           {
             property: 'test_id',
             constraints: 'test_id must be a number',
@@ -82,8 +83,8 @@ export class QuestionsController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while creating question',
+        data: null,
       },
     },
   })
@@ -91,13 +92,14 @@ export class QuestionsController {
     type: CreateQuestionDto,
     examples: {
       user_1: {
-        summary: 'Create a new question',
-        description: 'Create a new question',
+        summary: 'DTO for creating a new question',
+        description: 'scrore is optional',
         value: {
           test_id: 1,
-          question_text: 'What is your name?',
-          question_type: 'essay',
-          score: 10,
+          question_text: 'string',
+          question_type: 'QUESTION_TYPE',
+          score: 1,
+          title: 'string',
         },
       },
     },
@@ -135,6 +137,55 @@ export class QuestionsController {
     }
   }
 
+  @ApiOperation({
+    summary: 'Find questions by criterias',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Finding questions successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Finding questions successfully',
+        data: [
+          {
+            id: 8,
+            test_id: 2,
+            question_text: 'What is your name?',
+            question_type: 'essay',
+            score: 10,
+          },
+        ],
+      },
+    },
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'System error',
+    schema: {
+      example: {
+        success: false,
+        message: 'System error while finding questions',
+        data: null,
+      },
+    },
+  })
+  @ApiBody({
+    type: FindQuestionCriteriasDto,
+    required: true,
+    examples: {
+      findDto: {
+        summary: 'DTO for finding questions by criterias',
+        description: 'All fields are optional',
+        value: {
+          test_id: 1,
+          question_text: 'string',
+          question_type: 'QUESTION_TYPE',
+          score: 1,
+          title: 'string',
+        },
+      },
+    },
+  })
   @Post('/criterias')
   async findByCriterias(
     @Body() findQuestionCriteriasDto: FindQuestionCriteriasDto,
@@ -202,8 +253,8 @@ export class QuestionsController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while finding all questions',
+        data: null,
       },
     },
   })
@@ -235,11 +286,11 @@ export class QuestionsController {
   }
 
   @ApiOperation({
-    summary: 'Get a question by ID',
+    summary: 'Find a question by ID',
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the question to retrieve',
+    description: 'ID of the question to retrieve',
     type: Number,
   })
   @ApiResponse({
@@ -260,18 +311,29 @@ export class QuestionsController {
     },
   })
   @ApiResponse({
+    status: 400,
+    description: 'Bad request',
+    schema: {
+      example: {
+        success: false,
+        message: 'ID must be a number',
+        data: 'Bad Request',
+      },
+    },
+  })
+  @ApiResponse({
     status: 500,
     description: 'System error',
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while finding question',
+        data: null,
       },
     },
   })
   @Get(':id')
-  async findOne(@Param('id') id: string, @Res() res) {
+  async findOne(@Param('id', ValidationIDPipe) id: string, @Res() res) {
     try {
       const question = await this.questionsService.findOne(+id);
       this.logger.debug('Finding question successfully');
@@ -302,7 +364,7 @@ export class QuestionsController {
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the question to be updated',
+    description: 'ID of the question to be updated',
     type: Number,
   })
   @ApiResponse({
@@ -322,29 +384,40 @@ export class QuestionsController {
       },
     },
   })
+  @ApiBadRequestResponse({
+    description: 'Bad Request',
+    schema: {
+      example: {
+        success: false,
+        message: 'ID must be a number',
+        data: 'Bad Request',
+      },
+    },
+  })
   @ApiResponse({
     status: 500,
     description: 'System error',
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while updating question',
+        data: null,
       },
     },
   })
   @ApiBody({
     type: UpdateQuestionDto,
-    required: false,
+    required: true,
     examples: {
       user_1: {
-        summary: 'Update an existing question',
-        description: 'Update an existing question',
+        summary: 'DTO for updating a question',
+        description: 'All fields are optional',
         value: {
           test_id: 1,
-          question_text: 'What is your name?',
-          question_type: 'essay',
-          score: 10,
+          question_text: 'string',
+          question_type: 'QUESTION_TYPE',
+          score: 1,
+          title: 'string',
         },
       },
     },
@@ -353,7 +426,7 @@ export class QuestionsController {
   @UseGuards(AuthGuard)
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id', ValidationIDPipe) id: string,
     @Body() updateQuestionDto: UpdateQuestionDto,
     @Res() res,
   ) {
@@ -390,7 +463,7 @@ export class QuestionsController {
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the question to be deleted',
+    description: 'ID of the question to be deleted',
     type: Number,
   })
   @ApiResponse({
@@ -410,8 +483,8 @@ export class QuestionsController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while deleting question',
+        data: null,
       },
     },
   })

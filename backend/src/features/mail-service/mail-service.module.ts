@@ -15,7 +15,6 @@ import { MailService } from './mail-service.service';
         transport: {
           host: configService.get<string>('MAIL_HOST'),
           port: configService.get<number>('MAIL_PORT'),
-          // ignoreTLS: true,
           secure: true,
           auth: {
             user: configService.get<string>('MAIL_USER'),
@@ -25,10 +24,9 @@ import { MailService } from './mail-service.service';
         defaults: {
           from: '"No Reply" <no-reply@localhost>',
         },
-        // preview: true,
         template: {
           dir: join(__dirname, '', 'template/'),
-          adapter: new HandlebarsAdapter(), // or new PugAdapter() or new EjsAdapter()
+          adapter: new HandlebarsAdapter(),
           options: {
             strict: true,
           },

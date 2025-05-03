@@ -4,14 +4,19 @@ import { SwaggerModule } from '@nestjs/swagger';
 import { swaggerConfig } from './config/swagger/swagger.config';
 import * as cookieParser from 'cookie-parser';
 import 'reflect-metadata';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
 
   app.use(cookieParser());
   app.setGlobalPrefix('/api/v1');
   app.enableCors({
-    origin: ['http://localhost:3000'],
+    origin: [
+      configService.get<string>('FE_URL'),
+      configService.get<string>('FE_LOCAL_URL'),
+    ],
     credentials: true,
   });
 
@@ -21,6 +26,6 @@ async function bootstrap() {
     useGlobalPrefix: true,
   });
 
-  await app.listen(3010);
+  await app.listen(configService.get<number>('BE_PORT') ?? 3010);
 }
 bootstrap();

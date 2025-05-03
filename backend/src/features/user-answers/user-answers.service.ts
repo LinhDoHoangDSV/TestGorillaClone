@@ -148,11 +148,8 @@ export class UserAnswersService {
       },
     };
 
-    try {
-      const response = await axios.request(options);
-      return response.data;
-    } catch (error) {
-      return error;
-    }
+    const response = await axios.request(options);
+    const { stdout, status } = response.data;
+    return { stdout, status };
   }
 }

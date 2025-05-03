@@ -29,6 +29,7 @@ import { FindCriteriasDto } from './dto/find-criterias.dto';
 import { AuthGuard } from 'src/common/guard/jwt_auth.guard';
 import RoleGuard from 'src/common/guard/role.guard';
 import { Roles } from 'src/common/constant';
+import { ValidationIDPipe } from 'src/common/pipe/validation-id.pipe';
 
 @ApiTags('Answers')
 @Controller('answers')
@@ -66,7 +67,7 @@ export class AnswersController {
       example: {
         success: false,
         message: 'Invalid input data',
-        errors: [
+        data: [
           {
             property: 'question_text',
             constraints: 'Attribute question_text is not allowed',
@@ -81,8 +82,8 @@ export class AnswersController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while creating answer',
+        data: null,
       },
     },
   })
@@ -90,7 +91,7 @@ export class AnswersController {
     type: CreateAnswerDto,
     required: true,
     examples: {
-      user_1: {
+      createDto: {
         summary: 'Create a new answer',
         description: 'Create a new answer',
         value: {
@@ -135,6 +136,59 @@ export class AnswersController {
     }
   }
 
+  @ApiOperation({
+    summary: 'Find answers by criterias',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Finding answers successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Finding answers successfully',
+        data: [
+          {
+            id: 103,
+            question_id: 69,
+            option_text: 'true',
+            is_correct: true,
+          },
+          {
+            id: 104,
+            question_id: 69,
+            option_text: 'false',
+            is_correct: false,
+          },
+        ],
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'System error',
+    schema: {
+      example: {
+        success: false,
+        message: 'System error while finding answers',
+        data: null,
+      },
+    },
+  })
+  @ApiBody({
+    type: FindCriteriasDto,
+    required: true,
+    examples: {
+      createDto: {
+        summary: 'DTO to find answers',
+        description: 'All fields are optional',
+        value: {
+          question_id: 5,
+          option_text: 'kjasd',
+          is_correct: true,
+        },
+      },
+    },
+  })
   @Post('/criterias')
   async findByCriterias(
     @Body() findCriteriasDto: FindCriteriasDto,
@@ -146,7 +200,7 @@ export class AnswersController {
       this.logger.debug('Finding answers successfully');
       this.response.initResponse(
         true,
-        'Creating answer successfully',
+        'Finding answer successfully',
         existingAnswers,
       );
       return res.status(HttpStatus.OK).json(this.response);
@@ -167,7 +221,7 @@ export class AnswersController {
   }
 
   @ApiOperation({
-    summary: 'Get all questions',
+    summary: 'Find all questions',
   })
   @ApiResponse({
     status: 200,
@@ -193,8 +247,8 @@ export class AnswersController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while finding all answers',
+        data: null,
       },
     },
   })
@@ -226,11 +280,11 @@ export class AnswersController {
   }
 
   @ApiOperation({
-    summary: 'Get an answer by ID',
+    summary: 'Find an answer by ID',
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the answer to retrieve',
+    description: 'ID of the answer to retrieve',
     type: Number,
   })
   @ApiResponse({
@@ -250,18 +304,29 @@ export class AnswersController {
     },
   })
   @ApiResponse({
+    status: 400,
+    description: 'ID must be a number',
+    schema: {
+      example: {
+        success: false,
+        message: 'ID must be a number',
+        data: 'Bad Request',
+      },
+    },
+  })
+  @ApiResponse({
     status: 500,
     description: 'System error',
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while finding answer',
+        data: null,
       },
     },
   })
   @Get(':id')
-  async findOne(@Param('id') id: string, @Res() res) {
+  async findOne(@Param('id', ValidationIDPipe) id: string, @Res() res) {
     try {
       const answer = await this.answersService.findOne(+id);
       this.logger.debug('Finding answer successfully');
@@ -288,7 +353,7 @@ export class AnswersController {
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the answer to be updated',
+    description: 'ID of the answer to be updated',
     type: Number,
   })
   @ApiResponse({
@@ -308,23 +373,34 @@ export class AnswersController {
     },
   })
   @ApiResponse({
+    status: 400,
+    description: 'ID must be a number',
+    schema: {
+      example: {
+        success: false,
+        message: 'ID must be a number',
+        data: 'Bad Request',
+      },
+    },
+  })
+  @ApiResponse({
     status: 500,
     description: 'System error',
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while updating answer',
+        data: null,
       },
     },
   })
   @ApiBody({
     type: UpdateAnswerDto,
-    required: false,
+    required: true,
     examples: {
-      user_1: {
-        summary: 'Update an existing question',
-        description: 'Update an existing question',
+      updateDto: {
+        summary: 'DTO to update an answer',
+        description: 'All fields are optional',
         value: {
           question_id: 5,
           option_text: 'kjasd',
@@ -335,7 +411,7 @@ export class AnswersController {
   })
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id', ValidationIDPipe) id: string,
     @Body() updateAnswerDto: UpdateAnswerDto,
     @Res() res,
   ) {
@@ -372,7 +448,7 @@ export class AnswersController {
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the answer to be deleted',
+    description: 'ID of the answer to be deleted',
     type: Number,
   })
   @ApiResponse({
@@ -392,8 +468,8 @@ export class AnswersController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while deleting answer',
+        data: null,
       },
     },
   })

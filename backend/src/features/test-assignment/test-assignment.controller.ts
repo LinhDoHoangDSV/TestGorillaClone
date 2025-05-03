@@ -36,6 +36,7 @@ import { StatisticsService } from '../statistics/statistics.service';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
 import { ConfigService } from '@nestjs/config';
+import { ValidationIDPipe } from 'src/common/pipe/validation-id.pipe';
 
 @Controller('test-assignment')
 export class TestAssignmentController {
@@ -51,34 +52,53 @@ export class TestAssignmentController {
   ) {}
 
   @ApiOperation({
-    summary: 'Create a new role',
+    summary: 'Create a new test assignment',
   })
   @ApiResponse({
     status: 201,
-    description: 'Creating role successfully',
+    description: 'Creating test_assignment successfully',
     schema: {
       example: {
         success: true,
-        message: 'Creating role successfully',
+        message: 'Creating test_assignment successfully',
         data: {
-          id: 1,
-          name: 'HR',
-          description: 'Some one called HR',
+          id: 46,
+          test_id: 38,
+          candidate_email: 'linhdh@dgroup.co',
+          expired_invitation: null,
+          started_at: '2025-04-29T13:42:31.271Z',
+          is_online: true,
+          score: 20,
+          code: '579446',
+          status: 'completed',
+          count_exit: 0,
         },
       },
     },
   })
   @ApiResponse({
     status: 400,
-    description: 'Bad request from user',
+    description: 'Invalid input data',
     schema: {
       example: {
         success: false,
         message: 'Invalid input data',
-        errors: [
+        data: [
           {
-            property: 'question_text',
-            constraints: 'Attribute question_text is not allowed',
+            property: 'test_id',
+            constraints: 'Attribute test_id must exist',
+          },
+          {
+            property: 'candidate_email',
+            constraints: 'Attribute candidate_email must exist',
+          },
+          {
+            property: 'code',
+            constraints: 'Attribute code must exist',
+          },
+          {
+            property: 'status',
+            constraints: 'Attribute status must exist',
           },
         ],
       },
@@ -90,8 +110,8 @@ export class TestAssignmentController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while creating assignment',
+        data: null,
       },
     },
   })
@@ -99,12 +119,18 @@ export class TestAssignmentController {
     type: CreateTestAssignmentDto,
     required: true,
     examples: {
-      user_1: {
-        summary: 'Create a new role',
-        description: 'Create a new role',
+      createDto: {
+        summary: 'Create a new test-assignment',
+        description: 'expired_invitation, started_at, is_online are optional',
         value: {
-          name: 'HR',
-          description: 'Some one called HR',
+          test_id: 1,
+          candidate_email: 'string',
+          expired_invitation: new Date(),
+          started_at: new Date(),
+          is_online: true,
+          score: 1,
+          code: 'string',
+          status: 'not_started',
         },
       },
     },
@@ -127,7 +153,7 @@ export class TestAssignmentController {
       this.logger.debug('Creating test_assignment successfully');
       this.response.initResponse(
         true,
-        'Creating assignment successfully',
+        'Creating test_assignment successfully',
         newTestAssignment,
       );
       return res.status(HttpStatus.CREATED).json(this.response);
@@ -148,36 +174,27 @@ export class TestAssignmentController {
   }
 
   @ApiOperation({
-    summary: 'Find roles by criteria',
+    summary: 'Find test-assignment by criteria',
   })
   @ApiResponse({
-    status: 201,
-    description: 'Finding roles successfully',
+    status: 200,
+    description: 'Finding test_assignment successfully',
     schema: {
       example: {
         success: true,
-        message: 'Finding roles successfully',
+        message: 'Finding test_assignment successfully',
         data: [
           {
-            id: 1,
-            name: 'HR',
-            description: 'Some one called HR',
-          },
-        ],
-      },
-    },
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad request from user',
-    schema: {
-      example: {
-        success: false,
-        message: 'Invalid input data',
-        errors: [
-          {
-            property: 'question_text',
-            constraints: 'Attribute question_text is not allowed',
+            id: 46,
+            test_id: 38,
+            candidate_email: 'linhdh@dgroup.co',
+            expired_invitation: null,
+            started_at: '2025-04-29T13:42:31.271Z',
+            is_online: true,
+            score: 20,
+            code: '579446',
+            status: 'completed',
+            count_exit: 0,
           },
         ],
       },
@@ -189,21 +206,27 @@ export class TestAssignmentController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while finding test_assignment',
+        data: null,
       },
     },
   })
   @ApiBody({
     type: FindTestAssignmentCriteriaDto,
-    required: false,
+    required: true,
     examples: {
-      user_1: {
-        summary: 'Find roles by criterias',
-        description: 'Find roles by criterias',
+      findDto: {
+        summary: 'Find test-assignment by criterias',
+        description: 'All fields are optional',
         value: {
-          name: 'HR',
-          description: 'Some one called HR',
+          test_id: 1,
+          candidate_email: 'string',
+          expired_invitation: new Date(),
+          started_at: new Date(),
+          is_online: true,
+          score: 1,
+          code: 'string',
+          status: 'not_started',
         },
       },
     },
@@ -241,6 +264,50 @@ export class TestAssignmentController {
     }
   }
 
+  @ApiOperation({
+    summary: 'Invite candidate to take the test',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Sending requests successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Sending requests successfully',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'System error',
+    schema: {
+      example: {
+        success: false,
+        message: 'System error while sending requests',
+      },
+    },
+  })
+  @ApiBody({
+    type: InviteTestDto,
+    required: true,
+    examples: {
+      findDto: {
+        summary: 'DTO to invite candidate',
+        description: 'emails and test_id are required',
+        value: {
+          test_id: 1,
+          candidate_email: 'string',
+          expired_invitation: new Date(),
+          started_at: new Date(),
+          is_online: true,
+          score: 1,
+          code: 'string',
+          status: 'not_started',
+          emails: 'string',
+        },
+      },
+    },
+  })
   @UseGuards(RoleGuard(Roles.HR))
   @UseGuards(AuthGuard)
   @Post('/invite')
@@ -309,8 +376,45 @@ export class TestAssignmentController {
     }
   }
 
+  @ApiOperation({
+    summary: 'Start test assignment',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Start assessment successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Start assessment successfully',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+    schema: {
+      example: {
+        success: false,
+        message: 'ID must be a number',
+        data: 'Bad Request',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'System error',
+    schema: {
+      example: {
+        success: false,
+        message: 'System error while starting assignment',
+      },
+    },
+  })
   @Get('/start/:id')
-  async startTestAssignment(@Res() res, @Param('id') id: string) {
+  async startTestAssignment(
+    @Res() res,
+    @Param('id', ValidationIDPipe) id: string,
+  ) {
     try {
       const existingTestAssessment =
         await this.testAssignmentService.findOne(+id);
@@ -364,8 +468,45 @@ export class TestAssignmentController {
     }
   }
 
+  @ApiOperation({
+    summary: 'Complete test assignment',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Complete assessment',
+    schema: {
+      example: {
+        success: true,
+        message: 'Complete assessment',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+    schema: {
+      example: {
+        success: false,
+        message: 'ID must be a number',
+        data: 'Bad Request',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'System error',
+    schema: {
+      example: {
+        success: false,
+        message: 'System error while completing assignment',
+      },
+    },
+  })
   @Get('/complete/:id')
-  async completeTestAssignment(@Res() res, @Param('id') id: string) {
+  async completeTestAssignment(
+    @Res() res,
+    @Param('id', ValidationIDPipe) id: string,
+  ) {
     try {
       const jobName = `Assessment-${id}`;
       const existingCronJob: CronJob =
@@ -396,20 +537,27 @@ export class TestAssignmentController {
   }
 
   @ApiOperation({
-    summary: 'Get all roles',
+    summary: 'Find all test-assignment',
   })
   @ApiResponse({
     status: 200,
-    description: 'Finding all roles successfully',
+    description: 'Finding all test_assignment successfully',
     schema: {
       example: {
         success: true,
-        message: 'Finding all roles successfully',
+        message: 'Finding all test_assignment successfully',
         data: [
           {
-            id: 1,
-            name: 'HR',
-            description: 'Some one called HR',
+            id: 46,
+            test_id: 38,
+            candidate_email: 'linhdh@dgroup.co',
+            expired_invitation: null,
+            started_at: '2025-04-29T13:42:31.271Z',
+            is_online: true,
+            score: 20,
+            code: '579446',
+            status: 'completed',
+            count_exit: 0,
           },
         ],
       },
@@ -421,8 +569,8 @@ export class TestAssignmentController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while finding all test_assignment',
+        data: null,
       },
     },
   })
@@ -454,25 +602,43 @@ export class TestAssignmentController {
   }
 
   @ApiOperation({
-    summary: 'Get role by ID',
+    summary: 'Get test-assignment by ID',
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the role to retrieve',
+    description: 'ID of the test-assigment to retrieve',
     type: Number,
   })
   @ApiResponse({
     status: 200,
-    description: 'Finding role successfully',
+    description: 'Finding test_assignment successfully',
     schema: {
       example: {
         success: true,
-        message: 'Finding role successfully',
+        message: 'Finding test_assignment successfully',
         data: {
-          id: 1,
-          name: 'HR',
-          description: 'Some one called HR',
+          id: 46,
+          test_id: 38,
+          candidate_email: 'linhdh@dgroup.co',
+          expired_invitation: null,
+          started_at: '2025-04-29T13:42:31.271Z',
+          is_online: true,
+          score: 20,
+          code: '579446',
+          status: 'completed',
+          count_exit: 0,
         },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+    schema: {
+      example: {
+        success: false,
+        message: 'ID must be a number',
+        data: 'Bad Request',
       },
     },
   })
@@ -482,13 +648,13 @@ export class TestAssignmentController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while finding test_assignment',
+        data: null,
       },
     },
   })
   @Get(':id')
-  async findOne(@Param('id') id: string, @Res() res) {
+  async findOne(@Param('id', ValidationIDPipe) id: string, @Res() res) {
     try {
       const test_assignment = await this.testAssignmentService.findOne(+id);
       this.logger.debug('Finding test_assignment successfully');
@@ -515,25 +681,43 @@ export class TestAssignmentController {
   }
 
   @ApiOperation({
-    summary: 'Update role by ID',
+    summary: 'Update test-assignment by ID',
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the role to be updated',
+    description: 'ID of the role to be updated',
     type: Number,
   })
   @ApiResponse({
     status: 200,
-    description: 'Updating role successfully',
+    description: 'Updating test_assignment successfully',
     schema: {
       example: {
         success: true,
-        message: 'Updating role successfully',
+        message: 'Updating test_assignment successfully',
         data: {
-          id: 1,
-          name: 'HR',
-          description: 'Some one called HR',
+          id: 46,
+          test_id: 38,
+          candidate_email: 'linhdh@dgroup.co',
+          expired_invitation: null,
+          started_at: '2025-04-29T13:42:31.271Z',
+          is_online: true,
+          score: 20,
+          code: '579446',
+          status: 'completed',
+          count_exit: 0,
         },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+    schema: {
+      example: {
+        success: false,
+        message: 'ID must be a number',
+        data: 'Bad Request',
       },
     },
   })
@@ -543,20 +727,27 @@ export class TestAssignmentController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while updating test_assignment',
+        data: null,
       },
     },
   })
   @ApiBody({
     type: UpdateTestAssignmentDto,
-    required: false,
+    required: true,
     examples: {
       user_1: {
-        summary: 'Update an existing role',
-        description: 'Update an existing role',
+        summary: 'DTO to update test-assignment',
+        description: 'All fields are optional',
         value: {
-          name: 'HR',
+          test_id: 1,
+          candidate_email: 'string',
+          expired_invitation: new Date(),
+          started_at: new Date(),
+          is_online: true,
+          score: 1,
+          code: 'string',
+          status: 'not_started',
         },
       },
     },
@@ -595,9 +786,74 @@ export class TestAssignmentController {
     }
   }
 
+  @ApiOperation({
+    summary: 'Adjust score of test-assignment by ID',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID of the role to be adjusted score',
+    type: Number,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Updating test_assignment successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Updating test_assignment successfully',
+        data: {
+          id: 46,
+          test_id: 38,
+          candidate_email: 'linhdh@dgroup.co',
+          expired_invitation: null,
+          started_at: '2025-04-29T13:42:31.271Z',
+          is_online: true,
+          score: 20,
+          code: '579446',
+          status: 'completed',
+          count_exit: 0,
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+    schema: {
+      example: {
+        success: false,
+        message: 'ID must be a number',
+        data: 'Bad Request',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'System error',
+    schema: {
+      example: {
+        success: false,
+        message: 'System error while updating test_assignment',
+        data: null,
+      },
+    },
+  })
+  @ApiBody({
+    type: AdjustScoreDto,
+    required: true,
+    examples: {
+      adjustDto: {
+        summary: 'DTO to adjust score for test-assignment',
+        description: 'score is required',
+        value: {
+          score: 1,
+        },
+      },
+    },
+  })
   @Patch('/score-adjustment/:id')
   async adjustScore(
-    @Param('id') id: string,
+    @Param('id', ValidationIDPipe) id: string,
     @Body() adjustScoreDto: AdjustScoreDto,
     @Res() res,
   ) {
@@ -636,20 +892,20 @@ export class TestAssignmentController {
   }
 
   @ApiOperation({
-    summary: 'Delete role by ID',
+    summary: 'Delete test-assignment by ID',
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the role to be deleted',
+    description: 'ID of the test-assignment to be deleted',
     type: Number,
   })
   @ApiResponse({
     status: 200,
-    description: 'Deleting role successfully',
+    description: 'Deleting test_assignment successfully',
     schema: {
       example: {
         success: true,
-        message: 'Deleting role successfully',
+        message: 'Deleting test_assignment successfully',
       },
     },
   })
@@ -659,8 +915,8 @@ export class TestAssignmentController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while deleting test_assignment',
+        data: null,
       },
     },
   })

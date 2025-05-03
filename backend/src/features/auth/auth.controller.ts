@@ -19,6 +19,7 @@ import { Response } from '../response/response';
 import { LoggerService } from '../logger/logger.service';
 import { AuthGuard } from 'src/common/guard/jwt_auth.guard';
 import { RefreshTokenGuard } from 'src/common/guard/refresh_auth.guard';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -30,6 +31,31 @@ export class AuthController {
     private readonly logger: LoggerService,
   ) {}
 
+  @ApiOperation({
+    summary: 'Login with Google',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Login successfully',
+        data: null,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'System error',
+    schema: {
+      example: {
+        success: false,
+        message: 'System error while loging in',
+        data: null,
+      },
+    },
+  })
   @UseGuards(GoogleAuthGuard)
   @Post('log-in')
   async loginWithGoogle(@Req() request: RequestWithUserDto, @Res() response) {
@@ -123,6 +149,38 @@ export class AuthController {
     }
   }
 
+  @ApiOperation({
+    summary: 'Get user information',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Get user information successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Get user information successfully',
+        data: {
+          id: 4,
+          role_id: 2,
+          email: 'linhdh@dgroup.co',
+          first_name: 'Linh',
+          last_name: 'Hoang',
+          phone_number: '0942938128',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'System error',
+    schema: {
+      example: {
+        success: false,
+        message: 'System error while getting user information',
+        data: null,
+      },
+    },
+  })
   @UseGuards(AuthGuard)
   @Get('/me')
   async getUserInformation(@Res() res, @Req() request: RequestWithUserDto) {
@@ -147,12 +205,41 @@ export class AuthController {
         this.response.initResponse(false, error?.message, null);
         return res.status(error?.getStatus()).json(this.response);
       } else {
-        this.response.initResponse(false, 'System error while loging in', null);
+        this.response.initResponse(
+          false,
+          'System error while getting user information',
+          null,
+        );
         return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(this.response);
       }
     }
   }
 
+  @ApiOperation({
+    summary: 'Refresh token',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Generating token successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Generating token successfully',
+        data: null,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'System error',
+    schema: {
+      example: {
+        success: false,
+        message: 'System error while generating token',
+        data: null,
+      },
+    },
+  })
   @UseGuards(RefreshTokenGuard)
   @Post('/refresh')
   async refresh(@Req() request: RequestWithUserDto, @Res() res) {
@@ -216,6 +303,31 @@ export class AuthController {
     }
   }
 
+  @ApiOperation({
+    summary: 'Logout',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Logout successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Logout successfully',
+        data: null,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'System error',
+    schema: {
+      example: {
+        success: false,
+        message: 'System error while loging out',
+        data: null,
+      },
+    },
+  })
   @Post('log-out')
   async logout(@Res() res, @Req() request: RequestWithUserDto) {
     try {

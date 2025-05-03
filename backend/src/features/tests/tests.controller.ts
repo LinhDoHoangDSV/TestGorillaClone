@@ -29,6 +29,7 @@ import { AuthGuard } from 'src/common/guard/jwt_auth.guard';
 import RoleGuard from 'src/common/guard/role.guard';
 import { RequestWithUserDto, Roles } from 'src/common/constant';
 import { StatisticsService } from '../statistics/statistics.service';
+import { ValidationIDPipe } from 'src/common/pipe/validation-id.pipe';
 
 @ApiTags('Tests')
 @Controller('tests')
@@ -63,12 +64,12 @@ export class TestsController {
   })
   @ApiResponse({
     status: 400,
-    description: 'Bad request from user',
+    description: 'Invalid input data',
     schema: {
       example: {
         success: false,
         message: 'Invalid input data',
-        errors: [
+        data: [
           {
             property: 'test_ime',
             constraints: 'Attribute test_ime is not allowed',
@@ -87,8 +88,8 @@ export class TestsController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while creating test',
+        data: null,
       },
     },
   })
@@ -96,9 +97,9 @@ export class TestsController {
     type: CreateTestDto,
     required: true,
     examples: {
-      user_1: {
+      createDto: {
         summary: 'Create a new question',
-        description: 'Create a new question',
+        description: 'owner_id, ispublish and deleted_at are optional',
         value: {
           owner_id: 5,
           title: 'Fullstack Intern Test',
@@ -150,6 +151,50 @@ export class TestsController {
     }
   }
 
+  @ApiOperation({
+    summary: 'Find all tests created by the user',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Finding tests successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Finding all tests successfully',
+        data: [
+          {
+            id: 38,
+            owner_id: 4,
+            title: 'updated test again',
+            description: 'no description',
+            test_time: 10,
+            deleted_at: null,
+            is_publish: true,
+          },
+          {
+            id: 39,
+            owner_id: 4,
+            title: 'Hope it work well',
+            description: 'no des',
+            test_time: 10,
+            deleted_at: null,
+            is_publish: true,
+          },
+        ],
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'System error',
+    schema: {
+      example: {
+        success: false,
+        message: 'System error while finding tests',
+        data: null,
+      },
+    },
+  })
   @UseGuards(RoleGuard(Roles.HR))
   @UseGuards(AuthGuard)
   @Get('/all/own')
@@ -182,6 +227,67 @@ export class TestsController {
     }
   }
 
+  @ApiOperation({
+    summary: 'Find all tests by criterias',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Finding tests successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Finding all tests successfully',
+        data: [
+          {
+            id: 38,
+            owner_id: 4,
+            title: 'updated test again',
+            description: 'no description',
+            test_time: 10,
+            deleted_at: null,
+            is_publish: true,
+          },
+          {
+            id: 39,
+            owner_id: 4,
+            title: 'Hope it work well',
+            description: 'no des',
+            test_time: 10,
+            deleted_at: null,
+            is_publish: true,
+          },
+        ],
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'System error',
+    schema: {
+      example: {
+        success: false,
+        message: 'System error while finding tests',
+        data: null,
+      },
+    },
+  })
+  @ApiBody({
+    type: FindTestCriteriasDto,
+    required: true,
+    examples: {
+      createDto: {
+        summary: 'Criteria to find tests',
+        description: 'All fields are optional',
+        value: {
+          owner_id: 5,
+          title: 'Fullstack Intern Test',
+          description: 'Nothing',
+          test_time: 15,
+          is_publish: false,
+        },
+      },
+    },
+  })
   @Post('/criterias')
   async findByCriterias(
     @Body() findTestByCriteria: FindTestCriteriasDto,
@@ -214,7 +320,7 @@ export class TestsController {
   }
 
   @ApiOperation({
-    summary: 'Get all tests',
+    summary: 'Find all tests',
   })
   @ApiResponse({
     status: 200,
@@ -242,8 +348,8 @@ export class TestsController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while finding all tests',
+        data: null,
       },
     },
   })
@@ -271,11 +377,11 @@ export class TestsController {
   }
 
   @ApiOperation({
-    summary: 'Get a test by ID',
+    summary: 'Find a test by ID',
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the test to retrieve',
+    description: 'ID of test to retrieve',
     type: Number,
   })
   @ApiResponse({
@@ -297,18 +403,29 @@ export class TestsController {
     },
   })
   @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+    schema: {
+      example: {
+        success: false,
+        message: 'ID must be a number',
+        data: 'Bad Request',
+      },
+    },
+  })
+  @ApiResponse({
     status: 500,
     description: 'System error',
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while finding test',
+        data: null,
       },
     },
   })
   @Get(':id')
-  async findOne(@Param('id') id: string, @Res() res) {
+  async findOne(@Param('id', ValidationIDPipe) id: string, @Res() res) {
     try {
       const test = await this.testsService.findOne(+id);
       this.logger.debug('Finding test successfully');
@@ -335,7 +452,7 @@ export class TestsController {
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the test to be updated',
+    description: 'ID of the test to be updated',
     type: Number,
   })
   @ApiResponse({
@@ -357,27 +474,41 @@ export class TestsController {
     },
   })
   @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+    schema: {
+      example: {
+        success: false,
+        message: 'ID must be a number',
+        data: 'Bad Request',
+      },
+    },
+  })
+  @ApiResponse({
     status: 500,
     description: 'System error',
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while updating test',
+        data: null,
       },
     },
   })
   @ApiBody({
     type: UpdateTestDto,
-    required: false,
+    required: true,
     examples: {
       user_1: {
-        summary: 'Update an existing question',
-        description: 'Update an existing question',
+        summary: 'Update an existing test',
+        description: 'All fields are optional',
         value: {
-          question_id: 5,
-          option_text: 'kjasd',
-          is_correct: true,
+          owner_id: 1,
+          title: 'aba',
+          description: 'no description',
+          test_time: 100,
+          is_publish: true,
+          deleted_at: new Date(),
         },
       },
     },
@@ -386,7 +517,7 @@ export class TestsController {
   @UseGuards(AuthGuard)
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id', ValidationIDPipe) id: string,
     @Body() updateTestDto: UpdateTestDto,
     @Res() res,
   ) {
@@ -420,7 +551,7 @@ export class TestsController {
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the test to be deleted',
+    description: 'ID of the test to be deleted',
     type: Number,
   })
   @ApiResponse({
@@ -440,8 +571,8 @@ export class TestsController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while deleting test',
+        data: null,
       },
     },
   })
