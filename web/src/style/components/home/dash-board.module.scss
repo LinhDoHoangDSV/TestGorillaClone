@@ -2,27 +2,28 @@
   padding: 24px 0;
 
   &__container {
-    max-width: 1280px;
-    margin: 0 auto;
     padding: 0 3%;
+    margin: 0 auto;
+    max-width: 1280px;
   }
 
   &__header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
     margin-bottom: 24px;
   }
 
   &__greeting {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 600;
-    line-height: 26px;
+    line-height: 24px;
     color: #111827;
     margin: 0;
   }
 
-  &__createBtn {
+  &__create-btn {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -39,39 +40,35 @@
     &:hover {
       background-color: rgb(165, 12, 132);
     }
+
+    &-icon {
+      font-size: 20px;
+      font-weight: 300;
+    }
   }
 
-  &__plusIcon {
-    font-size: 20px;
-    font-weight: 300;
-  }
-
-  &__statsContainer {
+  &__stats {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: 1fr;
     gap: 16px;
     margin-bottom: 24px;
   }
-}
 
-@media (max-width: 1024px) {
-  .statsContainer {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 572px) {
-  .dashboard {
-    &__statsContainer {
+  @media (min-width: 572px) {
+    &__stats {
       grid-template-columns: repeat(2, 1fr);
     }
   }
-}
 
-@media (max-width: 372px) {
-  .dashboard {
-    &__statsContainer {
-      grid-template-columns: repeat(1, 1fr);
+  @media (min-width: 1024px) {
+    &__header {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    &__stats {
+      grid-template-columns: repeat(4, 1fr);
     }
   }
 }

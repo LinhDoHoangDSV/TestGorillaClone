@@ -1,11 +1,30 @@
-import { JSX } from 'react'
+import { JSX, ReactNode } from 'react'
 
 export type RouterType = {
+  // checked
   title: string
   path: string
   element: JSX.Element
   header: boolean | JSX.Element
   footer: boolean | JSX.Element
+}
+
+export interface ToasterProps {
+  // checked
+  message: string
+  type: string
+}
+
+export interface StatCardProps {
+  // checked
+  title: string
+  value: number
+}
+
+export interface ButtonProps {
+  // checked
+  children: ReactNode
+  variant: 'primary' | 'secondary'
 }
 
 export const steps = [
@@ -70,11 +89,6 @@ export const questionTypes = [
   },
   { id: 'coding', name: 'Coding', icon: 'coding' }
 ]
-
-export interface ToasterProps {
-  message: string
-  type: string // info / success / error
-}
 
 export interface CandidateProps {
   testAssignments: TestAssignment[]

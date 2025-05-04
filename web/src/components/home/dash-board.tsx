@@ -36,23 +36,21 @@ const Dashboard = () => {
 
   return (
     <div className={styles.dashboard}>
-      <div className={styles.dashboard__container}>
-        <div className={styles.dashboard__header}>
-          <h1 className={styles.dashboard__greeting}>
+      <div className={styles['dashboard__container']}>
+        <div className={styles['dashboard__header']}>
+          <h1 className={styles['dashboard__greeting']}>
             Hello, {name}. Find your next hire with skills-based assessments.
           </h1>
           <button
-            className={styles.dashboard__createBtn}
-            onClick={() => {
-              navigate('/assessments/new')
-            }}
+            className={styles['dashboard__create-btn']}
+            onClick={() => navigate('/assessments/new')}
           >
-            <span className={styles.dashboard__plusIcon}>+</span>
+            <span className={styles['dashboard__create-btn-icon']}>+</span>
             Create assessment
           </button>
         </div>
 
-        <div className={styles.dashboard__statsContainer}>
+        <div className={styles['dashboard__stats']}>
           <StatCard
             title='Active assessments'
             value={statistics?.active_assess}
