@@ -30,7 +30,7 @@ import RoleGuard from 'src/common/guard/role.guard';
 import { RequestWithUserDto, Roles } from 'src/common/constant';
 import { ValidationIDPipe } from 'src/common/pipe/validation-id.pipe';
 
-@ApiTags("'Statistics'")
+@ApiTags('Statistics')
 @Controller('statistics')
 export class StatisticsController {
   constructor(
@@ -349,11 +349,6 @@ export class StatisticsController {
 
   @ApiOperation({
     summary: 'Find statistics of user',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'ID of the statistics to retrieve',
-    type: Number,
   })
   @ApiResponse({
     status: 200,

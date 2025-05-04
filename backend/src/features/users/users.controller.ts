@@ -49,15 +49,33 @@ export class UsersController {
       example: {
         success: true,
         message: 'Creating user successfully',
+        data: {
+          id: 4,
+          role_id: 2,
+          email: 'linhdh@dgroup.co',
+          first_name: 'Linh',
+          last_name: 'Hoang',
+          phone_number: '',
+          refresh_token: '',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid input data',
+    schema: {
+      example: {
+        success: false,
+        message: 'Invalid input data',
         data: [
           {
-            id: 4,
-            role_id: 2,
-            email: 'linhdh@dgroup.co',
-            first_name: 'Linh',
-            last_name: 'Hoang',
-            phone_number: '',
-            refresh_token: '',
+            property: 'role_id',
+            constraints: 'Attribute role_id must exist',
+          },
+          {
+            property: 'email',
+            constraints: 'Attribute email must exist',
           },
         ],
       },
@@ -65,7 +83,7 @@ export class UsersController {
   })
   @ApiResponse({
     status: 500,
-    description: 'System error while creating user',
+    description: 'System error',
     schema: {
       example: {
         success: false,
@@ -116,94 +134,94 @@ export class UsersController {
     }
   }
 
-  // @ApiOperation({
-  //   summary: 'Find users by criterias',
-  // })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Finding users successfully',
-  //   schema: {
-  //     example: {
-  //       success: true,
-  //       message: 'Finding users successfully',
-  //       data: [
-  //         {
-  //           id: 4,
-  //           role_id: 2,
-  //           email: 'linhdh@dgroup.co',
-  //           first_name: 'Linh',
-  //           last_name: 'Hoang',
-  //           phone_number: '0942938128',
-  //           refresh_token:
-  //             '$2b$10$HpJ7gSCFhLarYA4BxxIgwOgaCHW5SBf.OaLXECR1MSgp0MDgxkFhC',
-  //         },
-  //       ],
-  //     },
-  //   },
-  // })
-  // @ApiResponse({
-  //   status: 500,
-  //   description: 'System error while finding users',
-  //   schema: {
-  //     example: {
-  //       success: false,
-  //       message: 'System error while finding users',
-  //       data: null,
-  //     },
-  //   },
-  // })
-  // @ApiBody({
-  //   type: FindUserCriteriaDto,
-  //   required: true,
-  //   examples: {
-  //     Criterias: {
-  //       summary: 'Criterias to find users',
-  //       description:
-  //         'All fields are optional. You can use any combination of them to find users',
-  //       value: {
-  //         role_id: 3,
-  //         email: 'linhdh@dgroup.co',
-  //         first_name: 'Linh',
-  //         last_name: 'Do Hoang',
-  //         phone_number: '',
-  //         refresh_token: '',
-  //       },
-  //     },
-  //   },
-  // })
-  // @Post('/criterias')
-  // async findByCriterias(
-  //   @Body() findUserCriteriaDto: FindUserCriteriaDto,
-  //   @Res() res,
-  // ) {
-  //   try {
-  //     const existingUsers =
-  //       await this.usersService.findByCriterias(findUserCriteriaDto);
-  //     this.logger.debug('Finding users successfully');
-  //     this.response.initResponse(
-  //       true,
-  //       'Finding users successfully',
-  //       existingUsers,
-  //     );
-  //     return res.status(HttpStatus.OK).json(this.response);
-  //   } catch (error) {
-  //     this.logger.error('Error while finding users', error?.stack);
-  //     if (error instanceof HttpException) {
-  //       this.response.initResponse(false, error?.message, null);
-  //       return res.status(error?.getStatus()).json(this.response);
-  //     } else {
-  //       this.response.initResponse(
-  //         false,
-  //         'System error while finding users',
-  //         null,
-  //       );
-  //       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(this.response);
-  //     }
-  //   }
-  // }
+  @ApiOperation({
+    summary: 'Find users by criterias',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Finding users successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Finding users successfully',
+        data: [
+          {
+            id: 4,
+            role_id: 2,
+            email: 'linhdh@dgroup.co',
+            first_name: 'Linh',
+            last_name: 'Hoang',
+            phone_number: '0942938128',
+            refresh_token:
+              '$2b$10$HpJ7gSCFhLarYA4BxxIgwOgaCHW5SBf.OaLXECR1MSgp0MDgxkFhC',
+          },
+        ],
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'System error',
+    schema: {
+      example: {
+        success: false,
+        message: 'System error while finding users',
+        data: null,
+      },
+    },
+  })
+  @ApiBody({
+    type: FindUserCriteriaDto,
+    required: true,
+    examples: {
+      Criterias: {
+        summary: 'Criterias to find users',
+        description:
+          'All fields are optional. You can use any combination of them to find users',
+        value: {
+          role_id: 3,
+          email: 'linhdh@dgroup.co',
+          first_name: 'Linh',
+          last_name: 'Do Hoang',
+          phone_number: '',
+          refresh_token: '',
+        },
+      },
+    },
+  })
+  @Post('/criterias')
+  async findByCriterias(
+    @Body() findUserCriteriaDto: FindUserCriteriaDto,
+    @Res() res,
+  ) {
+    try {
+      const existingUsers =
+        await this.usersService.findByCriterias(findUserCriteriaDto);
+      this.logger.debug('Finding users successfully');
+      this.response.initResponse(
+        true,
+        'Finding users successfully',
+        existingUsers,
+      );
+      return res.status(HttpStatus.OK).json(this.response);
+    } catch (error) {
+      this.logger.error('Error while finding users', error?.stack);
+      if (error instanceof HttpException) {
+        this.response.initResponse(false, error?.message, null);
+        return res.status(error?.getStatus()).json(this.response);
+      } else {
+        this.response.initResponse(
+          false,
+          'System error while finding users',
+          null,
+        );
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(this.response);
+      }
+    }
+  }
 
   @ApiOperation({
-    summary: 'Find all answers',
+    summary: 'Find all users',
   })
   @ApiResponse({
     status: 200,
@@ -261,7 +279,7 @@ export class UsersController {
   })
   @ApiResponse({
     status: 500,
-    description: 'System error while finding all users',
+    description: 'System error',
     schema: {
       example: {
         success: false,
@@ -296,7 +314,7 @@ export class UsersController {
   }
 
   @ApiOperation({
-    summary: 'Find an answer by ID',
+    summary: 'Find a user by ID',
   })
   @ApiParam({
     name: 'id',
@@ -336,7 +354,7 @@ export class UsersController {
   })
   @ApiResponse({
     status: 500,
-    description: 'System error while finding user',
+    description: 'System error',
     schema: {
       example: {
         success: false,
@@ -369,12 +387,7 @@ export class UsersController {
   }
 
   @ApiOperation({
-    summary: 'Update an user by ID',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'ID of the user to be updated',
-    type: Number,
+    summary: 'Update a user',
   })
   @ApiResponse({
     status: 200,
@@ -384,10 +397,13 @@ export class UsersController {
         success: true,
         message: 'Updating user successfully',
         data: {
-          id: 2,
-          question_id: 5,
-          option_text: 'kjasd',
-          is_correct: true,
+          id: 4,
+          role_id: 2,
+          email: 'linhdh@dgroup.co',
+          first_name: 'Linh',
+          last_name: 'Hoang',
+          phone_number: '',
+          refresh_token: '',
         },
       },
     },
@@ -398,22 +414,25 @@ export class UsersController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
+        message: 'System error while updating user',
         errors: null,
       },
     },
   })
   @ApiBody({
     type: UpdateUserDto,
-    required: false,
+    required: true,
     examples: {
-      user_1: {
-        summary: 'Update an existing question',
-        description: 'Update an existing question',
+      updateDto: {
+        summary: 'DTO to update user',
+        description: 'All fields are optional',
         value: {
-          question_id: 5,
-          option_text: 'kjasd',
-          is_correct: true,
+          role_id: 2,
+          email: 'linhdh@dgroup.co',
+          first_name: 'Linh',
+          last_name: 'Hoang',
+          phone_number: '',
+          refresh_token: '',
         },
       },
     },
@@ -456,11 +475,11 @@ export class UsersController {
   }
 
   @ApiOperation({
-    summary: 'Delete an answer by ID',
+    summary: 'Delete a user by ID',
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the answer to be deleted',
+    description: 'ID of the user to be deleted',
     type: Number,
   })
   @ApiResponse({
@@ -480,11 +499,13 @@ export class UsersController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
+        message: 'System error while deleting user',
         errors: null,
       },
     },
   })
+  @UseGuards(RoleGuard(Roles.ADMIN))
+  @UseGuards(AuthGuard)
   @Delete(':id')
   async remove(@Param('id') id: string, @Res() res) {
     try {

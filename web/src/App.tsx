@@ -7,7 +7,7 @@ import { RootState } from './redux/store'
 import Loading from './components/loading'
 import Toaster from './components/ui/toast'
 import { useEffect, useMemo } from 'react'
-import { setActiveState, setToasterAppear } from './redux/slices/common.slice'
+import { setActiveState } from './redux/slices/common.slice'
 import { setInitialState, setIsAuthen } from './redux/slices/user.slice'
 import { getInformation } from './api/auth.api'
 
