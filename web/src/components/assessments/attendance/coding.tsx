@@ -89,7 +89,7 @@ const CodingQuestion: FC<CodingQuestionProps> = ({
     while (listToken.length > 0) {
       if (counter >= maxAttempts) {
         dispatch(
-          setToasterAppear({ message: 'Fail to run tests', type: 'error' })
+          setToasterAppear({ message: 'Time limit exceed', type: 'error' })
         )
         break
       }

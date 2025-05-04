@@ -1,10 +1,6 @@
-import type { FC, ReactNode, ButtonHTMLAttributes } from 'react'
+import type { FC } from 'react'
 import styles from '../../style/ui/button.module.scss'
-
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  children: ReactNode
-  variant: 'primary' | 'secondary'
-}
+import { ButtonProps } from '../../constant/common'
 
 const Button: FC<ButtonProps> = ({ children, variant, ...props }) => {
   return (

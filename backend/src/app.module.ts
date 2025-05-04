@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { LoggerModule } from './features/logger/logger.module';
 import { ResponseModule } from './features/response/response.module';
 import { APP_FILTER, APP_PIPE } from '@nestjs/core';
@@ -27,6 +25,7 @@ import { TestCasesModule } from './features/test-cases/test-cases.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: `.env.${process.env.NODE_ENV}`,
       validationSchema: Joi.object({
         DB_HOST: Joi.string().required(),
         DB_PORT: Joi.number().required(),
@@ -55,9 +54,7 @@ import { TestCasesModule } from './features/test-cases/test-cases.module';
     InitialCodesModule,
     TestCasesModule,
   ],
-  controllers: [AppController],
   providers: [
-    AppService,
     {
       provide: APP_FILTER,
       useClass: GlobalExceptionFilter,

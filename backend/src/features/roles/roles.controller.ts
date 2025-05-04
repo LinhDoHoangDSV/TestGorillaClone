@@ -23,6 +23,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { FindRolesCriteriasDto } from './dto/find-criteria-role.dto';
+import { ValidationIDPipe } from 'src/common/pipe/validation-id.pipe';
 
 @ApiTags('Roles')
 @Controller('roles')
@@ -53,12 +54,12 @@ export class RolesController {
   })
   @ApiResponse({
     status: 400,
-    description: 'Bad request from user',
+    description: 'Invalid input data',
     schema: {
       example: {
         success: false,
         message: 'Invalid input data',
-        errors: [
+        data: [
           {
             property: 'question_text',
             constraints: 'Attribute question_text is not allowed',
@@ -73,8 +74,8 @@ export class RolesController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while creating role',
+        data: null,
       },
     },
   })
@@ -82,9 +83,9 @@ export class RolesController {
     type: CreateRoleDto,
     required: true,
     examples: {
-      user_1: {
-        summary: 'Create a new role',
-        description: 'Create a new role',
+      createDto: {
+        summary: 'DTO for creating a new role',
+        description: 'description is optional',
         value: {
           name: 'HR',
           description: 'Some one called HR',
@@ -136,39 +137,23 @@ export class RolesController {
     },
   })
   @ApiResponse({
-    status: 400,
-    description: 'Bad request from user',
-    schema: {
-      example: {
-        success: false,
-        message: 'Invalid input data',
-        errors: [
-          {
-            property: 'question_text',
-            constraints: 'Attribute question_text is not allowed',
-          },
-        ],
-      },
-    },
-  })
-  @ApiResponse({
     status: 500,
     description: 'System error',
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while finding roles',
+        data: null,
       },
     },
   })
   @ApiBody({
     type: FindRolesCriteriasDto,
-    required: false,
+    required: true,
     examples: {
       user_1: {
-        summary: 'Find roles by criterias',
-        description: 'Find roles by criterias',
+        summary: 'DTO for finding roles by criteria',
+        description: 'All fields are optional',
         value: {
           name: 'HR',
           description: 'Some one called HR',
@@ -234,8 +219,8 @@ export class RolesController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while finding all roles',
+        data: null,
       },
     },
   })
@@ -263,11 +248,11 @@ export class RolesController {
   }
 
   @ApiOperation({
-    summary: 'Get role by ID',
+    summary: 'Find role by ID',
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the role to retrieve',
+    description: 'ID of the role to retrieve',
     type: Number,
   })
   @ApiResponse({
@@ -286,18 +271,29 @@ export class RolesController {
     },
   })
   @ApiResponse({
+    status: 400,
+    description: 'ID must be a number',
+    schema: {
+      example: {
+        success: false,
+        message: 'ID must be a number',
+        data: 'Bad Request',
+      },
+    },
+  })
+  @ApiResponse({
     status: 500,
     description: 'System error',
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while finding role',
+        data: null,
       },
     },
   })
   @Get(':id')
-  async findOne(@Param('id') id: string, @Res() res) {
+  async findOne(@Param('id', ValidationIDPipe) id: string, @Res() res) {
     try {
       const role = await this.rolesService.findOne(+id);
       this.logger.debug('Finding role successfully');
@@ -324,7 +320,7 @@ export class RolesController {
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the role to be updated',
+    description: 'ID of the role to be updated',
     type: Number,
   })
   @ApiResponse({
@@ -343,32 +339,44 @@ export class RolesController {
     },
   })
   @ApiResponse({
+    status: 400,
+    description: 'ID must be a number',
+    schema: {
+      example: {
+        success: false,
+        message: 'ID must be a number',
+        data: 'Bad Request',
+      },
+    },
+  })
+  @ApiResponse({
     status: 500,
     description: 'System error',
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while updating role',
+        data: null,
       },
     },
   })
   @ApiBody({
     type: UpdateRoleDto,
-    required: false,
+    required: true,
     examples: {
-      user_1: {
-        summary: 'Update an existing role',
-        description: 'Update an existing role',
+      updateDto: {
+        summary: 'DTO for updating an existing role',
+        description: 'All fields are optional',
         value: {
           name: 'HR',
+          description: 'Some one called HR',
         },
       },
     },
   })
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id', ValidationIDPipe) id: string,
     @Body() updateRoleDto: UpdateRoleDto,
     @Res() res,
   ) {
@@ -421,8 +429,8 @@ export class RolesController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while deleting role',
+        data: null,
       },
     },
   })

@@ -3,6 +3,7 @@ import {
   ExecutionContext,
   UnauthorizedException,
   Injectable,
+  HttpException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
@@ -27,7 +28,7 @@ export class RefreshTokenGuard implements CanActivate {
     if (!refreshToken) {
       response.clearCookie('sid');
       response.clearCookie('refresh_token');
-      throw new UnauthorizedException('No refresh token provided');
+      throw new HttpException('No refresh token provided', 419);
     }
 
     try {
@@ -51,7 +52,7 @@ export class RefreshTokenGuard implements CanActivate {
       if (!user) {
         response.clearCookie('sid');
         response.clearCookie('refresh_token');
-        throw new UnauthorizedException('Invalid refresh token');
+        throw new HttpException('No refresh token provided', 419);
       }
 
       console.log('Refresh Token Payload:', payload);
@@ -62,9 +63,7 @@ export class RefreshTokenGuard implements CanActivate {
     } catch (error) {
       response.clearCookie('sid');
       response.clearCookie('refresh_token');
-      throw new UnauthorizedException(
-        'Error while authenticating refresh token',
-      );
+      throw new HttpException('Error while generating token', 419);
     }
 
     return true;

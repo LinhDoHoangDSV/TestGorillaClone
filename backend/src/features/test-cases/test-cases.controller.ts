@@ -29,8 +29,9 @@ import { AuthGuard } from 'src/common/guard/jwt_auth.guard';
 import RoleGuard from 'src/common/guard/role.guard';
 import { Roles } from 'src/common/constant';
 import { FindTestCasesDto } from './dto/find-test-case.dto';
+import { ValidationIDPipe } from 'src/common/pipe/validation-id.pipe';
 
-@ApiTags('Test-Cases')
+@ApiTags('Test Cases')
 @Controller('test-cases')
 export class TestCasesController {
   constructor(
@@ -40,35 +41,38 @@ export class TestCasesController {
   ) {}
 
   @ApiOperation({
-    summary: 'Create a new question',
+    summary: 'Create a new testcase',
   })
   @ApiResponse({
     status: 201,
-    description: 'The question has been successfully created.',
+    description: 'Create test case successfully',
     schema: {
       example: {
         success: true,
-        message: 'Create question successfully',
+        message: 'Create test case successfully',
         data: {
-          id: 8,
-          test_id: 2,
-          question_text: 'What is your name?',
-          question_type: 'essay',
-          score: 10,
+          id: 1,
+          question_id: 80,
+          input: '111',
+          expected_output: '1111',
         },
       },
     },
   })
   @ApiBadRequestResponse({
-    description: 'Bad request from user',
+    description: 'Invalid input data',
     schema: {
       example: {
         success: false,
         message: 'Invalid input data',
-        errors: [
+        data: [
           {
-            property: 'test_id',
-            constraints: 'test_id must be a number',
+            property: 'question_id',
+            constraints: 'Attribute question_id must exist',
+          },
+          {
+            property: 'expected_output',
+            constraints: 'Attribute expected_output must exist',
           },
         ],
       },
@@ -79,22 +83,22 @@ export class TestCasesController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while creating test case',
+        data: null,
       },
     },
   })
   @ApiBody({
     type: CreateTestCaseDto,
+    required: true,
     examples: {
-      user_1: {
-        summary: 'Create a new question',
-        description: 'Create a new question',
+      createDto: {
+        summary: 'Create a new testcase',
+        description: 'input is optional',
         value: {
-          test_id: 1,
-          question_text: 'What is your name?',
-          question_type: 'essay',
-          score: 10,
+          question_id: 1,
+          input: 'string',
+          expected_output: 'string',
         },
       },
     },
@@ -128,6 +132,52 @@ export class TestCasesController {
     }
   }
 
+  @ApiOperation({
+    summary: 'Find test case by criterias',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Finding test case successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Finding test case successfully',
+        data: [
+          {
+            id: 1,
+            question_id: 80,
+            input: '111',
+            expected_output: '1111',
+          },
+        ],
+      },
+    },
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'System error',
+    schema: {
+      example: {
+        success: false,
+        message: 'System error while finding test case',
+        data: null,
+      },
+    },
+  })
+  @ApiBody({
+    type: FindTestCasesDto,
+    required: true,
+    examples: {
+      findDto: {
+        summary: 'Find testcases',
+        description: 'All fields are optional',
+        value: {
+          question_id: 1,
+          input: 'string',
+          expected_output: 'string',
+        },
+      },
+    },
+  })
   @Post('/criterias')
   async findByCriterias(
     @Body() findTestCasesDto: FindTestCasesDto,
@@ -160,29 +210,27 @@ export class TestCasesController {
   }
 
   @ApiOperation({
-    summary: 'Get all questions',
+    summary: 'Find all testcases',
   })
   @ApiResponse({
     status: 200,
-    description: 'Finding all questions successfully',
+    description: 'Find all test case successfully',
     schema: {
       example: {
         success: true,
-        message: 'Finding all questions successfully',
+        message: 'Finding all test case successfully',
         data: [
           {
-            id: 2,
-            test_id: 5,
-            question_text: 'as',
-            question_type: 'multiple_choice',
-            score: 5,
+            id: 1,
+            question_id: 80,
+            input: '111',
+            expected_output: '1111',
           },
           {
-            id: 3,
-            test_id: 6,
-            question_text: 'as',
-            question_type: 'multiple_choice',
-            score: 10,
+            id: 2,
+            question_id: 80,
+            input: '222',
+            expected_output: '222',
           },
         ],
       },
@@ -194,8 +242,8 @@ export class TestCasesController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while finding all test case',
+        data: null,
       },
     },
   })
@@ -227,27 +275,37 @@ export class TestCasesController {
   }
 
   @ApiOperation({
-    summary: 'Get a question by ID',
+    summary: 'Find a testcase by ID',
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the question to retrieve',
+    description: 'ID of the testcase to retrieve',
     type: Number,
   })
   @ApiResponse({
     status: 200,
-    description: 'Finding question successfully',
+    description: 'Finding test case successfully',
     schema: {
       example: {
         success: true,
-        message: 'Finding question successfully',
+        message: 'Finding test case successfully',
         data: {
-          id: 4,
-          test_id: 6,
-          question_text: 'as',
-          question_type: 'multiple_choice',
-          score: 10,
+          id: 2,
+          question_id: 80,
+          input: '222',
+          expected_output: '222',
         },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+    schema: {
+      example: {
+        success: false,
+        message: 'ID must be a number',
+        data: 'Bad Request',
       },
     },
   })
@@ -257,13 +315,13 @@ export class TestCasesController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while finding test case',
+        data: null,
       },
     },
   })
   @Get(':id')
-  async findOne(@Param('id') id: string, @Res() res) {
+  async findOne(@Param('id', ValidationIDPipe) id: string, @Res() res) {
     try {
       const testCase = await this.testCasesService.findOne(+id);
       this.logger.debug('Finding test case successfully');
@@ -290,27 +348,37 @@ export class TestCasesController {
   }
 
   @ApiOperation({
-    summary: 'Update a question by ID',
+    summary: 'Update a testcase by ID',
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the question to be updated',
+    description: 'ID of the testcase to be updated',
     type: Number,
   })
   @ApiResponse({
     status: 200,
-    description: 'Updating question successfully',
+    description: 'Updating test case successfully',
     schema: {
       example: {
         success: true,
-        message: 'Updating question successfully',
+        message: 'Updating test case successfully',
         data: {
           id: 1,
-          test_id: 2,
-          question_text: 'sjdf\ndalsmdf\njasda',
-          question_type: 'essay',
-          score: 5,
+          question_id: 80,
+          input: '111',
+          expected_output: '1111',
         },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+    schema: {
+      example: {
+        success: false,
+        message: 'ID must be a number',
+        data: 'Bad Request',
       },
     },
   })
@@ -320,23 +388,22 @@ export class TestCasesController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while updating test case',
+        data: null,
       },
     },
   })
   @ApiBody({
     type: UpdateTestCaseDto,
-    required: false,
+    required: true,
     examples: {
-      user_1: {
-        summary: 'Update an existing question',
-        description: 'Update an existing question',
+      updateDto: {
+        summary: 'Update an existing testcase',
+        description: 'All fields are optional',
         value: {
-          test_id: 1,
-          question_text: 'What is your name?',
-          question_type: 'essay',
-          score: 10,
+          question_id: 1,
+          input: 'string',
+          expected_output: 'string',
         },
       },
     },
@@ -345,7 +412,7 @@ export class TestCasesController {
   @UseGuards(AuthGuard)
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id', ValidationIDPipe) id: string,
     @Body() updateTestCaseDto: UpdateTestCaseDto,
     @Res() res,
   ) {
@@ -382,17 +449,16 @@ export class TestCasesController {
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the question to be deleted',
+    description: 'ID of the testcase to be deleted',
     type: Number,
   })
   @ApiResponse({
     status: 200,
-    description: 'Deleting question successfully',
+    description: 'Deleting test case successfully',
     schema: {
       example: {
         success: true,
-        message: 'Deleting question successfully',
-        data: null,
+        message: 'Deleting test case successfully',
       },
     },
   })
@@ -402,8 +468,8 @@ export class TestCasesController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while deleting test case',
+        data: null,
       },
     },
   })

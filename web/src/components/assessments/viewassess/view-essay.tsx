@@ -103,7 +103,7 @@ const EssayQuestionDialog: FC<QuestionDialogProps> = ({
       await deleteQuestion(questions[rowIndex].id)
     }
 
-    const temp = questions.filter((item, index) => {
+    const temp = questions.filter((_, index) => {
       return index !== rowIndex
     })
 

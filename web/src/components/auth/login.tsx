@@ -10,7 +10,7 @@ import {
   setToasterAppear
 } from '../../redux/slices/common.slice'
 import { useNavigate } from 'react-router-dom'
-import { setIsAuthen } from '../../redux/slices/user.slice'
+import { setInitialState, setIsAuthen } from '../../redux/slices/user.slice'
 import { RootState } from '../../redux/store'
 
 const LoginPage = () => {
@@ -36,6 +36,27 @@ const LoginPage = () => {
         )
         return
       }
+
+      const userInformation = await getInformation()
+
+      if (userInformation?.status > 299) {
+        dispatch(setIsAuthen({ value: false }))
+        return
+      }
+
+      const data = userInformation?.data?.data
+
+      dispatch(
+        setInitialState({
+          email: data?.email,
+          id: data?.id,
+          first_name: data?.first_name,
+          last_name: data?.last_name,
+          role_id: data?.role_id,
+          phone_number: data?.phone_number
+        })
+      )
+
       navigate('/')
       dispatch(setIsAuthen({ value: true }))
       dispatch(setIsLoadingFalse())

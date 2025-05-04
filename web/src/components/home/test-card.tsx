@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import style from '../../style/components/test-card.module.scss'
 import Button from '../ui/button'
 import { getAllTestsByCriteria } from '../../api/tests.api'
@@ -12,7 +12,7 @@ import { TestCriteria } from '../../constant/api'
 import { useNavigate } from 'react-router-dom'
 import { TestEntity } from '../../constant/common'
 
-const TestCard: FC = () => {
+const TestCard = () => {
   const [tests, setAllTests] = useState<TestEntity[]>([])
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -56,20 +56,20 @@ const TestCard: FC = () => {
   }
 
   return (
-    <div className={style.wrapper}>
-      {tests.map((test: TestEntity, index) => {
-        return (
-          <div className={style.card} key={index}>
-            <div className={style.card__title}>{test?.title}</div>
-            <div className={style.card__description}>{test?.description}</div>
-            <div className={style.card__footer}>
-              <Button variant='primary' onClick={() => handleView(test)}>
-                View test
-              </Button>
-            </div>
+    <div className={style['test-card']}>
+      {tests.map((test: TestEntity, index) => (
+        <div className={style['test-card__item']} key={index}>
+          <div className={style['test-card__item-title']}>{test?.title}</div>
+          <div className={style['test-card__item-description']}>
+            {test?.description}
           </div>
-        )
-      })}
+          <div className={style['test-card__item-footer']}>
+            <Button variant='primary' onClick={() => handleView(test)}>
+              View test
+            </Button>
+          </div>
+        </div>
+      ))}
     </div>
   )
 }

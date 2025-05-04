@@ -1,19 +1,34 @@
 import { type FC, useState } from 'react'
 import styles from '../../../style/components/assessments/new/create-question.module.scss'
 import {
+  CreateInitialCodeDto,
+  CreateTestCaseDto,
   InitialCode,
   LanguageID,
   type QuestionDialogProps
 } from '../../../constant/common'
 import Button from '../../ui/button'
 import { useDispatch } from 'react-redux'
-import { setToasterAppear } from '../../../redux/slices/common.slice'
+import {
+  setIsLoadingFalse,
+  setIsLoadingTrue,
+  setToasterAppear
+} from '../../../redux/slices/common.slice'
+import { CreateQuestionDto } from '../../../constant/api'
+import { createQuestion } from '../../../api/questions.api'
+import {
+  createTestCase,
+  findTestCaseByCriteria
+} from '../../../api/test-case.api'
+import { createInitialCode } from '../../../api/initial-code.api'
 
 const CodingQuestionDialog: FC<QuestionDialogProps> = ({
   onCancel,
   setQuestions,
   questions,
-  rowIndex
+  rowIndex,
+  actionType,
+  testId
 }) => {
   const dispatch = useDispatch()
   const [title, setTitle] = useState<string>(
@@ -44,11 +59,6 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
           language_id: LanguageID.JS
         }
   )
-
-  console.log('title', title)
-  console.log('description', description)
-  console.log('initialCodes', initialCodes)
-  console.log('testCases', testCases)
 
   const handleDelete = () => {
     if (rowIndex >= 0) {
@@ -160,6 +170,100 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
     dispatch(setToasterAppear({ message: 'Question added', type: 'success' }))
     onCancel()
   }
+
+  const handleAdd = async () => {
+    if (!title.trim()) {
+      dispatch(
+        setToasterAppear({ message: 'Title must not be blank', type: 'error' })
+      )
+      return
+    }
+
+    if (!description.trim()) {
+      dispatch(
+        setToasterAppear({
+          message: 'Description must not be blank',
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    if (!+score) {
+      dispatch(
+        setToasterAppear({ message: 'Score must be a number', type: 'error' })
+      )
+      return
+    }
+
+    if (testCases?.length === 0) {
+      dispatch(
+        setToasterAppear({
+          message: 'You must provide some testcases',
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    dispatch(setIsLoadingTrue())
+
+    const createQuestionDto: CreateQuestionDto = {
+      question_text: description,
+      question_type: 'coding',
+      score: +score,
+      test_id: testId,
+      title
+    }
+
+    const newQuestion = await createQuestion(createQuestionDto)
+
+    if (newQuestion?.status > 299) {
+      dispatch(
+        setToasterAppear({
+          message: 'Failed to add question',
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    for (const testcase of testCases) {
+      const createTestCaseDto: CreateTestCaseDto = {
+        input: testcase.input,
+        expected_output: testcase.expected_output,
+        question_id: newQuestion?.data?.data?.id
+      }
+      await createTestCase(createTestCaseDto)
+    }
+
+    const createInitialCodeDto: CreateInitialCodeDto = {
+      question_id: newQuestion?.data?.data?.id,
+      language_id: LanguageID.JS,
+      description: initialCodes.description,
+      initial_code: initialCodes.initial_code
+    }
+
+    const newInitialCode = await createInitialCode(createInitialCodeDto)
+    const listTestcases = await findTestCaseByCriteria({
+      question_id: newQuestion?.data?.data?.id
+    })
+
+    setQuestions([
+      ...questions,
+      {
+        ...newQuestion?.data?.data,
+        testcases: listTestcases?.data?.data,
+        initial_code: newInitialCode?.data?.data
+      }
+    ])
+
+    dispatch(setToasterAppear({ message: 'Question added', type: 'success' }))
+    dispatch(setIsLoadingFalse())
+    onCancel()
+  }
+
+  const handleUpdateExisting = async () => {}
 
   const handleStarterCodeChange = (code: string) => {
     setInitialCodes((prev) => ({
@@ -410,7 +514,15 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
           <Button
             variant='primary'
             disabled={!title.trim()}
-            onClick={rowIndex >= 0 ? handleUpdate : handleSave}
+            onClick={
+              rowIndex >= 0
+                ? handleUpdate
+                : actionType === null
+                  ? handleSave
+                  : actionType === 'add'
+                    ? handleAdd
+                    : handleUpdateExisting
+            }
           >
             {rowIndex >= 0 ? 'Update' : 'Save'}
           </Button>

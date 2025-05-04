@@ -17,12 +17,20 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { LoggerService } from '../logger/logger.service';
 import { Response } from '../response/response';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { FindUserCriteriaDto } from './dto/find-user-criteria.dto';
 import { RequestWithUserDto, Roles } from 'src/common/constant';
 import { AuthGuard } from 'src/common/guard/jwt_auth.guard';
 import RoleGuard from 'src/common/guard/role.guard';
+import { ValidationIDPipe } from 'src/common/pipe/validation-id.pipe';
 
+@ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(
@@ -32,35 +40,42 @@ export class UsersController {
   ) {}
 
   @ApiOperation({
-    summary: 'Create a new answer',
+    summary: 'Create a new user',
   })
   @ApiResponse({
     status: 201,
-    description: 'Creating answer successfully',
+    description: 'Creating user successfully',
     schema: {
       example: {
         success: true,
-        message: 'Creating answer successfully',
+        message: 'Creating user successfully',
         data: {
-          id: 2,
-          question_id: 5,
-          option_text: 'kjasd',
-          is_correct: true,
+          id: 4,
+          role_id: 2,
+          email: 'linhdh@dgroup.co',
+          first_name: 'Linh',
+          last_name: 'Hoang',
+          phone_number: '',
+          refresh_token: '',
         },
       },
     },
   })
   @ApiResponse({
     status: 400,
-    description: 'Bad request from user',
+    description: 'Invalid input data',
     schema: {
       example: {
         success: false,
         message: 'Invalid input data',
-        errors: [
+        data: [
           {
-            property: 'question_text',
-            constraints: 'Attribute question_text is not allowed',
+            property: 'role_id',
+            constraints: 'Attribute role_id must exist',
+          },
+          {
+            property: 'email',
+            constraints: 'Attribute email must exist',
           },
         ],
       },
@@ -72,8 +87,8 @@ export class UsersController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while creating user',
+        data: null,
       },
     },
   })
@@ -82,12 +97,16 @@ export class UsersController {
     required: true,
     examples: {
       user_1: {
-        summary: 'Create a new answer',
-        description: 'Create a new answer',
+        summary: 'Create a new user',
+        description:
+          'first_name, last_name, phone_number and refresh_token are optional',
         value: {
-          question_id: 5,
-          option_text: 'kjasd',
-          is_correct: true,
+          role_id: 3,
+          email: 'linhdh@dgroup.co',
+          first_name: 'Linh',
+          last_name: 'Do Hoang',
+          phone_number: '',
+          refresh_token: '',
         },
       },
     },
@@ -115,19 +134,74 @@ export class UsersController {
     }
   }
 
+  @ApiOperation({
+    summary: 'Find users by criterias',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Finding users successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Finding users successfully',
+        data: [
+          {
+            id: 4,
+            role_id: 2,
+            email: 'linhdh@dgroup.co',
+            first_name: 'Linh',
+            last_name: 'Hoang',
+            phone_number: '0942938128',
+            refresh_token:
+              '$2b$10$HpJ7gSCFhLarYA4BxxIgwOgaCHW5SBf.OaLXECR1MSgp0MDgxkFhC',
+          },
+        ],
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'System error',
+    schema: {
+      example: {
+        success: false,
+        message: 'System error while finding users',
+        data: null,
+      },
+    },
+  })
+  @ApiBody({
+    type: FindUserCriteriaDto,
+    required: true,
+    examples: {
+      Criterias: {
+        summary: 'Criterias to find users',
+        description:
+          'All fields are optional. You can use any combination of them to find users',
+        value: {
+          role_id: 3,
+          email: 'linhdh@dgroup.co',
+          first_name: 'Linh',
+          last_name: 'Do Hoang',
+          phone_number: '',
+          refresh_token: '',
+        },
+      },
+    },
+  })
   @Post('/criterias')
   async findByCriterias(
     @Body() findUserCriteriaDto: FindUserCriteriaDto,
     @Res() res,
   ) {
     try {
-      const existingUser =
+      const existingUsers =
         await this.usersService.findByCriterias(findUserCriteriaDto);
       this.logger.debug('Finding users successfully');
       this.response.initResponse(
         true,
         'Finding users successfully',
-        existingUser,
+        existingUsers,
       );
       return res.status(HttpStatus.OK).json(this.response);
     } catch (error) {
@@ -147,23 +221,59 @@ export class UsersController {
   }
 
   @ApiOperation({
-    summary: 'Get all questions',
+    summary: 'Find all users',
   })
   @ApiResponse({
     status: 200,
-    description: 'Finding all answers successfully',
+    description: 'Finding all users successfully',
     schema: {
       example: {
         success: true,
-        message: 'Finding all answers successfully',
+        message: 'Finding all users successfully',
         data: [
           {
-            id: 2,
-            question_id: 5,
-            option_text: 'kjasd',
-            is_correct: true,
+            id: 4,
+            role_id: 2,
+            email: 'linhdh@dgroup.co',
+            first_name: 'Linh',
+            last_name: 'Hoang',
+            phone_number: '0942938128',
+            refresh_token:
+              '$2b$10$HpJ7gSCFhLarYA4BxxIgwOgaCHW5SBf.OaLXECR1MSgp0MDgxkFhC',
+          },
+          {
+            id: 6,
+            role_id: 2,
+            email: 'plmqaz310304@gmail.com',
+            first_name: 'Smalling',
+            last_name: 'Harry',
+            phone_number: '',
+            refresh_token:
+              '$2b$10$kg8Vnri4D6SJvDJPblZ7FuBozlztGa7G6xxFcCPpVcgA7GmUCAYJ6',
           },
         ],
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+    schema: {
+      example: {
+        success: false,
+        message: 'You need to log in to continue',
+        data: 'Unauthorized',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden',
+    schema: {
+      example: {
+        success: false,
+        message: 'Forbidden resource',
+        data: 'Forbidden',
       },
     },
   })
@@ -173,11 +283,13 @@ export class UsersController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while finding all users',
+        data: null,
       },
     },
   })
+  @UseGuards(RoleGuard(Roles.ADMIN))
+  @UseGuards(AuthGuard)
   @Get()
   async findAll(@Res() res) {
     try {
@@ -186,7 +298,7 @@ export class UsersController {
       this.response.initResponse(true, 'Finding all users successfully', users);
       return res.status(HttpStatus.OK).json(this.response);
     } catch (error) {
-      this.logger.error('Error finding all users', error?.stack);
+      this.logger.error('Error while finding all users', error?.stack);
       if (error instanceof HttpException) {
         this.response.initResponse(false, error?.message, null);
         return res.status(error?.getStatus()).json(this.response);
@@ -202,26 +314,41 @@ export class UsersController {
   }
 
   @ApiOperation({
-    summary: 'Get an answer by ID',
+    summary: 'Find a user by ID',
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the answer to retrieve',
+    description: 'ID of the user to retrieve',
     type: Number,
   })
   @ApiResponse({
     status: 200,
-    description: 'Finding answer successfully',
+    description: 'Finding user successfully',
     schema: {
       example: {
         success: true,
-        message: 'Finding answer successfully',
+        message: 'Finding user successfully',
         data: {
-          id: 2,
-          question_id: 5,
-          option_text: 'kjasd',
-          is_correct: true,
+          id: 4,
+          role_id: 2,
+          email: 'linhdh@dgroup.co',
+          first_name: 'Linh',
+          last_name: 'Hoang',
+          phone_number: '0942938128',
+          refresh_token:
+            '$2b$10$HpJ7gSCFhLarYA4BxxIgwOgaCHW5SBf.OaLXECR1MSgp0MDgxkFhC',
         },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'ID must be a number',
+    schema: {
+      example: {
+        success: false,
+        message: 'ID must be a number',
+        data: 'Bad Request',
       },
     },
   })
@@ -231,13 +358,13 @@ export class UsersController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while finding user',
+        data: null,
       },
     },
   })
   @Get(':id')
-  async findOne(@Param('id') id: string, @Res() res) {
+  async findOne(@Param('id', ValidationIDPipe) id: string, @Res() res) {
     try {
       const user = await this.usersService.findOne(+id);
       this.logger.debug('Finding user successfully');
@@ -260,25 +387,23 @@ export class UsersController {
   }
 
   @ApiOperation({
-    summary: 'Update an answer by ID',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'The ID of the answer to be updated',
-    type: Number,
+    summary: 'Update a user',
   })
   @ApiResponse({
     status: 200,
-    description: 'Updating answer successfully',
+    description: 'Updating user successfully',
     schema: {
       example: {
         success: true,
-        message: 'Updating answer successfully',
+        message: 'Updating user successfully',
         data: {
-          id: 2,
-          question_id: 5,
-          option_text: 'kjasd',
-          is_correct: true,
+          id: 4,
+          role_id: 2,
+          email: 'linhdh@dgroup.co',
+          first_name: 'Linh',
+          last_name: 'Hoang',
+          phone_number: '',
+          refresh_token: '',
         },
       },
     },
@@ -289,22 +414,25 @@ export class UsersController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
+        message: 'System error while updating user',
         errors: null,
       },
     },
   })
   @ApiBody({
     type: UpdateUserDto,
-    required: false,
+    required: true,
     examples: {
-      user_1: {
-        summary: 'Update an existing question',
-        description: 'Update an existing question',
+      updateDto: {
+        summary: 'DTO to update user',
+        description: 'All fields are optional',
         value: {
-          question_id: 5,
-          option_text: 'kjasd',
-          is_correct: true,
+          role_id: 2,
+          email: 'linhdh@dgroup.co',
+          first_name: 'Linh',
+          last_name: 'Hoang',
+          phone_number: '',
+          refresh_token: '',
         },
       },
     },
@@ -347,11 +475,11 @@ export class UsersController {
   }
 
   @ApiOperation({
-    summary: 'Delete an answer by ID',
+    summary: 'Delete a user by ID',
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the answer to be deleted',
+    description: 'ID of the user to be deleted',
     type: Number,
   })
   @ApiResponse({
@@ -371,11 +499,13 @@ export class UsersController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
+        message: 'System error while deleting user',
         errors: null,
       },
     },
   })
+  @UseGuards(RoleGuard(Roles.ADMIN))
+  @UseGuards(AuthGuard)
   @Delete(':id')
   async remove(@Param('id') id: string, @Res() res) {
     try {

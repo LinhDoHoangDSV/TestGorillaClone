@@ -5,8 +5,7 @@ import {
   ContentProps,
   CreateInitialCodeDto,
   CreateTestCaseDto,
-  Question,
-  TestCase
+  Question
 } from '../../../constant/common'
 import Button from '../../ui/button'
 import { createTest } from '../../../api/tests.api'
@@ -117,7 +116,7 @@ const Content: FC<ContentProps> = ({ title }) => {
       setToasterAppear({ message: 'Create test successfully', type: 'success' })
     )
     dispatch(setIsLoadingFalse())
-    navigate('/')
+    navigate(`/assessments/${300003 * newTest?.data?.data?.id + 200003}`)
   }
 
   return (

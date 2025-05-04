@@ -3,8 +3,8 @@ import spinnerImage from '../assets/spinner-solid.svg'
 
 const Loading = () => {
   return (
-    <div className={style.app__imgContainer}>
-      <img src={spinnerImage} className={style.app__img}></img>
+    <div className={style.loader__container}>
+      <img src={spinnerImage} className={style.loader__img}></img>
     </div>
   )
 }

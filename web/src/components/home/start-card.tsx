@@ -1,9 +1,5 @@
+import { StatCardProps } from '../../constant/common'
 import styles from '../../style/components/home/start-card.module.scss'
-
-interface StatCardProps {
-  title: string
-  value: number
-}
 
 const StatCard = ({ title, value }: StatCardProps) => {
   return (

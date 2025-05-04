@@ -7,11 +7,11 @@ export class GlobalExceptionFilter extends ExceptionsHandler {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
 
-    const status = exception.getStatus
+    const status = exception.getStatus()
       ? exception.getStatus()
       : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const errors = exception.getResponse
+    const errors = exception.getResponse()
       ? exception.getResponse()
       : exception.message;
 
@@ -22,15 +22,7 @@ export class GlobalExceptionFilter extends ExceptionsHandler {
     response.status(status).json({
       success: false,
       message,
-      errors:
-        typeof newErrors === 'string'
-          ? [
-              {
-                property: newErrors,
-                constraints: newErrors,
-              },
-            ]
-          : newErrors,
+      data: newErrors,
     });
   }
 }

@@ -1,6 +1,7 @@
 import Home from '.'
 import Footer from '../components/footer'
 import Header from '../components/header'
+import NotFound from '../components/not-found'
 import { RouterType } from '../constant/common'
 import Assessment from './assessments'
 import TakeAssessment from './assessments/attendance'
@@ -93,9 +94,9 @@ const pagesData: RouterType[] = [
   {
     title: 'not-found',
     path: '*',
-    element: <div>Page not found</div>,
-    header: false,
-    footer: false
+    element: <NotFound />,
+    header: <Header />,
+    footer: <Footer />
   }
 ]
 

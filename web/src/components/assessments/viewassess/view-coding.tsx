@@ -1,13 +1,24 @@
-import { FC, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import {
   InitialCode,
   LanguageID,
   QuestionDialogProps
 } from '../../../constant/common'
 import { useDispatch } from 'react-redux'
-import { setToasterAppear } from '../../../redux/slices/common.slice'
+import {
+  setIsLoadingFalse,
+  setIsLoadingTrue,
+  setToasterAppear
+} from '../../../redux/slices/common.slice'
 import Button from '../../ui/button'
 import styles from '../../../style/components/assessments/new/create-question.module.scss'
+import { updateQuestion } from '../../../api/questions.api'
+import { updateInitialCode } from '../../../api/initial-code.api'
+import {
+  createTestCase,
+  deleteTestcase,
+  updateTestcase
+} from '../../../api/test-case.api'
 
 const CodingQuestionDialog: FC<QuestionDialogProps> = ({
   type,
@@ -17,6 +28,7 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
   rowIndex
 }) => {
   const dispatch = useDispatch()
+  const [isViewPage, setIsViewPage] = useState<boolean>(false)
   const [title, setTitle] = useState<string>(
     rowIndex >= 0 ? questions[rowIndex]?.title : ''
   )
@@ -46,12 +58,10 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
         }
   )
 
-  console.log(questions)
-
-  console.log('title', title)
-  console.log('description', description)
-  console.log('initialCodes', initialCodes)
-  console.log('testCases', testCases)
+  useEffect(() => {
+    if (location.pathname.includes('assessments/new')) setIsViewPage(false)
+    else setIsViewPage(true)
+  }, [location.pathname])
 
   const handleDelete = () => {
     if (rowIndex >= 0) {
@@ -63,7 +73,7 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
     }
   }
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (!title.trim()) {
       dispatch(
         setToasterAppear({ message: 'Title must not be blank', type: 'error' })
@@ -98,8 +108,38 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
       return
     }
 
+    if (isViewPage) {
+      dispatch(setIsLoadingTrue())
+      const result = await updateQuestion(questions[rowIndex].id, {
+        question_text: description,
+        title,
+        score: +score
+      })
+
+      if (result?.status > 299) {
+        dispatch(
+          setToasterAppear({
+            message: 'Failed to update question',
+            type: 'error'
+          })
+        )
+        return
+      }
+
+      if (
+        initialCodes.initial_code !==
+        questions[rowIndex]?.initial_code?.initial_code
+      ) {
+        await updateInitialCode(questions[rowIndex]?.initial_code?.id, {
+          initial_code: initialCodes.initial_code
+        })
+      }
+
+      dispatch(setIsLoadingFalse())
+    }
     const updatedQuestions = [...questions]
     updatedQuestions[rowIndex] = {
+      ...updatedQuestions[rowIndex],
       question_type: 'coding',
       question_text: description,
       title,
@@ -183,16 +223,91 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
     )
   }
 
-  const addTestCase = () => {
-    setTestCases((prev) => [
-      ...prev,
-      { id: counterTestCases, input: '', expected_output: '' }
-    ])
-    setCounterTestCases((prev) => prev + 1)
+  const handleBlurTestcase = async (id: number) => {
+    if (isViewPage) {
+      const testcase = testCases?.find((item) => item.id === id)
+
+      await updateTestcase(id, {
+        expected_output: testcase?.expected_output,
+        input: testcase?.input
+      })
+
+      setQuestions(
+        questions.map((question, index) => {
+          if (index === rowIndex) {
+            return {
+              ...question,
+              testcases: testCases
+            }
+          }
+
+          return question
+        })
+      )
+    }
   }
 
-  const removeTestCase = (id: number) => {
+  const addTestCase = async () => {
+    if (isViewPage) {
+      const newTestcase = await createTestCase({
+        expected_output: 'output',
+        input: 'input',
+        question_id: questions[rowIndex].id
+      })
+
+      if (newTestcase?.status > 299) {
+        dispatch(
+          setToasterAppear({
+            message: 'Error while creating new testcase',
+            type: 'error'
+          })
+        )
+        return
+      }
+
+      setTestCases((prev) => [...prev, newTestcase?.data?.data])
+
+      setQuestions(
+        questions.map((question, index) => {
+          if (rowIndex === index) {
+            return {
+              ...question,
+              testcases: [...question.testcases, newTestcase?.data?.data]
+            }
+          }
+
+          return question
+        })
+      )
+    } else {
+      setTestCases((prev) => [
+        ...prev,
+        { id: counterTestCases, input: '', expected_output: '' }
+      ])
+      setCounterTestCases((prev) => prev + 1)
+    }
+  }
+
+  const removeTestCase = async (id: number) => {
     if (testCases.length <= 1) return
+
+    if (isViewPage) {
+      await deleteTestcase(id)
+    }
+
+    const testcasesList = testCases.filter((testCase) => testCase.id !== id)
+    setQuestions(
+      questions.map((question, index) => {
+        if (index === rowIndex) {
+          return {
+            ...question,
+            testcases: testcasesList
+          }
+        }
+
+        return question
+      })
+    )
     setTestCases((prev) => prev.filter((testCase) => testCase.id !== id))
   }
 
@@ -356,6 +471,7 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
                           e.target.value
                         )
                       }
+                      onBlur={() => handleBlurTestcase(testCase.id)}
                       placeholder='Enter test case input'
                       rows={2}
                     />
@@ -380,6 +496,7 @@ const CodingQuestionDialog: FC<QuestionDialogProps> = ({
                           e.target.value
                         )
                       }
+                      onBlur={() => handleBlurTestcase(testCase.id)}
                       placeholder='Enter expected output'
                       rows={2}
                     />

@@ -34,50 +34,46 @@ axiosInstance.interceptors.response.use(
 
         try {
           const result = await axiosInstance.post(`/auth/refresh`)
-          console.log('resu', result)
 
           if (
             result?.status > 299 &&
             window.location.href !== 'http://localhost:3000/login'
           ) {
+            window.location.href = '/login'
             store.dispatch(
               setToasterAppear({
                 message: 'You need to log in to continue',
                 type: 'error'
               })
             )
-            window.location.href = '/login'
+          } else {
+            onRefreshed('new-token')
           }
 
           isRefreshing = false
-          onRefreshed('new-token')
           return axiosInstance(originalRequest)
         } catch (refreshError) {
-          console.log('refresh')
-
           isRefreshing = false
           refreshSubscribers = []
           store.dispatch(clearAuth())
 
           if (window.location.href !== 'http://localhost:3000/login') {
+            window.location.href = '/login'
             store.dispatch(
               setToasterAppear({
                 message: 'You need to log in to continue',
                 type: 'error'
               })
             )
-            window.location.href = '/login'
           }
           return Promise.reject(refreshError)
         }
       } else {
         return new Promise((resolve) => {
-          console.log('Queueing request:', originalRequest.url)
           subscribeTokenRefresh(() => {
             resolve(axiosInstance(originalRequest))
           })
         })
-        return Promise.reject(error)
       }
     }
 

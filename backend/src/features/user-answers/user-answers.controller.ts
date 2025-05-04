@@ -15,7 +15,13 @@ import {
 import { UserAnswersService } from './user-answers.service';
 import { CreateUserAnswerDto } from './dto/create-user-answer.dto';
 import { UpdateUserAnswerDto } from './dto/update-user-answer.dto';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { QuestionsService } from '../questions/questions.service';
 import { TestAssignmentService } from '../test-assignment/test-assignment.service';
 import { LoggerService } from '../logger/logger.service';
@@ -25,7 +31,9 @@ import { AuthGuard } from 'src/common/guard/jwt_auth.guard';
 import RoleGuard from 'src/common/guard/role.guard';
 import { Roles } from 'src/common/constant';
 import { SubmitCodeDto } from './dto/submit-code.dto';
+import { ValidationIDPipe } from 'src/common/pipe/validation-id.pipe';
 
+@ApiTags('User Answers')
 @Controller('user-answers')
 export class UserAnswersController {
   constructor(
@@ -37,34 +45,40 @@ export class UserAnswersController {
   ) {}
 
   @ApiOperation({
-    summary: 'Create a new role',
+    summary: 'Create a new user_answer',
   })
   @ApiResponse({
     status: 201,
-    description: 'Creating role successfully',
+    description: 'Creating user_answer successfully',
     schema: {
       example: {
         success: true,
-        message: 'Creating role successfully',
+        message: 'Creating user_answer successfully',
         data: {
-          id: 1,
-          name: 'HR',
-          description: 'Some one called HR',
+          id: 78,
+          test_assignment_id: 46,
+          question_id: 96,
+          answer_text: 'hi',
+          score: 10,
         },
       },
     },
   })
   @ApiResponse({
     status: 400,
-    description: 'Bad request from user',
+    description: 'Invalid input data',
     schema: {
       example: {
         success: false,
         message: 'Invalid input data',
-        errors: [
+        data: [
           {
-            property: 'question_text',
-            constraints: 'Attribute question_text is not allowed',
+            property: 'test_assignment_ida',
+            constraints: 'Attribute test_assignment_ida is not allowed',
+          },
+          {
+            property: 'test_assignment_id',
+            constraints: 'Attribute test_assignment_id must exist',
           },
         ],
       },
@@ -76,8 +90,8 @@ export class UserAnswersController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while creating user_answer',
+        data: null,
       },
     },
   })
@@ -85,12 +99,14 @@ export class UserAnswersController {
     type: CreateUserAnswerDto,
     required: true,
     examples: {
-      user_1: {
-        summary: 'Create a new role',
-        description: 'Create a new role',
+      user_answers: {
+        summary: 'DTO for creating a new user_answer',
+        description: 'Require all fields',
         value: {
-          name: 'HR',
-          description: 'Some one called HR',
+          test_assignment_id: 46,
+          question_id: 96,
+          answer_text: 'hi',
+          score: 10,
         },
       },
     },
@@ -138,12 +154,74 @@ export class UserAnswersController {
     }
   }
 
+  @ApiOperation({
+    summary: 'Submit code for a user_answer',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Submit code successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Submit code successfully',
+        data: {
+          token: 'eaeb562e-3825-45ab-a775-7cb75d561336',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid input data',
+    schema: {
+      example: {
+        success: false,
+        message: 'Invalid input data',
+        data: [
+          {
+            property: 'languageIds',
+            constraints: 'Attribute languageIds is not allowed',
+          },
+          {
+            property: 'languageId',
+            constraints: 'Attribute languageId must exist',
+          },
+        ],
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'System error',
+    schema: {
+      example: {
+        success: false,
+        message: 'System error while submitting code',
+        data: null,
+      },
+    },
+  })
+  @ApiBody({
+    type: SubmitCodeDto,
+    required: true,
+    examples: {
+      submitCode: {
+        summary: 'DTO for submitting code',
+        description: 'Require all fields',
+        value: {
+          code: 'const a = [1,2,3];\nfunction temp(b) {\n return b;\n}; \n console.log(temp(a));',
+          languageId: 102,
+        },
+      },
+    },
+  })
   @Post('/submit')
   async submitCode(@Body() submitCodeDto: SubmitCodeDto, @Res() res) {
     try {
-      const result = await this.userAnswersService.submitCode(submitCodeDto);
+      const codeSubmit =
+        await this.userAnswersService.submitCode(submitCodeDto);
       this.logger.debug('Submit code successfully');
-      this.response.initResponse(true, 'Submit code successfully', result);
+      this.response.initResponse(true, 'Submit code successfully', codeSubmit);
       return res.status(HttpStatus.OK).json(this.response);
     } catch (error) {
       this.logger.error('Error while submitting code', error?.stack);
@@ -161,6 +239,51 @@ export class UserAnswersController {
     }
   }
 
+  @ApiOperation({
+    summary: 'Get code result by token',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Get code result successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Get code result successfully',
+        data: {
+          stdout: 'WyAxLCAyLCAzIF0K',
+          status: {
+            id: 3,
+            description: 'Accepted',
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'System error',
+    schema: {
+      example: {
+        success: false,
+        message: 'System error while getting code result',
+        data: null,
+      },
+    },
+  })
+  @ApiBody({
+    type: SubmitCodeDto,
+    required: true,
+    examples: {
+      submitCode: {
+        summary: 'DTO for submitting code',
+        description: 'Require all fields',
+        value: {
+          code: 'const a = [1,2,3];\nfunction temp(b) {\n return b;\n}; \n console.log(temp(a));',
+          languageId: 102,
+        },
+      },
+    },
+  })
   @Get('/code-result/:token')
   async getCodeResult(@Param('token') token: string, @Res() res) {
     try {
@@ -185,20 +308,30 @@ export class UserAnswersController {
   }
 
   @ApiOperation({
-    summary: 'Find roles by criteria',
+    summary: 'Find user_answer by criterias',
   })
   @ApiResponse({
-    status: 201,
-    description: 'Finding roles successfully',
+    status: 200,
+    description: 'Finding user_answer successfully',
     schema: {
       example: {
         success: true,
-        message: 'Finding roles successfully',
+        message: 'Finding user_answer successfully',
         data: [
           {
-            id: 1,
-            name: 'HR',
-            description: 'Some one called HR',
+            id: 78,
+            test_assignment_id: 46,
+            question_id: 96,
+            answer_text: 'hi',
+            score: 10,
+          },
+          {
+            id: 79,
+            test_assignment_id: 62,
+            question_id: 118,
+            answer_text:
+              'var main = function(tasks, workers, pills, strength) {\n    tasks.sort((a, b) => a - b);\n    workers.sort((a, b) => a - b);\n\n    function canAssign(mid) {\n        let boosted = [];\n        let w = workers.length - 1;\n        let freePills = pills;\n\n        for (let t = mid - 1; t >= 0; t--) {\n            const task = tasks[t];\n\n            if (boosted.length && boosted[0] >= task) {\n                boosted.shift();\n            } else if (w >= 0 && workers[w] >= task) {\n                w--;\n            } else {\n                while (w >= 0 && workers[w] + strength >= task) {\n                    boosted.push(workers[w--]);\n                }\n                if (!boosted.length || freePills === 0) return false;\n                boosted.pop();\n                freePills--;\n            }\n        }\n\n        return true;\n    }\n\n    let low = 0, high = Math.min(tasks.length, workers.length);\n    while (low < high) {\n        let mid = Math.floor((low + high + 1) / 2);\n        if (canAssign(mid)) low = mid;\n        else high = mid - 1;\n    }\n    return low;\n};',
+            score: 20,
           },
         ],
       },
@@ -206,12 +339,12 @@ export class UserAnswersController {
   })
   @ApiResponse({
     status: 400,
-    description: 'Bad request from user',
+    description: 'Invalit input data',
     schema: {
       example: {
         success: false,
         message: 'Invalid input data',
-        errors: [
+        data: [
           {
             property: 'question_text',
             constraints: 'Attribute question_text is not allowed',
@@ -226,21 +359,24 @@ export class UserAnswersController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while finding user_answer',
+        data: null,
       },
     },
   })
   @ApiBody({
     type: FindUserAnswersCriteriaDto,
-    required: false,
+    required: true,
     examples: {
-      user_1: {
-        summary: 'Find roles by criterias',
-        description: 'Find roles by criterias',
+      critetias: {
+        summary: 'Find user_ansers by criterias',
+        description: 'All fields are optional',
         value: {
-          name: 'HR',
-          description: 'Some one called HR',
+          id: 1,
+          test_assignment_id: 1,
+          question_id: 1,
+          answer_text: 'main()',
+          score: 5,
         },
       },
     },
@@ -280,20 +416,30 @@ export class UserAnswersController {
   }
 
   @ApiOperation({
-    summary: 'Get all roles',
+    summary: 'Find all user_answers',
   })
   @ApiResponse({
     status: 200,
-    description: 'Finding all roles successfully',
+    description: 'Finding all user_answer successfully',
     schema: {
       example: {
         success: true,
-        message: 'Finding all roles successfully',
+        message: 'Finding all user_answer successfully',
         data: [
           {
-            id: 1,
-            name: 'HR',
-            description: 'Some one called HR',
+            id: 78,
+            test_assignment_id: 46,
+            question_id: 96,
+            answer_text: 'hi',
+            score: 10,
+          },
+          {
+            id: 79,
+            test_assignment_id: 62,
+            question_id: 118,
+            answer_text:
+              'var main = function(tasks, workers, pills, strength) {\n    tasks.sort((a, b) => a - b);\n    workers.sort((a, b) => a - b);\n\n    function canAssign(mid) {\n        let boosted = [];\n        let w = workers.length - 1;\n        let freePills = pills;\n\n        for (let t = mid - 1; t >= 0; t--) {\n            const task = tasks[t];\n\n            if (boosted.length && boosted[0] >= task) {\n                boosted.shift();\n            } else if (w >= 0 && workers[w] >= task) {\n                w--;\n            } else {\n                while (w >= 0 && workers[w] + strength >= task) {\n                    boosted.push(workers[w--]);\n                }\n                if (!boosted.length || freePills === 0) return false;\n                boosted.pop();\n                freePills--;\n            }\n        }\n\n        return true;\n    }\n\n    let low = 0, high = Math.min(tasks.length, workers.length);\n    while (low < high) {\n        let mid = Math.floor((low + high + 1) / 2);\n        if (canAssign(mid)) low = mid;\n        else high = mid - 1;\n    }\n    return low;\n};',
+            score: 20,
           },
         ],
       },
@@ -305,8 +451,8 @@ export class UserAnswersController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'Error finding all user_answer',
+        data: null,
       },
     },
   })
@@ -338,25 +484,38 @@ export class UserAnswersController {
   }
 
   @ApiOperation({
-    summary: 'Get role by ID',
+    summary: 'Find user_answer by ID',
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the role to retrieve',
+    description: 'ID of user_answer to retrieve',
     type: Number,
   })
   @ApiResponse({
     status: 200,
-    description: 'Finding role successfully',
+    description: 'Finding user_answer successfully',
     schema: {
       example: {
         success: true,
-        message: 'Finding role successfully',
+        message: 'Finding user_answer successfully',
         data: {
-          id: 1,
-          name: 'HR',
-          description: 'Some one called HR',
+          id: 78,
+          test_assignment_id: 46,
+          question_id: 96,
+          answer_text: 'hi',
+          score: 10,
         },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'ID must be a number',
+    schema: {
+      example: {
+        success: false,
+        message: 'ID must be a number',
+        data: 'Bad Request',
       },
     },
   })
@@ -366,13 +525,13 @@ export class UserAnswersController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while finding user_answer',
+        data: null,
       },
     },
   })
   @Get(':id')
-  async findOne(@Param('id') id: string, @Res() res) {
+  async findOne(@Param('id', ValidationIDPipe) id: string, @Res() res) {
     try {
       const user_answer = await this.userAnswersService.findOne(+id);
       this.logger.debug('Finding user_answer successfully');
@@ -427,27 +586,30 @@ export class UserAnswersController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'System error while updating user_answer',
+        data: null,
       },
     },
   })
   @ApiBody({
     type: UpdateUserAnswerDto,
-    required: false,
+    required: true,
     examples: {
-      user_1: {
-        summary: 'Update an existing role',
-        description: 'Update an existing role',
+      updateDto: {
+        summary: 'DTO for updating user_answer',
+        description: 'All fields are optional',
         value: {
-          name: 'HR',
+          test_assignment_id: 46,
+          question_id: 96,
+          answer_text: 'hi',
+          score: 10,
         },
       },
     },
   })
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id', ValidationIDPipe) id: string,
     @Body() updateUserAnswerDto: UpdateUserAnswerDto,
     @Res() res,
   ) {
@@ -480,20 +642,20 @@ export class UserAnswersController {
   }
 
   @ApiOperation({
-    summary: 'Delete role by ID',
+    summary: 'Delete user_answer by ID',
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the role to be deleted',
+    description: 'ID of user_answer to be deleted',
     type: Number,
   })
   @ApiResponse({
     status: 200,
-    description: 'Deleting role successfully',
+    description: 'Deleting user_answer successfully',
     schema: {
       example: {
         success: true,
-        message: 'Deleting role successfully',
+        message: 'Deleting user_answer successfully',
       },
     },
   })
@@ -503,8 +665,8 @@ export class UserAnswersController {
     schema: {
       example: {
         success: false,
-        message: 'System error',
-        errors: null,
+        message: 'Error while deleting user_answer',
+        data: null,
       },
     },
   })

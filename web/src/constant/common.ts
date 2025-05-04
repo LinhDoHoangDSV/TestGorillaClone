@@ -1,11 +1,30 @@
-import { JSX } from 'react'
+import { JSX, ReactNode } from 'react'
 
 export type RouterType = {
+  // checked
   title: string
   path: string
   element: JSX.Element
   header: boolean | JSX.Element
   footer: boolean | JSX.Element
+}
+
+export interface ToasterProps {
+  // checked
+  message: string
+  type: string
+}
+
+export interface StatCardProps {
+  // checked
+  title: string
+  value: number
+}
+
+export interface ButtonProps {
+  // checked
+  children: ReactNode
+  variant: 'primary' | 'secondary'
 }
 
 export const steps = [
@@ -49,6 +68,8 @@ export interface QuestionDialogProps {
   setQuestions: (questions: Question[]) => void
   questions: Question[]
   rowIndex: number
+  actionType: string | null
+  testId?: number
 }
 
 export const sampleEssayQuestion: QuestionsType = {
@@ -68,11 +89,6 @@ export const questionTypes = [
   },
   { id: 'coding', name: 'Coding', icon: 'coding' }
 ]
-
-export interface ToasterProps {
-  message: string
-  type: string // info / success / error
-}
 
 export interface CandidateProps {
   testAssignments: TestAssignment[]
@@ -102,6 +118,12 @@ export interface CreateTestCaseDto {
   expected_output: string
 }
 
+export interface UpdateTestCaseDto {
+  question_id?: number
+  input?: string
+  expected_output?: string
+}
+
 export interface FindTestCaseByCriterias {
   id?: number
   question_id?: number
@@ -117,6 +139,13 @@ export interface CreateInitialCodeDto {
 }
 
 export interface FindInitialCodeCriteriasDto {
+  question_id?: number
+  language_id?: number
+  description?: string
+  initial_code?: string
+}
+
+export interface UpdateInitialCodeDto {
   question_id?: number
   language_id?: number
   description?: string

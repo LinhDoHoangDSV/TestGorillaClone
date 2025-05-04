@@ -32,7 +32,7 @@
 // }
 
 import axiosInstance from './axios.instance'
-import { CreateAnswerDto } from '../constant/api'
+import { CreateAnswerDto, UpdateAnswerDto } from '../constant/api'
 
 export const createAnswer = async (data: CreateAnswerDto) => {
   try {
@@ -50,6 +50,20 @@ export const getAllAnswerByCriteria = async (
 ) => {
   try {
     const result = await axiosInstance.post('/answers/criterias', data)
+    console.log(result)
+    return result
+  } catch (error) {
+    console.log(error)
+    return error
+  }
+}
+
+export const updateAnswer = async (
+  id: number,
+  updateAnswerDto: UpdateAnswerDto
+) => {
+  try {
+    const result = await axiosInstance.patch(`/answers/${id}`, updateAnswerDto)
     console.log(result)
     return result
   } catch (error) {
