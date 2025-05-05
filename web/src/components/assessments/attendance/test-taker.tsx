@@ -1,5 +1,5 @@
 import { FC, useState } from 'react'
-import { QuestionResponse, TestResponse } from '../../../constant/common'
+import { QuestionResponse, TestTakerProps } from '../../../constant/common'
 import TestHeader from './test-header'
 import MultipleChoiceQuestion from './multiple'
 import EssayQuestion from './essay'
@@ -13,13 +13,6 @@ import { createUserAnsers } from '../../../api/user-answers.api'
 import { CreateUserAnser } from '../../../constant/api'
 import { increaseScoreTestAssignment } from '../../../api/test-assignment.api'
 import CodingQuestion from './coding'
-
-interface TestTakerProps {
-  seconds: number
-  test: TestResponse | null
-  testAssignmentId: number
-  onComplete: () => void
-}
 
 const TestTaker: FC<TestTakerProps> = ({
   seconds,

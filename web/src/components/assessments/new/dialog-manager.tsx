@@ -2,17 +2,7 @@ import type { FC } from 'react'
 import EssayQuestionDialog from './create-essay'
 import MultipleChoiceDialog from './create-multiple-choice'
 import CodingQuestionDialog from './create-coding'
-import { Question } from '../../../constant/common'
-
-interface QuestionDialogManagerProps {
-  onCancel: () => void
-  questionType: string | null
-  setQuestions: (questions: Question[]) => void
-  questions: Question[]
-  rowIndex: number
-  actionType: string | null
-  testId?: number
-}
+import { QuestionDialogManagerProps } from '../../../constant/common'
 
 const QuestionDialogManager: FC<QuestionDialogManagerProps> = ({
   onCancel,

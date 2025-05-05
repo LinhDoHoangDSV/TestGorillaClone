@@ -30,6 +30,7 @@ import {
 } from '../../api/initial-code.api'
 import { createTestCase, findTestCaseByCriteria } from '../../api/test-case.api'
 import QuestionDialogManager from './new/dialog-manager'
+import Button from '../ui/button'
 
 const TestInfo: FC<TestInfoProps> = ({ testId, type }) => {
   const dispatch = useDispatch()
@@ -378,24 +379,18 @@ const TestInfo: FC<TestInfoProps> = ({ testId, type }) => {
 
       {type === 'view' && (
         <div className={styles.test_info__clone}>
-          <button
-            onClick={handleCloneTest}
-            className={styles.test_info__clone_button}
-          >
+          <Button onClick={handleCloneTest} variant='primary'>
             Clone test
-          </button>
+          </Button>
         </div>
       )}
 
       {type === 'own' && (
         <div className={styles.test_info__clone}>
           <InviteDialog testId={testId} />
-          <button
-            onClick={handleUpdateTest}
-            className={styles.test_info__clone_button}
-          >
+          <Button variant='primary' onClick={handleUpdateTest}>
             Update test
-          </button>
+          </Button>
         </div>
       )}
 

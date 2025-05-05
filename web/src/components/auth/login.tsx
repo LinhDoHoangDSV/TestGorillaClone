@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import styles from '../../style/components/auth/login.module.scss'
 import logoImage from '../../assets/logo.svg'
 import { useGoogleLogin } from '@react-oauth/google'
-import { getInformation, login, refreshToken } from '../../api/auth.api'
+import { getInformation, login } from '../../api/auth.api'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   setIsLoadingFalse,
@@ -27,6 +27,7 @@ const LoginPage = () => {
 
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
+      setIsLoading(true)
       dispatch(setIsLoadingTrue())
       const result = await login(tokenResponse.access_token)
 
@@ -59,6 +60,7 @@ const LoginPage = () => {
 
       navigate('/')
       dispatch(setIsAuthen({ value: true }))
+      setIsLoading(false)
       dispatch(setIsLoadingFalse())
     }
   })

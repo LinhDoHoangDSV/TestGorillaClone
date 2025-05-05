@@ -27,6 +27,123 @@ export interface ButtonProps {
   variant: 'primary' | 'secondary'
 }
 
+export interface SidebarProps {
+  // checked
+  open: boolean
+  onClose: () => void
+}
+
+export interface UserProfile {
+  // checked
+  firstName: string
+  lastName: string
+  phoneNumber: string
+  email: string
+}
+
+export interface CandidateEntity {
+  // checked
+  id: number
+  candidate_email: string
+  testTitle: string
+  score: number | null
+  status: string
+  completed_time?: string
+}
+
+export interface Answer {
+  id: number
+  question_id: number
+  option_text: string
+  is_correct: boolean
+}
+
+export interface CandidateAnswer {
+  id: number
+  test_assignment_id: number
+  question_id: number
+  answer_text: string
+  score: number
+}
+
+export interface QuesionsInterface {
+  // checked
+  id: number
+  test_id: number
+  question_text: string
+  question_type: string
+  score: number
+  title: string
+  answers?: Answer[]
+  candidate_answer?: CandidateAnswer
+}
+
+export interface HeaderProps {
+  title: string
+  setTitle: (title: string) => void
+}
+
+export interface QuestionDialogManagerProps {
+  onCancel: () => void
+  questionType: string | null
+  setQuestions: (questions: Question[]) => void
+  questions: Question[]
+  rowIndex: number
+  actionType: string | null
+  testId?: number
+}
+
+export interface OptionType {
+  id: string
+  text: string
+  isCorrect: boolean
+}
+
+export interface CodeAuthenticationProps {
+  testTitle: string
+  onAuthenticated: (code: string) => void
+}
+
+export interface TestTakerProps {
+  seconds: number
+  test: TestResponse | null
+  testAssignmentId: number
+  onComplete: () => void
+}
+
+export interface MultipleChoiceQuestionProps {
+  answer: string
+  setAnswer: (answer: string) => void
+  setScore: (score: number) => void
+  question: QuestionResponse
+}
+
+export interface EssayQuestionProps {
+  answer: string
+  setAnswer: (answer: string) => void
+  question: QuestionResponse
+}
+
+export interface CodingQuestionProps {
+  answer: string
+  setAnswer: (answer: string) => void
+  question: QuestionResponse
+  setScore: (score: number) => void
+}
+export interface TestCaseProps {
+  id?: number
+  input?: string
+  expected_output?: string
+  output: string
+  token: string
+}
+
+export interface InviteDialogProps {
+  testId?: number
+}
+
+//checked
+
 export const steps = [
   { id: 1, name: 'Add questions' },
   { id: 2, name: 'Finalize' }

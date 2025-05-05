@@ -1,23 +1,13 @@
 import { FC, useEffect, useState } from 'react'
 import styles from '../../../style/components/assessments/attendance/coding.module.scss'
-import { LanguageID, QuestionResponse } from '../../../constant/common'
+import {
+  CodingQuestionProps,
+  LanguageID,
+  TestCaseProps
+} from '../../../constant/common'
 import { getCodeResult, submitCode } from '../../../api/user-answers.api'
 import { useDispatch } from 'react-redux'
 import { setToasterAppear } from '../../../redux/slices/common.slice'
-
-interface CodingQuestionProps {
-  answer: string
-  setAnswer: (answer: string) => void
-  question: QuestionResponse
-  setScore: (score: number) => void
-}
-export interface TestCase {
-  id?: number
-  input?: string
-  expected_output?: string
-  output: string
-  token: string
-}
 
 const CodingQuestion: FC<CodingQuestionProps> = ({
   answer,
@@ -31,7 +21,7 @@ const CodingQuestion: FC<CodingQuestionProps> = ({
   )
   const [userCode, setUserCode] = useState<string>(initialCode)
   const [runningTests, setRunningTests] = useState<boolean>(false)
-  const [testResults, setTestResults] = useState<TestCase[]>([
+  const [testResults, setTestResults] = useState<TestCaseProps[]>([
     ...question.testcases
   ])
 
@@ -102,7 +92,11 @@ const CodingQuestion: FC<CodingQuestionProps> = ({
       const token = listToken[0]
       const codeResult = await getCodeResult(token)
 
-      if (codeResult?.data?.data?.status?.description !== 'Accepted') {
+      if (codeResult?.data?.data?.status?.description.includes('Runtime')) {
+        dispatch(setToasterAppear({ message: 'Runtime error', type: 'error' }))
+        listToken.shift()
+        continue
+      } else if (codeResult?.data?.data?.status?.description !== 'Accepted') {
         listToken.push(token)
         listToken.shift()
         continue

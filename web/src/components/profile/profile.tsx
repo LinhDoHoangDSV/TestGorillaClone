@@ -1,5 +1,3 @@
-import type React from 'react'
-
 import { useEffect, useState, type FormEvent } from 'react'
 import styles from '../../style/components/profile/profile.module.scss'
 import { useDispatch, useSelector } from 'react-redux'
@@ -11,13 +9,7 @@ import {
 } from '../../redux/slices/common.slice'
 import { updateUserInformation, UserInformation } from '../../api/user.api'
 import { setUserInformation } from '../../redux/slices/user.slice'
-
-interface UserProfile {
-  firstName: string
-  lastName: string
-  phoneNumber: string
-  email: string
-}
+import { UserProfile } from '../../constant/common'
 
 const ProfilePage = () => {
   const dispatch = useDispatch()
@@ -39,8 +31,6 @@ const ProfilePage = () => {
       phoneNumber: user.phone_number
     })
   }, [user])
-
-  console.log(formData)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target

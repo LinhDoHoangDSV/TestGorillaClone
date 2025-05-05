@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import styles from '../../style/components/candidates/candidates.module.scss'
-import { TestResponse } from '../../constant/common'
 import { useDispatch } from 'react-redux'
+import styles from '../../style/components/candidates/candidates.module.scss'
+import { CandidateEntity, TestResponse } from '../../constant/common'
 import {
   setIsLoadingFalse,
   setIsLoadingTrue,
@@ -11,66 +11,47 @@ import {
 import { getAllOwnTests } from '../../api/tests.api'
 import { getAllTestAssignmentByCriteria } from '../../api/test-assignment.api'
 
-interface CandidateEntity {
-  id: number
-  candidate_email: string
-  testTitle: string
-  score: number | null
-  status: string
-  completed_time?: string
-}
-
 const CandidatesComponent = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const [candidates, setCandidates] = useState<CandidateEntity[]>([])
   const [tests, setTests] = useState<TestResponse[]>([])
-  const [searchQuery, setSearchQuery] = useState<string>('')
-  const [selectedTest, setSelectedTest] = useState<string>('')
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedTest, setSelectedTest] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchData = async () => {
+    ;(async () => {
       try {
         setIsLoading(true)
         dispatch(setIsLoadingTrue())
 
-        const testResponse = await getAllOwnTests()
+        const res = await getAllOwnTests()
+        if (res?.status > 299) throw new Error('Failed to get tests')
 
-        if (testResponse?.status > 299) {
-          throw new Error('Failed to get tests')
-        }
-
-        const tempTests = testResponse?.data?.data || []
+        const tempTests: TestResponse[] = res?.data?.data || []
         setTests(tempTests)
 
-        const allTestAssignments: CandidateEntity[] = []
-
-        for (const test of tempTests) {
-          const assignmentsResponse = await getAllTestAssignmentByCriteria({
-            test_id: test?.id
+        const allAssignments: CandidateEntity[] = []
+        for (const t of tempTests) {
+          const assignRes = await getAllTestAssignmentByCriteria({
+            test_id: t.id
           })
+          if (assignRes?.status > 299) continue
 
-          if (assignmentsResponse?.status > 299) {
-            continue
-          }
-
-          const assignments = assignmentsResponse?.data?.data || []
-          const formattedAssignments = assignments.map((assignment: any) => ({
-            id: assignment.id,
-            candidate_email: assignment.candidate_email || '',
-            testTitle: test.title || '',
-            score: assignment.score,
-            status: assignment.status,
-            completed_time: assignment.completed_time
+          const formatted = (assignRes?.data?.data || []).map((a: any) => ({
+            id: a.id,
+            candidate_email: a.candidate_email || '',
+            testTitle: t.title || '',
+            score: a.score,
+            status: a.status,
+            completed_time: a.completed_time
           }))
-
-          allTestAssignments.push(...formattedAssignments)
+          allAssignments.push(...formatted)
         }
-
-        setCandidates(allTestAssignments)
-      } catch (err) {
+        setCandidates(allAssignments)
+      } catch {
         setError('Failed to load candidates data')
         dispatch(
           setToasterAppear({
@@ -82,28 +63,36 @@ const CandidatesComponent = () => {
         setIsLoading(false)
         dispatch(setIsLoadingFalse())
       }
-    }
-
-    fetchData()
+    })()
   }, [dispatch])
 
-  const filteredCandidates = candidates.filter(
-    (candidate) =>
-      candidate.candidate_email
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase()) &&
-      (!selectedTest || candidate.testTitle === selectedTest)
+  const filtered = candidates.filter(
+    (c) =>
+      c.candidate_email.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      (!selectedTest || c.testTitle === selectedTest)
   )
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value)
+  const changeStatus = (s: string) =>
+    s === 'completed'
+      ? 'Completed'
+      : s === 'in_progress'
+        ? 'In progress'
+        : 'Not started'
+
+  const handleClickRow = (c: CandidateEntity) => {
+    if (c.status !== 'completed') {
+      dispatch(
+        setToasterAppear({
+          message: 'Can not grade an uncompleted assessment',
+          type: 'error'
+        })
+      )
+      return
+    }
+    navigate(`/assessments/grade/${c.id * 300003 + 200003}`)
   }
 
-  const handleCreateAssessment = () => {
-    navigate('/assessments/new')
-  }
-
-  if (error) {
+  if (error)
     return (
       <div className={styles.candidates}>
         <div className={styles.candidates__container}>
@@ -117,38 +106,19 @@ const CandidatesComponent = () => {
         </div>
       </div>
     )
-  }
-
-  const handleClickRow = (candidate) => {
-    if (candidate?.status !== 'completed') {
-      dispatch(
-        setToasterAppear({
-          message: 'Can not grade an uncompleted assessment',
-          type: 'error'
-        })
-      )
-      return
-    }
-    navigate(`/assessments/grade/${candidate.id * 300003 + 200003}`)
-  }
-
-  const changeStatus = (assessStatus: string) => {
-    if (assessStatus === 'completed') return 'Completed'
-    else if (assessStatus === 'in_progress') return 'In progress'
-    else return 'Not started'
-  }
 
   return (
     <div className={styles.candidates}>
       <div className={styles.candidates__container}>
+        {/* header */}
         <div className={styles.candidates__header}>
           <h1 className={styles.candidates__title}>Candidates</h1>
           <button
             className={styles.candidates__button}
-            onClick={handleCreateAssessment}
+            onClick={() => navigate('/assessments/new')}
             disabled={isLoading}
           >
-            <span className={styles.candidates__buttonIcon}>+</span>
+            <span className={styles['candidates__button-icon']}>+</span>
             Create assessment
           </button>
         </div>
@@ -160,7 +130,7 @@ const CandidatesComponent = () => {
               className={styles['candidates__search-input']}
               placeholder='Search candidates by email'
               value={searchQuery}
-              onChange={handleSearchChange}
+              onChange={(e) => setSearchQuery(e.target.value)}
               disabled={isLoading}
             />
           </div>
@@ -173,9 +143,9 @@ const CandidatesComponent = () => {
               disabled={isLoading || tests.length === 0}
             >
               <option value=''>All Tests</option>
-              {tests.map((test) => (
-                <option key={test.id} value={test.title}>
-                  {test.title}
+              {tests.map((t) => (
+                <option key={t.id} value={t.title}>
+                  {t.title}
                 </option>
               ))}
             </select>
@@ -188,7 +158,7 @@ const CandidatesComponent = () => {
           <div className={styles.candidates__loading}>
             Loading candidates...
           </div>
-        ) : filteredCandidates.length > 0 ? (
+        ) : filtered.length ? (
           <table className={styles.candidates__table}>
             <thead>
               <tr>
@@ -200,24 +170,24 @@ const CandidatesComponent = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredCandidates.map((candidate, index) => (
+              {filtered.map((c, i) => (
                 <tr
-                  key={candidate.id}
+                  key={c.id}
                   className={styles.candidates__row}
-                  onClick={() => handleClickRow(candidate)}
+                  onClick={() => handleClickRow(c)}
                 >
-                  <td>{index + 1}</td>
-                  <td>{candidate.candidate_email}</td>
-                  <td>{candidate.testTitle}</td>
-                  <td>{candidate.score ?? 'N/A'}</td>
-                  <td>{changeStatus(candidate.status)}</td>
+                  <td>{i + 1}</td>
+                  <td>{c.candidate_email}</td>
+                  <td>{c.testTitle}</td>
+                  <td>{c.score ?? 'N/A'}</td>
+                  <td>{changeStatus(c.status)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         ) : (
           <div className={styles.candidates__empty}>
-            <p className={styles.candidates__emptyText}>
+            <p className={styles['candidates__empty--text']}>
               {candidates.length === 0
                 ? "You don't have any candidates yet."
                 : 'No candidates match your search criteria.'}

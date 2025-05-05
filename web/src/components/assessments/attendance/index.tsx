@@ -21,6 +21,7 @@ import { getAllQuestionsByCriteria } from '../../../api/questions.api'
 import { getAllAnswerByCriteria } from '../../../api/answers.api'
 import { findInitialCodeByCriteria } from '../../../api/initial-code.api'
 import { findTestCaseByCriteria } from '../../../api/test-case.api'
+import NotFound from '../../not-found'
 
 function TakeAssessmentComp() {
   const location = useLocation()
@@ -295,7 +296,7 @@ function TakeAssessmentComp() {
   }
 
   if (!validPath) {
-    return <div>Not Found</div>
+    return <NotFound />
   }
 
   if (testCompleted || testAssessment?.status === 'completed') {

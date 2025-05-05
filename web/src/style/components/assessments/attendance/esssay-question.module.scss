@@ -4,13 +4,15 @@
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  flex-direction: column;
 
   &__content {
     flex: 1;
     padding: 32px;
-    border-right: 1px solid #f3f4f6;
     max-height: 500px;
     overflow-y: scroll;
+    border-right: none;
+    border-bottom: 1px solid #f3f4f6;
   }
 
   &__description {
@@ -28,7 +30,7 @@
   }
 
   &__answer {
-    width: 40%;
+    width: 100%;
     padding: 32px;
     background-color: #fff;
   }
@@ -66,17 +68,12 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (min-width: 768px) {
   .question {
-    flex-direction: column;
-
-    &__content {
-      border-right: none;
-      border-bottom: 1px solid #f3f4f6;
-    }
+    flex-direction: row;
 
     &__answer {
-      width: 100%;
+      width: 40%;
     }
   }
 }

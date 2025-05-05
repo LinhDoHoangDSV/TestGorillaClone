@@ -1,4 +1,4 @@
-import { type FC, useState } from 'react'
+import { FC, useState } from 'react'
 import styles from '../../../style/components/assessments/new/create-question.module.scss'
 import {
   CreateInitialCodeDto,

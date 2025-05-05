@@ -100,8 +100,8 @@
       &::after {
         content: '';
         position: absolute;
-        top: 3px;
-        left: 3px;
+        top: 5px;
+        left: 5px;
         width: 6px;
         height: 6px;
         background-color: #22c55e;
@@ -181,8 +181,8 @@
 
       &--correct::after,
       &--incorrect::after {
-        top: 4px;
-        left: 4px;
+        top: 6px;
+        left: 6px;
         width: 8px;
         height: 8px;
       }

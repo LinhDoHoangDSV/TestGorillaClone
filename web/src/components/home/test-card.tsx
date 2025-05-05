@@ -23,7 +23,7 @@ const TestCard = () => {
 
       const criterias: TestCriteria = {
         is_publish: true,
-        limit: 9
+        limit: 12
       }
       const result: any = await getAllTestsByCriteria(criterias)
 

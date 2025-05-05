@@ -8,10 +8,8 @@ import {
 } from '../../../redux/slices/common.slice'
 import { sendTestRequest } from '../../../api/test-assignment.api'
 import { SendTestRequestDto } from '../../../constant/api'
-
-interface InviteDialogProps {
-  testId?: number
-}
+import { InviteDialogProps } from '../../../constant/common'
+import Button from '../../ui/button'
 
 const InviteDialog: FC<InviteDialogProps> = ({ testId }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -68,13 +66,9 @@ const InviteDialog: FC<InviteDialogProps> = ({ testId }) => {
 
   return (
     <div className={styles.invite}>
-      <button
-        className={styles.invite__button}
-        onClick={handleOpen}
-        type='button'
-      >
+      <Button variant='primary' onClick={handleOpen}>
         Invite candidates
-      </button>
+      </Button>
 
       {isOpen && (
         <div className={styles.invite__overlay}>
@@ -94,21 +88,16 @@ const InviteDialog: FC<InviteDialogProps> = ({ testId }) => {
               </div>
 
               <div className={styles.invite__actions}>
-                <button
-                  className={`${styles.invite__action} ${styles['invite__action--cancel']}`}
-                  onClick={handleClose}
-                  type='button'
-                >
+                <Button onClick={handleClose} variant='secondary'>
                   Cancel
-                </button>
-                <button
-                  className={`${styles.invite__action} ${styles['invite__action--confirm']}`}
+                </Button>
+                <Button
                   onClick={handleSubmit}
-                  type='button'
+                  variant='primary'
                   disabled={!email.trim()}
                 >
                   Confirm
-                </button>
+                </Button>
               </div>
             </div>
           </div>

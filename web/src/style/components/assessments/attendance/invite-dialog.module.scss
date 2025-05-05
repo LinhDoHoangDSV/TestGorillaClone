@@ -1,24 +1,4 @@
 .invite {
-  &__button {
-    padding: 10px 16px;
-    background-color: #d311aa;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-
-    &:hover {
-      background-color: #ad0b8a;
-    }
-
-    &:focus {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
-    }
-  }
-
   &__overlay {
     position: fixed;
     top: 0;
@@ -84,29 +64,6 @@
     cursor: pointer;
     border: none;
     transition: background-color 0.2s;
-
-    &--cancel {
-      background-color: #f2f2f2;
-      color: #333;
-
-      &:hover {
-        background-color: #e6e6e6;
-      }
-    }
-
-    &--confirm {
-      background-color: #007bff;
-      color: white;
-
-      &:hover {
-        background-color: #0069d9;
-      }
-
-      &:disabled {
-        background-color: #cccccc;
-        cursor: not-allowed;
-      }
-    }
   }
 }
 

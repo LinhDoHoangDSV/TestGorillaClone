@@ -19,7 +19,6 @@ const GradeCoding = ({ question }) => {
         <textarea
           className={styles.question__answerTextarea}
           value={question?.candidate_answer?.answer_text || 'No answer'}
-          // onChange={}
           placeholder='Type your answer here...'
           disabled={true}
           rows={10}

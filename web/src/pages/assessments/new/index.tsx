@@ -1,5 +1,4 @@
 import { lazy, Suspense, useState } from 'react'
-import styles from '../../../style/pages/new-assessment.module.scss'
 import Loading from '../../../components/loading'
 
 const Header = lazy(() => import('../../../components/assessments/new/header'))
@@ -12,7 +11,7 @@ const AssessmentsNew = () => {
 
   return (
     <Suspense fallback={<Loading />}>
-      <div className={styles['assessments-new']}>
+      <div>
         <Header title={title} setTitle={setTitle} />
         <Content title={title} />
       </div>

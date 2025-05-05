@@ -1,4 +1,4 @@
-import { useState, type FC } from 'react'
+import { useState, FC } from 'react'
 import styles from '../../../style/components/assessments/new/content.module.scss'
 import QuestionType from './question-type'
 import {
@@ -27,14 +27,14 @@ import { createTestCase } from '../../../api/test-case.api'
 import { createInitialCode } from '../../../api/initial-code.api'
 
 const Content: FC<ContentProps> = ({ title }) => {
-  const [totalTime, setTotalTime] = useState<string>('10')
-  const [questions, setQuestions] = useState<Question[]>([])
-  const [isPublish, setIsPublish] = useState<boolean>(false)
-  const [description, setDescription] = useState<string>('')
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  console.log(questions)
+  const [totalTime, setTotalTime] = useState('10')
+  const [questions, setQuestions] = useState<Question[]>([])
+  const [isPublish, setIsPublish] = useState(false)
+  const [description, setDescription] = useState('')
 
+  /* ---------------- handle create ---------------- */
   const handleCreate = async () => {
     if (!+totalTime) {
       dispatch(
@@ -46,7 +46,7 @@ const Content: FC<ContentProps> = ({ title }) => {
       return
     }
 
-    if (!description || description === '') {
+    if (!description.trim()) {
       dispatch(
         setToasterAppear({
           message: 'Description must not be empty',
@@ -58,112 +58,120 @@ const Content: FC<ContentProps> = ({ title }) => {
 
     dispatch(setIsLoadingTrue())
 
-    const data: CreateTestDto = {
+    const payload: CreateTestDto = {
       description,
       is_publish: isPublish,
       test_time: parseInt(totalTime),
       title
     }
 
-    const newTest: any = await createTest(data)
+    try {
+      const testRes: any = await createTest(payload)
 
-    for (const i of questions) {
-      const createQuestionDto: CreateQuestionDto = {
-        question_text: i.question_text,
-        question_type: i.question_type,
-        score: i.score,
-        test_id: newTest?.data?.data?.id,
-        title: i.title
-      }
+      for (const q of questions) {
+        const qDto: CreateQuestionDto = {
+          question_text: q.question_text,
+          question_type: q.question_type,
+          score: q.score,
+          test_id: testRes?.data?.data?.id,
+          title: q.title
+        }
 
-      const newQuestion: any = await createQuestion(createQuestionDto)
+        const newQ: any = await createQuestion(qDto)
 
-      if (i.question_type !== 'coding' && i.answers) {
-        for (const j of i.answers) {
-          const createAnserDto: CreateAnswerDto = {
-            is_correct: j.is_correct,
-            option_text: j.option_text,
-            question_id: newQuestion?.data?.data?.id
+        /* MCQ / True‑False answers */
+        if (q.question_type !== 'coding' && q.answers) {
+          for (const ans of q.answers) {
+            const aDto: CreateAnswerDto = {
+              is_correct: ans.is_correct,
+              option_text: ans.option_text,
+              question_id: newQ?.data?.data?.id
+            }
+            await createAnswer(aDto)
+          }
+        }
+
+        /* Coding question extras */
+        if (q.question_type === 'coding') {
+          for (const tc of q.testcases) {
+            const tcDto: CreateTestCaseDto = {
+              expected_output: tc.expected_output,
+              input: tc.input,
+              question_id: newQ?.data?.data?.id
+            }
+            await createTestCase(tcDto)
           }
 
-          await createAnswer(createAnserDto)
-        }
-      }
-
-      if (i.question_type === 'coding') {
-        for (const testcase of i.testcases) {
-          const createTestCaseDto: CreateTestCaseDto = {
-            expected_output: testcase.expected_output,
-            input: testcase.input,
-            question_id: newQuestion?.data?.data?.id
+          const icDto: CreateInitialCodeDto = {
+            description: q.initial_code?.description,
+            initial_code: q.initial_code?.initial_code,
+            language_id: q.initial_code?.language_id,
+            question_id: newQ?.data?.data?.id
           }
-
-          await createTestCase(createTestCaseDto)
+          await createInitialCode(icDto)
         }
-
-        const createInitialCodeDto: CreateInitialCodeDto = {
-          description: i.initial_code?.description,
-          initial_code: i.initial_code?.initial_code,
-          language_id: i.initial_code?.language_id,
-          question_id: newQuestion?.data?.data?.id
-        }
-
-        await createInitialCode(createInitialCodeDto)
       }
+
+      dispatch(
+        setToasterAppear({
+          message: 'Create test successfully',
+          type: 'success'
+        })
+      )
+      navigate(`/assessments/${300003 * testRes?.data?.data?.id + 200003}`)
+    } catch {
+      dispatch(
+        setToasterAppear({ message: 'Failed to create test', type: 'error' })
+      )
+    } finally {
+      dispatch(setIsLoadingFalse())
     }
-
-    dispatch(
-      setToasterAppear({ message: 'Create test successfully', type: 'success' })
-    )
-    dispatch(setIsLoadingFalse())
-    navigate(`/assessments/${300003 * newTest?.data?.data?.id + 200003}`)
   }
 
   return (
-    <div className={styles['content']}>
-      <div className={styles['content__field']}>
-        <div className={styles['content__label']}>Total time:</div>
+    <div className={styles.content}>
+      {/* time */}
+      <div className={styles.content__field}>
+        <div className={styles.content__label}>Minutes:</div>
         <input
-          className={styles['content__input']}
-          value={totalTime}
-          onChange={(e) => setTotalTime(e.target.value)}
+          className={styles.content__input}
           type='number'
           placeholder='Total time'
+          value={totalTime}
+          onChange={(e) => setTotalTime(e.target.value)}
         />
       </div>
 
-      <div className={styles['content__field']}>
-        <div className={styles['content__label']}>Description:</div>
+      <div className={styles.content__field}>
+        <div className={styles.content__label}>Description:</div>
         <input
-          className={styles['content__input']}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          className={styles.content__input}
           type='text'
           placeholder='Description'
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
         />
       </div>
 
-      <div className={styles['content__publish']}>
-        <div className={styles['content__ptitle']}>
+      <div className={styles.content__publish}>
+        <div className={styles.content__ptitle}>
           Do you want to publish this test?
         </div>
-        <div className={styles['content__radio-group']}>
-          <label className={styles['content__radio']}>
+        <div className={styles['content__radio--group']}>
+          <label className={styles.content__radio}>
             <input
               type='radio'
               name='publish'
-              value='yes'
-              checked={isPublish === true}
+              checked={isPublish}
               onChange={() => setIsPublish(true)}
             />
             Yes
           </label>
-          <label className={styles['content__radio']}>
+          <label className={styles.content__radio}>
             <input
               type='radio'
               name='publish'
-              value='no'
-              checked={isPublish === false}
+              checked={!isPublish}
               onChange={() => setIsPublish(false)}
             />
             No
@@ -171,18 +179,18 @@ const Content: FC<ContentProps> = ({ title }) => {
         </div>
       </div>
 
-      <div className={styles['content__step']}>
+      <div className={styles.content__step}>
         <QuestionType questions={questions} setQuestions={setQuestions} />
       </div>
 
-      <div className={styles['content__button']}>
+      <div className={styles.content__button}>
         <Button variant='primary' onClick={handleCreate}>
           Finish
           <svg
             viewBox='0 0 24 24'
-            fill='none'
+            className={styles['content__button-icon']}
             xmlns='http://www.w3.org/2000/svg'
-            className={styles['question-type__button-icon']}
+            fill='none'
           >
             <path
               d='M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12l-4.58 4.59z'

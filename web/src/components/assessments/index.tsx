@@ -14,14 +14,14 @@ const AssessmentsComponent = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const [tests, setTests] = useState<TestEntity[]>([])
-  const [filterTitle, setFilterTitle] = useState<string>('')
+  const [filterTitle, setFilterTitle] = useState('')
 
   useEffect(() => {
-    const firstFetch = async () => {
+    ;(async () => {
       dispatch(setIsLoadingTrue())
-      const result = await getAllOwnTests()
+      const res = await getAllOwnTests()
 
-      if (result?.status > 299) {
+      if (res?.status > 299) {
         dispatch(
           setToasterAppear({
             message: 'Error while finding tests',
@@ -31,7 +31,7 @@ const AssessmentsComponent = () => {
         return
       }
 
-      setTests(result?.data?.data)
+      setTests(res?.data?.data)
       dispatch(
         setToasterAppear({
           message: 'Get all tests successfully',
@@ -39,9 +39,7 @@ const AssessmentsComponent = () => {
         })
       )
       dispatch(setIsLoadingFalse())
-    }
-
-    firstFetch()
+    })()
   }, [])
 
   const handleNavigate = (id: number) => {
@@ -52,28 +50,30 @@ const AssessmentsComponent = () => {
     setFilterTitle(e.target.value)
   }
 
-  const filteredTests = tests.filter((test) =>
-    test.title.toLowerCase().includes(filterTitle.toLowerCase())
+  const filteredTests = tests.filter((t) =>
+    t.title.toLowerCase().includes(filterTitle.toLowerCase())
   )
 
   return (
     <div className={styles.assessments}>
       <div className={styles.assessments__container}>
+        {/* header */}
         <div className={styles.assessments__header}>
           <h1 className={styles.assessments__title}>Assessments</h1>
           <button
             className={styles.assessments__button}
             onClick={() => navigate('/assessments/new')}
           >
-            <span className={styles.assessments__buttonIcon}>+</span>
+            <span className={styles['assessments__button-icon']}>+</span>
             Create assessment
           </button>
         </div>
 
+        {/* search */}
         <div className={styles.assessments__filter}>
           <input
             type='text'
-            className={styles.assessments__filterInput}
+            className={styles['assessments__filter-input']}
             placeholder='Search by test title...'
             value={filterTitle}
             onChange={handleFilterChange}
@@ -81,6 +81,7 @@ const AssessmentsComponent = () => {
         </div>
       </div>
 
+      {/* table */}
       <div className={styles['assessments__table-container']}>
         <table className={styles.assessments__table}>
           <thead>
@@ -94,20 +95,24 @@ const AssessmentsComponent = () => {
           <tbody>
             {filteredTests.length === 0 && (
               <tr>
-                <td colSpan={4} className={styles.assessments__emptyMessage}>
+                <td
+                  colSpan={4}
+                  className={styles['assessments__empty-message']}
+                >
                   {tests.length === 0
                     ? 'You have no test.'
                     : 'No tests match your search.'}
                 </td>
               </tr>
             )}
-            {filteredTests.map((test, index) => (
+
+            {filteredTests.map((test, idx) => (
               <tr
-                key={index}
+                key={test.id}
                 className={styles.assessments__row}
                 onClick={() => handleNavigate(test.id)}
               >
-                <td>{index + 1}</td>
+                <td>{idx + 1}</td>
                 <td>{test.title}</td>
                 <td>{test.test_time}</td>
                 <td>{test.is_publish ? 'Yes' : 'No'}</td>

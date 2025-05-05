@@ -1,4 +1,4 @@
-import { type FC, useState } from 'react'
+import { FC, useState } from 'react'
 import styles from '../../../style/components/assessments/new/question-type.module.scss'
 import QuestionDialogManager from './dialog-manager'
 import { QuestionTypeProps, questionTypes } from '../../../constant/common'

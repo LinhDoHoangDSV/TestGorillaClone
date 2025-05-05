@@ -10,7 +10,6 @@ import AssessmentsNew from './assessments/new'
 import AssessmentViewAndOwn from './assessments/view-and-own'
 import LoginPage from './auth'
 import Candidates from './candidates'
-import Login from './login'
 import Profile from './profile'
 
 const pagesData: RouterType[] = [
@@ -67,13 +66,6 @@ const pagesData: RouterType[] = [
     title: 'assessments-attendance',
     path: '/assessments/attendance/:path',
     element: <TakeAssessment />,
-    header: false,
-    footer: false
-  },
-  {
-    title: 'login',
-    path: '/login',
-    element: <Login />,
     header: false,
     footer: false
   },
