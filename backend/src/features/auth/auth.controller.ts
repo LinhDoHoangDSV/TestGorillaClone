@@ -331,8 +331,14 @@ export class AuthController {
   @Post('log-out')
   async logout(@Res() res, @Req() request: RequestWithUserDto) {
     try {
-      request.res.clearCookie('sid', { path: '/' });
-      request.res.clearCookie('refresh_token', { path: '/' });
+      const cookieOptions = {
+        path: '/',
+        sameSite: 'none' as const,
+        secure: true,
+        httpOnly: true,
+      };
+      request.res.clearCookie('sid', cookieOptions);
+      request.res.clearCookie('refresh_token', cookieOptions);
 
       this.logger.debug('Logout successfully');
       this.response.initResponse(true, 'Logout successfully', null);
