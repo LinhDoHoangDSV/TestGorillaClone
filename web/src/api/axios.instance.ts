@@ -37,7 +37,7 @@ axiosInstance.interceptors.response.use(
 
           if (
             result?.status > 299 &&
-            window.location.href !== 'http://localhost:3000/login'
+            window.location.href !== 'https://testgorillaclonefe.web.app/login'
           ) {
             window.location.href = '/login'
             store.dispatch(
@@ -57,7 +57,9 @@ axiosInstance.interceptors.response.use(
           refreshSubscribers = []
           store.dispatch(clearAuth())
 
-          if (window.location.href !== 'http://localhost:3000/login') {
+          if (
+            window.location.href !== 'https://testgorillaclonefe.web.app/login'
+          ) {
             window.location.href = '/login'
             store.dispatch(
               setToasterAppear({
