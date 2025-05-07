@@ -1,7 +1,7 @@
-import { type FC, useState } from 'react'
+import { FC, useState } from 'react'
 import styles from '../../../style/components/assessments/new/create-question.module.scss'
 import Button from '../../ui/button'
-import { QuestionDialogProps } from '../../../constant/common'
+import { OptionType, QuestionDialogProps } from '../../../constant/common'
 import { useDispatch } from 'react-redux'
 import {
   setIsLoadingFalse,
@@ -11,12 +11,6 @@ import {
 import { CreateAnswerDto, CreateQuestionDto } from '../../../constant/api'
 import { createQuestion } from '../../../api/questions.api'
 import { createAnswer, getAllAnswerByCriteria } from '../../../api/answers.api'
-
-interface TempType {
-  id: string
-  text: string
-  isCorrect: boolean
-}
 
 const MultipleChoiceDialog: FC<QuestionDialogProps> = ({
   onCancel,
@@ -36,7 +30,7 @@ const MultipleChoiceDialog: FC<QuestionDialogProps> = ({
   const [counter, setCounter] = useState<number>(
     rowIndex >= 0 ? questions.length + 1 : 3
   )
-  const [options, setOptions] = useState<TempType[]>(
+  const [options, setOptions] = useState<OptionType[]>(
     rowIndex >= 0 && questions[rowIndex]?.answers
       ? questions[rowIndex]?.answers.map((item, index) => {
           return {

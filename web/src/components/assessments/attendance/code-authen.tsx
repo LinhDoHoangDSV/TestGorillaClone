@@ -1,11 +1,7 @@
 import { type FC, useState } from 'react'
 import styles from '../../../style/components/assessments/attendance/code-authen.module.scss'
 import logoUrl from '../../../assets/logo.svg'
-
-interface CodeAuthenticationProps {
-  testTitle: string
-  onAuthenticated: (code: string) => void
-}
+import { CodeAuthenticationProps } from '../../../constant/common'
 
 const CodeAuthentication: FC<CodeAuthenticationProps> = ({
   testTitle,

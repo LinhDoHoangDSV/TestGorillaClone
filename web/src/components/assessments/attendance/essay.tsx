@@ -1,12 +1,6 @@
 import { FC } from 'react'
-import { QuestionResponse } from '../../../constant/common'
+import { EssayQuestionProps } from '../../../constant/common'
 import styles from '../../../style/components/assessments/attendance/esssay-question.module.scss'
-
-interface EssayQuestionProps {
-  answer: string
-  setAnswer: (answer: string) => void
-  question: QuestionResponse
-}
 
 const EssayQuestion: FC<EssayQuestionProps> = ({
   answer,

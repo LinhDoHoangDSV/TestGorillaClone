@@ -2,11 +2,8 @@ import { useEffect, useRef, useState, type FC } from 'react'
 import Pencil from '../../../assets/pencil-solid.svg'
 import styles from '../../../style/components/assessments/new/header.module.scss'
 import { useNavigate } from 'react-router-dom'
-
-interface HeaderProps {
-  title: string
-  setTitle: (title: string) => void
-}
+import { HeaderProps } from '../../../constant/common'
+import Button from '../../ui/button'
 
 const Header: FC<HeaderProps> = ({ title, setTitle }) => {
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false)
@@ -57,9 +54,9 @@ const Header: FC<HeaderProps> = ({ title, setTitle }) => {
           onClick={handleChangeTitle}
         />
       </div>
-      <button className={styles['header__save-button']} onClick={handleExit}>
+      <Button variant='secondary' onClick={handleExit}>
         Exit
-      </button>
+      </Button>
     </div>
   )
 }

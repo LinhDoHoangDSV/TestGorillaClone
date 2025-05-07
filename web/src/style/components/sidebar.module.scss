@@ -5,7 +5,7 @@
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.3);
-  height: 100vh;
+  height: 100%;
   z-index: 40;
   opacity: 0;
   visibility: hidden;
@@ -23,7 +23,7 @@
   position: fixed;
   top: 0;
   left: 0;
-  height: 100vh;
+  height: 100%;
   width: 280px;
   background-color: white;
   z-index: 50;

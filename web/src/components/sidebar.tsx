@@ -8,11 +8,7 @@ import {
 } from '../redux/slices/common.slice'
 import { logout } from '../api/auth.api'
 import { clearAuth } from '../redux/slices/user.slice'
-
-type SidebarProps = {
-  open: boolean
-  onClose: () => void
-}
+import { SidebarProps } from '../constant/common'
 
 export const AppSidebar = ({ open, onClose }: SidebarProps) => {
   const dispatch = useDispatch()
@@ -32,6 +28,11 @@ export const AppSidebar = ({ open, onClose }: SidebarProps) => {
     await logout()
     dispatch(clearAuth())
     dispatch(setIsLoadingFalse())
+  }
+
+  const handleNavigateProfile = () => {
+    navigate('/profile')
+    onClose()
   }
 
   return (
@@ -100,10 +101,13 @@ export const AppSidebar = ({ open, onClose }: SidebarProps) => {
         <div className={styles.sidebar__footer}>
           <div className={styles.sidebar__user}>
             <div
-              onClick={() => navigate('/profile')}
+              onClick={handleNavigateProfile}
               className={styles.sidebar__userInitials}
             >{`${userState.last_name.slice(0, 1)}${userState.first_name.slice(0, 1)}`}</div>
-            <div className={styles.sidebar__userInfo}>
+            <div
+              className={styles.sidebar__userInfo}
+              onClick={handleNavigateProfile}
+            >
               <p
                 className={styles.sidebar__userName}
               >{`${userState.last_name} ${userState.first_name}`}</p>

@@ -20,32 +20,8 @@ import {
 import { getAllAnswerByCriteria } from '../../../api/answers.api'
 import { useLocation, useNavigate } from 'react-router-dom'
 import GradeCoding from './grade-coding'
-
-interface Answer {
-  id: number
-  question_id: number
-  option_text: string
-  is_correct: boolean
-}
-
-interface CandidateAnswer {
-  id: number
-  test_assignment_id: number
-  question_id: number
-  answer_text: string
-  score: number
-}
-
-interface QuesionsInterface {
-  id: number
-  test_id: number
-  question_text: string
-  question_type: string
-  score: number
-  title: string
-  answers?: Answer[]
-  candidate_answer?: CandidateAnswer
-}
+import { CandidateAnswer, QuesionsInterface } from '../../../constant/common'
+import Button from '../../ui/button'
 
 const EssayGrading = () => {
   const dispatch = useDispatch()
@@ -203,12 +179,12 @@ const EssayGrading = () => {
         </div>
       ))}
       <div className={styles.grading__submit}>
-        <button className={styles.grading__submitButton} onClick={handleExit}>
+        <Button variant='secondary' onClick={handleExit}>
           Exit
-        </button>
-        <button className={styles.grading__submitButton} onClick={handleSubmit}>
+        </Button>
+        <Button variant='primary' onClick={handleSubmit}>
           Done
-        </button>
+        </Button>
       </div>
     </div>
   )

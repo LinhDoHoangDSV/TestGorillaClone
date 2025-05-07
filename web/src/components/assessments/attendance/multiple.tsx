@@ -1,13 +1,6 @@
 import { FC } from 'react'
-import type { QuestionResponse } from '../../../constant/common'
+import { MultipleChoiceQuestionProps } from '../../../constant/common'
 import styles from '../../../style/components/assessments/attendance/multiple-question.module.scss'
-
-interface MultipleChoiceQuestionProps {
-  answer: string
-  setAnswer: (answer: string) => void
-  setScore: (score: number) => void
-  question: QuestionResponse
-}
 
 const MultipleChoiceQuestion: FC<MultipleChoiceQuestionProps> = ({
   answer,
