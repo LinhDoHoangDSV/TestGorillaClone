@@ -265,9 +265,7 @@ const MultipleChoiceDialog: FC<QuestionDialogProps> = ({
       })
     )
 
-    const temp = questions.filter((item, index) => {
-      console.log(item)
-
+    const temp = questions.filter((_, index) => {
       return index !== rowIndex
     })
 

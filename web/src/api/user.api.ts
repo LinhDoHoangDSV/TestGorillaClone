@@ -10,10 +10,8 @@ export interface UserInformation {
 export const updateUserInformation = async (data: UserInformation) => {
   try {
     const result = await axiosInstance.patch('/users/update', data)
-    console.log(result)
     return result
   } catch (error) {
-    console.log(error)
     return error
   }
 }
