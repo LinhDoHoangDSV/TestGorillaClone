@@ -114,8 +114,6 @@ export class AuthController {
         existingUser.id,
       );
 
-      console.log('maxAgeAccessToken', maxAgeAccessToken);
-
       request.res.cookie('sid', accessToken, {
         maxAge: maxAgeAccessToken,
         sameSite: 'none',
@@ -275,8 +273,6 @@ export class AuthController {
         1000 *
         60;
 
-      console.log('maxAgeAccessToken', maxAgeAccessToken);
-
       request.res.cookie('sid', accessToken, {
         maxAge: maxAgeAccessToken,
         sameSite: 'none',
@@ -335,8 +331,8 @@ export class AuthController {
   @Post('log-out')
   async logout(@Res() res, @Req() request: RequestWithUserDto) {
     try {
-      request.res.clearCookie('sid');
-      request.res.clearCookie('refresh_token');
+      request.res.clearCookie('sid', { path: '/' });
+      request.res.clearCookie('refresh_token', { path: '/' });
 
       this.logger.debug('Logout successfully');
       this.response.initResponse(true, 'Logout successfully', null);

@@ -55,7 +55,6 @@ export class RefreshTokenGuard implements CanActivate {
         throw new HttpException('No refresh token provided', 419);
       }
 
-      console.log('Refresh Token Payload:', payload);
       request['user'] = {
         userId: user.id,
         role: user.role_id === 3 ? 'ADMIN' : 'HR',
